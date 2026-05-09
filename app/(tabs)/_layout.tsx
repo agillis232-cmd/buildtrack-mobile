@@ -1,14 +1,6 @@
 import { Tabs } from "expo-router"
 import { View, Text } from "react-native"
 
-function TabIcon({ emoji, focused }: { emoji: string, focused: boolean }) {
-  return (
-    <View style={{ alignItems: "center", justifyContent: "center" }}>
-      <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>{emoji}</Text>
-    </View>
-  )
-}
-
 export default function TabsLayout() {
   return (
     <Tabs
@@ -33,14 +25,18 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: "Dashboard",
-          tabBarIcon: ({ focused }) => <TabIcon emoji="⊞" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>⊞</Text>
+          ),
         }}
       />
       <Tabs.Screen
         name="projects"
         options={{
           title: "Projects",
-          tabBarIcon: ({ focused }) => <TabIcon emoji="◫" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>◫</Text>
+          ),
         }}
       />
       <Tabs.Screen
@@ -68,14 +64,18 @@ export default function TabsLayout() {
         name="expenses"
         options={{
           title: "Expenses",
-          tabBarIcon: ({ focused }) => <TabIcon emoji="💵" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>💵</Text>
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ focused }) => <TabIcon emoji="◉" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>◉</Text>
+          ),
         }}
       />
     </Tabs>

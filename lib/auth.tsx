@@ -12,24 +12,24 @@ interface User {
 
 interface AuthContextType {
   user: User | null
+  token: string | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<string | null>
   signOut: () => Promise<void>
-  sessionCookie: string | null
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
+  token: null,
   loading: true,
   signIn: async () => null,
   signOut: async () => {},
-  sessionCookie: null,
 })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
+  const [token, setToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [sessionCookie, setSessionCookie] = useState<string | null>(null)
 
   useEffect(() => {
     checkSession()
@@ -37,15 +37,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function checkSession() {
     try {
-      const cookie = await SecureStore.getItemAsync("session_cookie")
-      if (!cookie) { setLoading(false); return }
-      setSessionCookie(cookie)
-
-      const res = await fetch(`${API_URL}/api/auth/session`, {
-        headers: { Cookie: cookie }
-      })
-      const data = await res.json()
-      if (data?.user) setUser(data.user)
+      const savedToken = await SecureStore.getItemAsync("auth_token")
+      const savedUser = await SecureStore.getItemAsync("auth_user")
+      if (savedToken && savedUser) {
+        setToken(savedToken)
+        setUser(JSON.parse(savedUser))
+      }
     } catch (e) {
       console.log("Session check failed:", e)
     }
@@ -54,61 +51,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function signIn(email: string, password: string): Promise<string | null> {
     try {
-      // Get CSRF token first
-      const csrfRes = await fetch(`${API_URL}/api/auth/csrf`)
-      const csrfData = await csrfRes.json()
-      const csrfToken = csrfData.csrfToken
-
-      // Sign in with credentials
-      const res = await fetch(`${API_URL}/api/auth/callback/credentials`, {
+      const res = await fetch(`${API_URL}/api/mobile/auth`, {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          email,
-          password,
-          csrfToken,
-          callbackUrl: `${API_URL}/dashboard`,
-          json: "true"
-        }),
-        redirect: "manual"
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
       })
 
-      // Extract session cookie
-      const setCookie = res.headers.get("set-cookie")
-      if (!setCookie) return "Invalid email or password"
+      const data = await res.json()
 
-      const sessionMatch = setCookie.match(/(next-auth\.session-token=[^;]+)/)
-      if (!sessionMatch) return "Login failed"
+      if (!res.ok) return data.error || "Login failed"
 
-      const cookie = sessionMatch[1]
-      await SecureStore.setItemAsync("session_cookie", cookie)
-      setSessionCookie(cookie)
-
-      // Get user info
-      const sessionRes = await fetch(`${API_URL}/api/auth/session`, {
-        headers: { Cookie: cookie }
-      })
-      const sessionData = await sessionRes.json()
-
-      if (sessionData?.user) {
-        setUser(sessionData.user)
-        return null
-      }
-
-      return "Login failed"
+      await SecureStore.setItemAsync("auth_token", data.token)
+      await SecureStore.setItemAsync("auth_user", JSON.stringify(data.user))
+      setToken(data.token)
+      setUser(data.user)
+      return null
     } catch (e) {
-      return "Connection error"
+      return "Connection error — check your internet"
     }
   }
 
   async function signOut() {
-    await SecureStore.deleteItemAsync("session_cookie")
+    await SecureStore.deleteItemAsync("auth_token")
+    await SecureStore.deleteItemAsync("auth_user")
     setUser(null)
-    setSessionCookie(null)
+    setToken(null)
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut, sessionCookie }}>
+    <AuthContext.Provider value={{ user, token, loading, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   )

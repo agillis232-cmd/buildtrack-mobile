@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
 
 export default function DashboardScreen() {
-  const { user, signOut, sessionCookie } = useAuth()
+  const { user, signOut, token } = useAuth()
   const router = useRouter()
   const [projects, setProjects] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -19,8 +19,19 @@ export default function DashboardScreen() {
   async function loadProjects() {
     try {
       const res = await fetch(`${API_URL}/api/mobile/projects`, {
-        headers: { Cookie: sessionCookie || "" }
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
       })
+
+      if (!res.ok) {
+        console.log("Projects fetch failed:", res.status)
+        setLoading(false)
+        setRefreshing(false)
+        return
+      }
+
       const data = await res.json()
       setProjects(data.projects || [])
     } catch (e) {
@@ -42,7 +53,7 @@ export default function DashboardScreen() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator color="#F97316" size="large" />
+        <ActivityIndicator color="#F97316" />
       </View>
     )
   }
