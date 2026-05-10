@@ -1,4 +1,4 @@
-export const API_URL = "https://your-vercel-url.vercel.app"
+export const API_URL = "https://buildtrackpro.app"
 
 export async function apiFetch(path: string, token: string, options?: RequestInit) {
   const res = await fetch(`${API_URL}${path}`, {

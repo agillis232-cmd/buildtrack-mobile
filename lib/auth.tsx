@@ -58,6 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
 
       const data = await res.json()
+      console.log("Sign in response:", res.status, JSON.stringify(data))  // ADD THIS
 
       if (!res.ok) return data.error || "Login failed"
 

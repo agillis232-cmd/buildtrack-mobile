@@ -14,9 +14,16 @@ export default function DashboardScreen() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
 
-  useEffect(() => { loadProjects() }, [])
+useEffect(() => { 
+  if (token) {
+    loadProjects() 
+  } else {
+    setLoading(false)
+  }
+}, [token])
 
-  async function loadProjects() {
+ async function loadProjects() {
+    console.log("Token is:", token)
     try {
       const res = await fetch(`${API_URL}/api/mobile/projects`, {
         headers: {
@@ -25,6 +32,10 @@ export default function DashboardScreen() {
         }
       })
 
+      console.log("Response status:", res.status)
+      const data = await res.json()
+      console.log("Response data:", JSON.stringify(data))
+
       if (!res.ok) {
         console.log("Projects fetch failed:", res.status)
         setLoading(false)
@@ -32,7 +43,6 @@ export default function DashboardScreen() {
         return
       }
 
-      const data = await res.json()
       setProjects(data.projects || [])
     } catch (e) {
       console.log("Error loading projects:", e)
