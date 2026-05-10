@@ -35,39 +35,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkSession()
   }, [])
 
-  async function checkSession() {
+ async function checkSession() {
     try {
       const savedToken = await SecureStore.getItemAsync("auth_token")
       const savedUser = await SecureStore.getItemAsync("auth_user")
+      console.log("Saved token:", savedToken)  // ADD THIS
+      console.log("Saved user:", savedUser)     // ADD THIS
       if (savedToken && savedUser) {
         setToken(savedToken)
         setUser(JSON.parse(savedUser))
       }
     } catch (e) {
-      console.log("Session check failed:", e)
+      console.log("SignIn catch error:", e)  // CHANGE THIS
+      return "Connection error — check your internet"
     }
     setLoading(false)
   }
 
   async function signIn(email: string, password: string): Promise<string | null> {
+    console.log("signIn function called!")
+    console.log("Fetching:", `${API_URL}/api/mobile/auth`)
     try {
       const res = await fetch(`${API_URL}/api/mobile/auth`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
       })
-
+      console.log("Fetch completed, status:", res.status)
       const data = await res.json()
-      console.log("Sign in response:", res.status, JSON.stringify(data))  // ADD THIS
-
+      console.log("Data:", JSON.stringify(data))
       if (!res.ok) return data.error || "Login failed"
-
       await SecureStore.setItemAsync("auth_token", data.token)
       await SecureStore.setItemAsync("auth_user", JSON.stringify(data.user))
       setToken(data.token)
       setUser(data.user)
       return null
     } catch (e) {
+      console.log("FETCH ERROR:", JSON.stringify(e))
       return "Connection error — check your internet"
     }
   }

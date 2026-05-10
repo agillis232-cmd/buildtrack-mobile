@@ -15,12 +15,14 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false)
 
   async function handleLogin() {
+    console.log("Attempting login with:", email)  // ADD THIS
     if (!email || !password) {
       Alert.alert("Error", "Please enter your email and password")
       return
     }
     setLoading(true)
     const error = await signIn(email, password)
+    console.log("Sign in result:", error)  // ADD THIS
     setLoading(false)
     if (error) {
       Alert.alert("Login failed", error)
