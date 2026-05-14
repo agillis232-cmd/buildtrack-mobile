@@ -1,12 +1,16 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from "react-native"
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Image } from "react-native"
 import { useAuth } from "@/lib/auth"
 import { useRouter } from "expo-router"
 import { useState } from "react"
+import * as ImagePicker from "expo-image-picker"
+import { API_URL } from "@/lib/api"
 
 export default function ProfileScreen() {
-  const { user, signOut } = useAuth()
+  const { user, signOut, token } = useAuth()
   const router = useRouter()
   const [signingOut, setSigningOut] = useState(false)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || null)
 
   async function handleSignOut() {
     Alert.alert("Sign Out", "Are you sure you want to sign out?", [
@@ -21,6 +25,44 @@ export default function ProfileScreen() {
     ])
   }
 
+  async function changeAvatar() {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync()
+    if (!permission.granted) {
+      Alert.alert("Permission needed", "Please allow photo library access")
+      return
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      base64: true,
+      quality: 0.8,
+      allowsEditing: true,
+      aspect: [1, 1],
+    })
+
+    if (result.canceled) return
+
+    setUploadingAvatar(true)
+    try {
+      const res = await fetch(`${API_URL}/api/mobile/profile/avatar`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ image: result.assets[0].base64 })
+      })
+      const data = await res.json()
+      if (data.avatarUrl) {
+        setAvatarUrl(data.avatarUrl)
+      } else {
+        Alert.alert("Error", "Could not update avatar")
+      }
+    } catch (e) {
+      Alert.alert("Error", "Connection error")
+    }
+    setUploadingAvatar(false)
+  }
+
   const initials = user?.name?.split(" ").map(n => n[0]).join("").toUpperCase() || "?"
 
   return (
@@ -29,9 +71,21 @@ export default function ProfileScreen() {
 
       {/* Avatar */}
       <View style={styles.avatarSection}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{initials}</Text>
-        </View>
+        <TouchableOpacity onPress={changeAvatar} disabled={uploadingAvatar}>
+          {avatarUrl ? (
+            <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
+          ) : (
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>{initials}</Text>
+            </View>
+          )}
+          <View style={styles.avatarEditBadge}>
+            {uploadingAvatar
+              ? <ActivityIndicator color="white" size="small" />
+              : <Text style={styles.avatarEditText}>✏️</Text>
+            }
+          </View>
+        </TouchableOpacity>
         <Text style={styles.name}>{user?.name}</Text>
         <Text style={styles.email}>{user?.email}</Text>
         <View style={styles.roleBadge}>
@@ -83,8 +137,11 @@ const styles = StyleSheet.create({
   content: { padding: 20, paddingBottom: 60, paddingTop: 60 },
   pageTitle: { fontSize: 28, fontWeight: "700", color: "#1A1A1A", marginBottom: 24 },
   avatarSection: { alignItems: "center", marginBottom: 32 },
+  avatarImage: { width: 80, height: 80, borderRadius: 40, marginBottom: 12 },
   avatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: "#F97316", justifyContent: "center", alignItems: "center", marginBottom: 12 },
   avatarText: { fontSize: 28, fontWeight: "700", color: "white" },
+  avatarEditBadge: { position: "absolute", bottom: 12, right: -4, width: 26, height: 26, borderRadius: 13, backgroundColor: "#1C1F26", justifyContent: "center", alignItems: "center", borderWidth: 2, borderColor: "#F5F4F0" },
+  avatarEditText: { fontSize: 12 },
   name: { fontSize: 20, fontWeight: "700", color: "#1A1A1A", marginBottom: 4 },
   email: { fontSize: 14, color: "#6B7280", marginBottom: 8 },
   roleBadge: { backgroundColor: "#FEF3C7", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 99 },

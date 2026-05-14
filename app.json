@@ -20,7 +20,11 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1C1F26"
       },
-      "package": "com.watthouse.buildtrack"
+      "package": "com.watthouse.buildtrack",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -39,6 +43,13 @@
     "scheme": "buildtrack",
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "65041af5-d938-4922-96e8-734b54a9ed8e"
+      }
+    },
+    "owner": "dru232"
   }
 }
