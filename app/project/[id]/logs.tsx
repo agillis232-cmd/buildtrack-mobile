@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router"
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, TextInput, Alert } from "react-native"
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, TextInput, Alert, Modal } from "react-native"
 import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
@@ -12,11 +12,13 @@ export default function LogsScreen() {
   const [loading, setLoading] = useState(true)
   const [adding, setAdding] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [editingLog, setEditingLog] = useState<any>(null)
 
   const [summary, setSummary] = useState("")
   const [crew, setCrew] = useState("")
   const [hours, setHours] = useState("")
   const [weather, setWeather] = useState("Clear")
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0])
 
   useEffect(() => {
     if (token && id) loadLogs()
@@ -35,6 +37,24 @@ export default function LogsScreen() {
     setLoading(false)
   }
 
+  function openEdit(log: any) {
+    setEditingLog(log)
+    setSummary(log.summary)
+    setCrew(log.crew)
+    setHours(log.hoursWorked.toString())
+    setWeather(log.weather)
+    setDate(new Date(log.date).toISOString().split("T")[0])
+  }
+
+  function closeEdit() {
+    setEditingLog(null)
+    setSummary("")
+    setCrew("")
+    setHours("")
+    setWeather("Clear")
+    setDate(new Date().toISOString().split("T")[0])
+  }
+
   async function saveLog() {
     if (!summary || !crew || !hours) {
       Alert.alert("Error", "Summary, crew and hours are required")
@@ -42,28 +62,31 @@ export default function LogsScreen() {
     }
     setSaving(true)
     try {
-      const res = await fetch(`${API_URL}/api/mobile/projects/${id}/logs`, {
-        method: "POST",
+      const url = editingLog
+        ? `${API_URL}/api/mobile/projects/${id}/logs/${editingLog.id}`
+        : `${API_URL}/api/mobile/projects/${id}/logs`
+
+      const res = await fetch(url, {
+        method: editingLog ? "PATCH" : "POST",
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          summary,
-          crew,
-          hoursWorked: parseInt(hours),
-          weather,
-          date: new Date().toISOString().split("T")[0]
-        })
+        body: JSON.stringify({ summary, crew, hoursWorked: parseInt(hours), weather, date })
       })
       const data = await res.json()
       if (data.log) {
-        setLogs(prev => [data.log, ...prev])
-        setSummary("")
-        setCrew("")
-        setHours("")
-        setWeather("Clear")
-        setAdding(false)
+        if (editingLog) {
+          setLogs(prev => prev.map(l => l.id === data.log.id ? data.log : l))
+          closeEdit()
+        } else {
+          setLogs(prev => [data.log, ...prev])
+          setSummary("")
+          setCrew("")
+          setHours("")
+          setWeather("Clear")
+          setAdding(false)
+        }
       } else {
         Alert.alert("Error", "Could not save log")
       }
@@ -71,6 +94,29 @@ export default function LogsScreen() {
       Alert.alert("Error", "Connection error")
     }
     setSaving(false)
+  }
+
+  async function deleteLog(logId: string) {
+    Alert.alert("Delete Log", "Are you sure?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete", style: "destructive", onPress: async () => {
+          try {
+            const res = await fetch(`${API_URL}/api/mobile/projects/${id}/logs/${logId}`, {
+              method: "DELETE",
+              headers: { "Authorization": `Bearer ${token}` }
+            })
+            if (res.ok) {
+              setLogs(prev => prev.filter(l => l.id !== logId))
+            } else {
+              Alert.alert("Error", "Could not delete log")
+            }
+          } catch (e) {
+            Alert.alert("Error", "Connection error")
+          }
+        }
+      }
+    ])
   }
 
   if (loading) return <View style={styles.center}><ActivityIndicator color="#F97316" /></View>
@@ -121,23 +167,31 @@ export default function LogsScreen() {
         )}
 
         {logs.length === 0 && !adding ? (
-           <View style={styles.emptyCard}>
+          <View style={styles.emptyCard}>
             <Text style={styles.emptyTitle}>No logs yet</Text>
-<Text style={styles.emptySub}>Add your first daily log</Text>
+            <Text style={styles.emptySub}>Add your first daily log</Text>
           </View>
         ) : (
           logs.map(log => (
-            <View key={log.id} style={styles.logCard}>
+            <TouchableOpacity key={log.id} style={styles.logCard} onPress={() => openEdit(log)} activeOpacity={0.8}>
               <View style={styles.logTop}>
                 <Text style={styles.logDate}>{new Date(log.date).toLocaleDateString()}</Text>
                 <Text style={styles.logWeather}>{log.weather}</Text>
               </View>
               <Text style={styles.logSummary}>{log.summary}</Text>
               <View style={styles.logMeta}>
-                <Text style={styles.logMetaText}>👷 {log.crew}</Text>
-                <Text style={styles.logMetaText}>⏱ {log.hoursWorked}hrs</Text>
+                <Text style={styles.logMetaText}>Crew: {log.crew}</Text>
+                <Text style={styles.logMetaText}>{log.hoursWorked} hrs</Text>
               </View>
-            </View>
+              <View style={styles.logActions}>
+                <TouchableOpacity style={styles.editBtn} onPress={() => openEdit(log)}>
+                  <Text style={styles.editBtnText}>Edit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.deleteBtn} onPress={() => deleteLog(log.id)}>
+                  <Text style={styles.deleteBtnText}>Delete</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
           ))
         )}
       </ScrollView>
@@ -149,6 +203,47 @@ export default function LogsScreen() {
           </TouchableOpacity>
         </View>
       )}
+
+      {/* Edit Modal */}
+      <Modal visible={!!editingLog} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Edit Log</Text>
+            <ScrollView>
+              <View style={styles.field}>
+                <Text style={styles.label}>Summary *</Text>
+                <TextInput style={[styles.input, styles.multiline]} value={summary} onChangeText={setSummary} placeholder="What was done..." placeholderTextColor="#9CA3AF" multiline numberOfLines={3} />
+              </View>
+              <View style={styles.field}>
+                <Text style={styles.label}>Crew *</Text>
+                <TextInput style={styles.input} value={crew} onChangeText={setCrew} placeholder="John, Mike..." placeholderTextColor="#9CA3AF" />
+              </View>
+              <View style={styles.field}>
+                <Text style={styles.label}>Hours *</Text>
+                <TextInput style={styles.input} value={hours} onChangeText={setHours} keyboardType="number-pad" placeholder="8" placeholderTextColor="#9CA3AF" />
+              </View>
+              <View style={styles.field}>
+                <Text style={styles.label}>Weather</Text>
+                <View style={styles.weatherRow}>
+                  {["Clear", "Cloudy", "Rain", "Hot"].map(w => (
+                    <TouchableOpacity key={w} style={[styles.weatherBtn, weather === w && styles.weatherBtnActive]} onPress={() => setWeather(w)}>
+                      <Text style={[styles.weatherBtnText, weather === w && styles.weatherBtnTextActive]}>{w}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+              <View style={styles.modalBtns}>
+                <TouchableOpacity style={styles.cancelBtn} onPress={closeEdit}>
+                  <Text style={styles.cancelText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.saveBtn} onPress={saveLog} disabled={saving}>
+                  {saving ? <ActivityIndicator color="white" size="small" /> : <Text style={styles.saveBtnText}>Update</Text>}
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   )
 }
@@ -177,7 +272,6 @@ const styles = StyleSheet.create({
   saveBtn: { flex: 1, backgroundColor: "#F97316", borderRadius: 10, padding: 13, alignItems: "center" },
   saveBtnText: { color: "white", fontSize: 15, fontWeight: "700" },
   emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1" },
-  emptyEmoji: { fontSize: 40, marginBottom: 12 },
   emptyTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 6 },
   emptySub: { fontSize: 13, color: "#9CA3AF", textAlign: "center" },
   logCard: { backgroundColor: "white", borderRadius: 14, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: "#E8E6E1" },
@@ -185,9 +279,18 @@ const styles = StyleSheet.create({
   logDate: { fontSize: 13, fontWeight: "700", color: "#1A1A1A" },
   logWeather: { fontSize: 12, color: "#9CA3AF" },
   logSummary: { fontSize: 14, color: "#374151", marginBottom: 10, lineHeight: 20 },
-  logMeta: { flexDirection: "row", gap: 14 },
+  logMeta: { flexDirection: "row", gap: 14, marginBottom: 10 },
   logMetaText: { fontSize: 12, color: "#6B7280" },
+  logActions: { flexDirection: "row", gap: 8, paddingTop: 10, borderTopWidth: 1, borderTopColor: "#F3F4F6" },
+  editBtn: { flex: 1, backgroundColor: "#F3F4F6", borderRadius: 8, padding: 8, alignItems: "center" },
+  editBtnText: { fontSize: 13, fontWeight: "600", color: "#374151" },
+  deleteBtn: { flex: 1, backgroundColor: "#FEE2E2", borderRadius: 8, padding: 8, alignItems: "center" },
+  deleteBtnText: { fontSize: 13, fontWeight: "600", color: "#DC2626" },
   fab: { position: "absolute", bottom: 30, left: 20, right: 20 },
   fabBtn: { backgroundColor: "#F97316", borderRadius: 14, padding: 16, alignItems: "center" },
   fabText: { color: "white", fontSize: 15, fontWeight: "700" },
+  modalOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" },
+  modalCard: { backgroundColor: "white", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, paddingBottom: 40, maxHeight: "85%" },
+  modalTitle: { fontSize: 18, fontWeight: "700", color: "#1A1A1A", marginBottom: 20 },
+  modalBtns: { flexDirection: "row", gap: 10, marginTop: 8 },
 })

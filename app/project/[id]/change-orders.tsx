@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router"
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, TextInput, Alert } from "react-native"
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, TextInput, Alert, Modal } from "react-native"
 import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
@@ -12,6 +12,7 @@ export default function ChangeOrdersScreen() {
   const [loading, setLoading] = useState(true)
   const [adding, setAdding] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [editingCO, setEditingCO] = useState<any>(null)
 
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
@@ -36,15 +37,37 @@ export default function ChangeOrdersScreen() {
     setLoading(false)
   }
 
-  async function saveChangeOrder() {
+  function openEdit(co: any) {
+    setEditingCO(co)
+    setTitle(co.title)
+    setDescription(co.description)
+    setCostImpact(co.costImpact.toString())
+    setScheduleDays(co.scheduleDays.toString())
+    setReason(co.reason)
+  }
+
+  function closeEdit() {
+    setEditingCO(null)
+    setTitle("")
+    setDescription("")
+    setCostImpact("")
+    setScheduleDays("")
+    setReason("Client request")
+  }
+
+  async function saveCO() {
     if (!title || !description || !costImpact) {
       Alert.alert("Error", "Title, description and cost impact are required")
       return
     }
     setSaving(true)
     try {
-      const res = await fetch(`${API_URL}/api/mobile/projects/${id}/change-orders`, {
-        method: "POST",
+      const url = editingCO
+        ? `${API_URL}/api/mobile/projects/${id}/change-orders/${editingCO.id}`
+        : `${API_URL}/api/mobile/projects/${id}/change-orders`
+
+      const res = await fetch(url, {
+        method: editingCO ? "PATCH" : "POST",
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json"
@@ -59,13 +82,18 @@ export default function ChangeOrdersScreen() {
       })
       const data = await res.json()
       if (data.changeOrder) {
-        setChangeOrders(prev => [data.changeOrder, ...prev])
-        setTitle("")
-        setDescription("")
-        setCostImpact("")
-        setScheduleDays("")
-        setReason("Client request")
-        setAdding(false)
+        if (editingCO) {
+          setChangeOrders(prev => prev.map(c => c.id === data.changeOrder.id ? data.changeOrder : c))
+          closeEdit()
+        } else {
+          setChangeOrders(prev => [data.changeOrder, ...prev])
+          setTitle("")
+          setDescription("")
+          setCostImpact("")
+          setScheduleDays("")
+          setReason("Client request")
+          setAdding(false)
+        }
       } else {
         Alert.alert("Error", "Could not save change order")
       }
@@ -73,6 +101,29 @@ export default function ChangeOrdersScreen() {
       Alert.alert("Error", "Connection error")
     }
     setSaving(false)
+  }
+
+  async function deleteCO(coId: string) {
+    Alert.alert("Delete Change Order", "Are you sure?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete", style: "destructive", onPress: async () => {
+          try {
+            const res = await fetch(`${API_URL}/api/mobile/projects/${id}/change-orders/${coId}`, {
+              method: "DELETE",
+              headers: { "Authorization": `Bearer ${token}` }
+            })
+            if (res.ok) {
+              setChangeOrders(prev => prev.filter(c => c.id !== coId))
+            } else {
+              Alert.alert("Error", "Could not delete change order")
+            }
+          } catch (e) {
+            Alert.alert("Error", "Connection error")
+          }
+        }
+      }
+    ])
   }
 
   const statusColor = (status: string) => {
@@ -129,7 +180,7 @@ export default function ChangeOrdersScreen() {
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setAdding(false)}>
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.saveBtn} onPress={saveChangeOrder} disabled={saving}>
+              <TouchableOpacity style={styles.saveBtn} onPress={saveCO} disabled={saving}>
                 {saving ? <ActivityIndicator color="white" size="small" /> : <Text style={styles.saveBtnText}>Save</Text>}
               </TouchableOpacity>
             </View>
@@ -137,9 +188,9 @@ export default function ChangeOrdersScreen() {
         )}
 
         {changeOrders.length === 0 && !adding ? (
-           <View style={styles.emptyCard}>
-           <Text style={styles.emptyTitle}>No change orders yet</Text>
-<Text style={styles.emptySub}>Create your first change order</Text>
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyTitle}>No change orders yet</Text>
+            <Text style={styles.emptySub}>Create your first change order</Text>
           </View>
         ) : (
           changeOrders.map(co => (
@@ -153,9 +204,17 @@ export default function ChangeOrdersScreen() {
               <Text style={styles.coTitle}>{co.title}</Text>
               <Text style={styles.coDesc}>{co.description}</Text>
               <View style={styles.coStats}>
-                <Text style={styles.coStat}>💰 ${co.costImpact.toLocaleString()}</Text>
-                <Text style={styles.coStat}>📅 {co.scheduleDays} days</Text>
-                <Text style={styles.coStat}>📌 {co.reason}</Text>
+                <Text style={styles.coStat}>Cost: ${co.costImpact.toLocaleString()}</Text>
+                <Text style={styles.coStat}>Days: {co.scheduleDays}</Text>
+                <Text style={styles.coStat}>{co.reason}</Text>
+              </View>
+              <View style={styles.coActions}>
+                <TouchableOpacity style={styles.editBtn} onPress={() => openEdit(co)}>
+                  <Text style={styles.editBtnText}>Edit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.deleteBtn} onPress={() => deleteCO(co.id)}>
+                  <Text style={styles.deleteBtnText}>Delete</Text>
+                </TouchableOpacity>
               </View>
             </View>
           ))
@@ -165,10 +224,55 @@ export default function ChangeOrdersScreen() {
       {!adding && (
         <View style={styles.fab}>
           <TouchableOpacity style={styles.fabBtn} onPress={() => setAdding(true)}>
-           <Text style={styles.fabText}>New Change Order</Text>
+            <Text style={styles.fabText}>New Change Order</Text>
           </TouchableOpacity>
         </View>
       )}
+
+      {/* Edit Modal */}
+      <Modal visible={!!editingCO} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Edit Change Order</Text>
+            <ScrollView>
+              <View style={styles.field}>
+                <Text style={styles.label}>Title *</Text>
+                <TextInput style={styles.input} value={title} onChangeText={setTitle} placeholder="Title" placeholderTextColor="#9CA3AF" />
+              </View>
+              <View style={styles.field}>
+                <Text style={styles.label}>Description *</Text>
+                <TextInput style={[styles.input, styles.multiline]} value={description} onChangeText={setDescription} placeholder="Description" placeholderTextColor="#9CA3AF" multiline numberOfLines={3} />
+              </View>
+              <View style={styles.field}>
+                <Text style={styles.label}>Cost Impact ($) *</Text>
+                <TextInput style={styles.input} value={costImpact} onChangeText={setCostImpact} keyboardType="decimal-pad" placeholder="0.00" placeholderTextColor="#9CA3AF" />
+              </View>
+              <View style={styles.field}>
+                <Text style={styles.label}>Schedule Impact (days)</Text>
+                <TextInput style={styles.input} value={scheduleDays} onChangeText={setScheduleDays} keyboardType="number-pad" placeholder="0" placeholderTextColor="#9CA3AF" />
+              </View>
+              <View style={styles.field}>
+                <Text style={styles.label}>Reason</Text>
+                <View style={styles.reasonRow}>
+                  {["Client request", "Unforeseen", "Design change"].map(r => (
+                    <TouchableOpacity key={r} style={[styles.reasonBtn, reason === r && styles.reasonBtnActive]} onPress={() => setReason(r)}>
+                      <Text style={[styles.reasonBtnText, reason === r && styles.reasonBtnTextActive]}>{r}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+              <View style={styles.modalBtns}>
+                <TouchableOpacity style={styles.cancelBtn} onPress={closeEdit}>
+                  <Text style={styles.cancelText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.saveBtn} onPress={saveCO} disabled={saving}>
+                  {saving ? <ActivityIndicator color="white" size="small" /> : <Text style={styles.saveBtnText}>Update</Text>}
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   )
 }
@@ -197,7 +301,6 @@ const styles = StyleSheet.create({
   saveBtn: { flex: 1, backgroundColor: "#F97316", borderRadius: 10, padding: 13, alignItems: "center" },
   saveBtnText: { color: "white", fontSize: 15, fontWeight: "700" },
   emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1" },
-  emptyEmoji: { fontSize: 40, marginBottom: 12 },
   emptyTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 6 },
   emptySub: { fontSize: 13, color: "#9CA3AF", textAlign: "center" },
   coCard: { backgroundColor: "white", borderRadius: 14, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: "#E8E6E1" },
@@ -207,9 +310,18 @@ const styles = StyleSheet.create({
   statusText: { fontSize: 11, fontWeight: "700" },
   coTitle: { fontSize: 15, fontWeight: "700", color: "#1A1A1A", marginBottom: 4 },
   coDesc: { fontSize: 13, color: "#6B7280", marginBottom: 10, lineHeight: 18 },
-  coStats: { flexDirection: "row", gap: 12, flexWrap: "wrap" },
+  coStats: { flexDirection: "row", gap: 12, flexWrap: "wrap", marginBottom: 10 },
   coStat: { fontSize: 12, color: "#6B7280" },
+  coActions: { flexDirection: "row", gap: 8, paddingTop: 10, borderTopWidth: 1, borderTopColor: "#F3F4F6" },
+  editBtn: { flex: 1, backgroundColor: "#F3F4F6", borderRadius: 8, padding: 8, alignItems: "center" },
+  editBtnText: { fontSize: 13, fontWeight: "600", color: "#374151" },
+  deleteBtn: { flex: 1, backgroundColor: "#FEE2E2", borderRadius: 8, padding: 8, alignItems: "center" },
+  deleteBtnText: { fontSize: 13, fontWeight: "600", color: "#DC2626" },
   fab: { position: "absolute", bottom: 30, left: 20, right: 20 },
   fabBtn: { backgroundColor: "#F97316", borderRadius: 14, padding: 16, alignItems: "center" },
   fabText: { color: "white", fontSize: 15, fontWeight: "700" },
+  modalOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" },
+  modalCard: { backgroundColor: "white", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, paddingBottom: 40, maxHeight: "85%" },
+  modalTitle: { fontSize: 18, fontWeight: "700", color: "#1A1A1A", marginBottom: 20 },
+  modalBtns: { flexDirection: "row", gap: 10, marginTop: 8 },
 })
