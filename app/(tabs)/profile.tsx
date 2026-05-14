@@ -82,7 +82,7 @@ export default function ProfileScreen() {
           <View style={styles.avatarEditBadge}>
             {uploadingAvatar
               ? <ActivityIndicator color="white" size="small" />
-              : <Text style={styles.avatarEditText}>✏️</Text>
+              :<Text style={styles.avatarEditText}>Edit</Text>
             }
           </View>
         </TouchableOpacity>

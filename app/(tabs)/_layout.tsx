@@ -33,7 +33,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="projects"
         options={{
-          title: "Projects",
+          title: "Schedule",
           tabBarIcon: ({ focused }) => (
             <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>◫</Text>
           ),

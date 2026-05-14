@@ -72,10 +72,9 @@ export default function MessagesScreen() {
         onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}
       >
         {messages.length === 0 ? (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyEmoji}>💬</Text>
-            <Text style={styles.emptyTitle}>No messages yet</Text>
-            <Text style={styles.emptySub}>Start the conversation</Text>
+           <View style={styles.emptyCard}>
+            <Text style={styles.emptyTitle}>No expenses yet</Text>
+            <Text style={styles.emptySub}>Scan a receipt or add manually</Text>
           </View>
         ) : (
           messages.map(msg => {

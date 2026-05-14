@@ -73,7 +73,7 @@ export default function CameraScreen() {
 
       <TouchableOpacity style={styles.card} onPress={scanReceipt} disabled={scanning}>
         <View style={styles.iconBox}>
-          <Text style={styles.icon}>🧾</Text>
+          <Text style={styles.icon}></Text>
         </View>
         <View style={styles.cardText}>
           <Text style={styles.cardTitle}>Scan Receipt</Text>
@@ -84,7 +84,7 @@ export default function CameraScreen() {
 
       <TouchableOpacity style={styles.card} onPress={takePhoto}>
         <View style={styles.iconBox}>
-          <Text style={styles.icon}>📸</Text>
+          <Text style={styles.icon}></Text>
         </View>
         <View style={styles.cardText}>
           <Text style={styles.cardTitle}>Take Photo</Text>
@@ -95,7 +95,7 @@ export default function CameraScreen() {
 
       <TouchableOpacity style={styles.card} onPress={() => router.push("/(tabs)")}>
         <View style={styles.iconBox}>
-          <Text style={styles.icon}>📋</Text>
+          <Text style={styles.icon}></Text>
         </View>
         <View style={styles.cardText}>
           <Text style={styles.cardTitle}>Add Daily Log</Text>

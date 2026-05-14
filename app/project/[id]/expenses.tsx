@@ -83,8 +83,7 @@ export default function ExpensesScreen() {
         <Text style={styles.title}>Expenses</Text>
 
         {expenses.length === 0 ? (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyEmoji}>🧾</Text>
+           <View style={styles.emptyCard}>
             <Text style={styles.emptyTitle}>No expenses yet</Text>
             <Text style={styles.emptySub}>Scan a receipt or add manually</Text>
           </View>
@@ -103,11 +102,11 @@ export default function ExpensesScreen() {
       </ScrollView>
 
       <View style={styles.fab}>
-        <TouchableOpacity style={styles.fabBtn} onPress={scanReceipt} disabled={scanning}>
-          {scanning ? <ActivityIndicator color="white" /> : <Text style={styles.fabText}>📷 Scan Receipt</Text>}
+       <TouchableOpacity style={styles.fabBtn} onPress={scanReceipt} disabled={scanning}>
+          {scanning ? <ActivityIndicator color="white" /> : <Text style={styles.fabText}>Scan Receipt</Text>}
         </TouchableOpacity>
         <TouchableOpacity style={[styles.fabBtn, styles.fabSecondary]} onPress={() => router.push(`/project/${id}/add-expense` as any)}>
-          <Text style={styles.fabText}>+ Add Manual</Text>
+          <Text style={styles.fabText}>Add Expense</Text>
         </TouchableOpacity>
       </View>
     </View>

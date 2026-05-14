@@ -121,10 +121,9 @@ export default function LogsScreen() {
         )}
 
         {logs.length === 0 && !adding ? (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyEmoji}>📋</Text>
-            <Text style={styles.emptyTitle}>No logs yet</Text>
-            <Text style={styles.emptySub}>Add your first daily log</Text>
+           <View style={styles.emptyCard}>
+            <Text style={styles.emptyTitle}>No expenses yet</Text>
+            <Text style={styles.emptySub}>Scan a receipt or add manually</Text>
           </View>
         ) : (
           logs.map(log => (
@@ -146,7 +145,7 @@ export default function LogsScreen() {
       {!adding && (
         <View style={styles.fab}>
           <TouchableOpacity style={styles.fabBtn} onPress={() => setAdding(true)}>
-            <Text style={styles.fabText}>+ Add Daily Log</Text>
+            <Text style={styles.fabText}>Add Daily Log</Text>
           </TouchableOpacity>
         </View>
       )}

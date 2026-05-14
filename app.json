@@ -38,7 +38,8 @@
           "photosPermission": "BuildTrack needs access to your photos to upload site photos and receipts.",
           "cameraPermission": "BuildTrack needs access to your camera to capture site photos and receipts."
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ],
     "scheme": "buildtrack",
     "experiments": {

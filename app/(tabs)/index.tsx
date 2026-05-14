@@ -107,11 +107,10 @@ export default function DashboardScreen() {
       {/* Projects */}
       <Text style={styles.sectionTitle}>Active projects</Text>
       {projects.length === 0 ? (
-        <View style={styles.emptyCard}>
-          <Text style={styles.emptyEmoji}>🏗️</Text>
-          <Text style={styles.emptyTitle}>No projects yet</Text>
-          <Text style={styles.emptySub}>Create your first project on the web app</Text>
-        </View>
+         <View style={styles.emptyCard}>
+            <Text style={styles.emptyTitle}>No expenses yet</Text>
+            <Text style={styles.emptySub}>Scan a receipt or add manually</Text>
+          </View>
       ) : (
         projects.map(project => (
           <TouchableOpacity
@@ -150,11 +149,11 @@ export default function DashboardScreen() {
               <Text style={styles.progressText}>{project.completionPct}%</Text>
             </View>
 
-            <View style={styles.projectStats}>
-              <Text style={styles.statItem}>💰 ${project.contractValue.toLocaleString()}</Text>
-              <Text style={styles.statItem}>📋 {project._count?.dailyLogs || 0} logs</Text>
-              <Text style={styles.statItem}>📝 {project._count?.changeOrders || 0} COs</Text>
-            </View>
+           <View style={styles.projectStats}>
+  <Text style={styles.statItem}>Contract: ${project.contractValue.toLocaleString()}</Text>
+  <Text style={styles.statItem}>Logs: {project._count?.dailyLogs || 0}</Text>
+  <Text style={styles.statItem}>COs: {project._count?.changeOrders || 0}</Text>
+</View>
           </TouchableOpacity>
         ))
       )}

@@ -42,11 +42,10 @@ export default function ExpensesScreen() {
       </View>
 
       {expenses.length === 0 ? (
-        <View style={styles.emptyCard}>
-          <Text style={styles.emptyEmoji}>💰</Text>
-          <Text style={styles.emptyTitle}>No expenses yet</Text>
-          <Text style={styles.emptySub}>Add expenses from within a project</Text>
-        </View>
+         <View style={styles.emptyCard}>
+            <Text style={styles.emptyTitle}>No expenses yet</Text>
+            <Text style={styles.emptySub}>Scan a receipt or add manually</Text>
+          </View>
       ) : (
         expenses.map(expense => (
           <TouchableOpacity

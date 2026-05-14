@@ -31,12 +31,12 @@ export default function ProjectDetailScreen() {
   if (loading) return <View style={styles.center}><ActivityIndicator color="#F97316" /></View>
   if (!project) return <View style={styles.center}><Text style={styles.errorText}>Project not found</Text></View>
 
-  const sections = [
-    { label: "💰 Expenses", sub: "Scan receipts & track costs", route: `/project/${id}/expenses` },
-    { label: "📸 Photos", sub: "Upload job site photos", route: `/project/${id}/photos` },
-    { label: "📋 Daily Logs", sub: "View & add daily reports", route: `/project/${id}/logs` },
-    { label: "📝 Change Orders", sub: "View & create change orders", route: `/project/${id}/change-orders` },
-    { label: "💬 Messages", sub: "Notes & communication", route: `/project/${id}/messages` },
+   const sections = [
+    { label: "Expenses", sub: "Scan receipts & track costs", route: `/project/${id}/expenses` },
+    { label: "Photos", sub: "Upload job site photos", route: `/project/${id}/photos` },
+    { label: "Daily Logs", sub: "View & add daily reports", route: `/project/${id}/logs` },
+    { label: "Change Orders", sub: "View & create change orders", route: `/project/${id}/change-orders` },
+    { label: "Messages", sub: "Notes & communication", route: `/project/${id}/messages` },
   ]
 
   return (
@@ -88,7 +88,7 @@ export default function ProjectDetailScreen() {
             <Text style={styles.sectionLabel}>{section.label}</Text>
             <Text style={styles.sectionSub}>{section.sub}</Text>
           </View>
-          <Text style={styles.arrow}>→</Text>
+          <Text style={styles.arrow}>›</Text>
         </TouchableOpacity>
       ))}
     </ScrollView>

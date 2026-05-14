@@ -92,12 +92,11 @@ setPhotos(data.photos || [])
         <Text style={styles.title}>Photos</Text>
 
         {photos.length === 0 ? (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyEmoji}>📸</Text>
-            <Text style={styles.emptyTitle}>No photos yet</Text>
-            <Text style={styles.emptySub}>Take or upload job site photos</Text>
+           <View style={styles.emptyCard}>
+            <Text style={styles.emptyTitle}>No expenses yet</Text>
+            <Text style={styles.emptySub}>Scan a receipt or add manually</Text>
           </View>
-        ) : (
+     ) : (
           <View style={styles.grid}>
            {photos.map(photo => (
   <Image 
@@ -115,7 +114,7 @@ setPhotos(data.photos || [])
 
       <View style={styles.fab}>
         <TouchableOpacity style={styles.fabBtn} onPress={pickSource} disabled={uploading}>
-          {uploading ? <ActivityIndicator color="white" /> : <Text style={styles.fabText}>+ Upload Photo</Text>}
+         {uploading ? <ActivityIndicator color="white" /> : <Text style={styles.fabText}>Upload Photo</Text>}
         </TouchableOpacity>
       </View>
     </View>

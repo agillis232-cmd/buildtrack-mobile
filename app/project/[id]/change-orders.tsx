@@ -137,10 +137,9 @@ export default function ChangeOrdersScreen() {
         )}
 
         {changeOrders.length === 0 && !adding ? (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyEmoji}>📝</Text>
-            <Text style={styles.emptyTitle}>No change orders yet</Text>
-            <Text style={styles.emptySub}>Create your first change order</Text>
+           <View style={styles.emptyCard}>
+            <Text style={styles.emptyTitle}>No expenses yet</Text>
+            <Text style={styles.emptySub}>Scan a receipt or add manually</Text>
           </View>
         ) : (
           changeOrders.map(co => (
