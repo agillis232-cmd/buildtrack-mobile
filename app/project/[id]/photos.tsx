@@ -62,9 +62,6 @@ export default function PhotosScreen() {
         setPhotos(prev => [data.photo, ...prev])
       } else {
         Alert.alert("Error", "Could not upload photo")
-        const data = await res.json()
-console.log("Photos data:", JSON.stringify(data))
-setPhotos(data.photos || [])
       }
     } catch (e) {
       Alert.alert("Error", "Connection error")
@@ -92,21 +89,22 @@ setPhotos(data.photos || [])
         <Text style={styles.title}>Photos</Text>
 
         {photos.length === 0 ? (
-           <View style={styles.emptyCard}>
-            <Text style={styles.emptyTitle}>No expenses yet</Text>
-            <Text style={styles.emptySub}>Scan a receipt or add manually</Text>
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyTitle}>No photos yet</Text>
+            <Text style={styles.emptySub}>Take or upload job site photos</Text>
           </View>
-     ) : (
+        ) : (
           <View style={styles.grid}>
-           {photos.map(photo => (
-  <Image 
-    key={photo.id} 
-    source={{ uri: photo.url.replace('/upload/', '/upload/f_jpg/') }} 
-    style={styles.photo}
-    onLoad={() => console.log("Image loaded:", photo.url)}
-    onError={(e) => console.log("Image error:", photo.url, e.nativeEvent.error)}
-  />
-))}
+            {photos.map(photo => (
+              <TouchableOpacity
+                key={photo.id}
+                onPress={() => router.push(`/project/${id}/photo-viewer?photoId=${photo.id}&url=${encodeURIComponent(photo.url)}&caption=${encodeURIComponent(photo.caption || "")}` as any)}
+              >
+                <Image
+                  source={{ uri: photo.url.replace('/upload/', '/upload/f_jpg/') }}
+                  style={styles.photo}
+                />
+              </TouchableOpacity>
             ))}
           </View>
         )}

@@ -122,8 +122,8 @@ export default function LogsScreen() {
 
         {logs.length === 0 && !adding ? (
            <View style={styles.emptyCard}>
-            <Text style={styles.emptyTitle}>No expenses yet</Text>
-            <Text style={styles.emptySub}>Scan a receipt or add manually</Text>
+            <Text style={styles.emptyTitle}>No logs yet</Text>
+<Text style={styles.emptySub}>Add your first daily log</Text>
           </View>
         ) : (
           logs.map(log => (
