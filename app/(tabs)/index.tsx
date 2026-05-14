@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, RefreshControl, ActivityIndicator
+  StyleSheet, RefreshControl, ActivityIndicator, Image
 } from "react-native"
 import { useRouter } from "expo-router"
 import { useAuth } from "@/lib/auth"
@@ -14,16 +14,15 @@ export default function DashboardScreen() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
 
-useEffect(() => { 
-  if (token) {
-    loadProjects() 
-  } else {
-    setLoading(false)
-  }
-}, [token])
+  useEffect(() => {
+    if (token) {
+      loadProjects()
+    } else {
+      setLoading(false)
+    }
+  }, [token])
 
- async function loadProjects() {
-    console.log("Token is:", token)
+  async function loadProjects() {
     try {
       const res = await fetch(`${API_URL}/api/mobile/projects`, {
         headers: {
@@ -31,18 +30,12 @@ useEffect(() => {
           "Content-Type": "application/json"
         }
       })
-
-      console.log("Response status:", res.status)
-      const data = await res.json()
-      console.log("Response data:", JSON.stringify(data))
-
       if (!res.ok) {
-        console.log("Projects fetch failed:", res.status)
         setLoading(false)
         setRefreshing(false)
         return
       }
-
+      const data = await res.json()
       setProjects(data.projects || [])
     } catch (e) {
       console.log("Error loading projects:", e)
@@ -80,9 +73,15 @@ useEffect(() => {
           <Text style={styles.greeting}>{greeting},</Text>
           <Text style={styles.name}>{firstName} 👋</Text>
         </View>
-        <TouchableOpacity onPress={signOut} style={styles.signOutBtn}>
-          <Text style={styles.signOutText}>Sign out</Text>
-        </TouchableOpacity>
+        {user?.avatarUrl ? (
+          <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
+        ) : (
+          <View style={styles.avatarFallback}>
+            <Text style={styles.avatarText}>
+              {user?.name?.split(" ").map(n => n[0]).join("").toUpperCase() || "?"}
+            </Text>
+          </View>
+        )}
       </View>
 
       {/* KPI strip */}
@@ -118,7 +117,7 @@ useEffect(() => {
           <TouchableOpacity
             key={project.id}
             style={styles.projectCard}
-            onPress={() => router.push(`/project/${project.id}`)}
+            onPress={() => router.push(`/project/${project.id}` as any)}
             activeOpacity={0.8}
           >
             <View style={styles.projectTop}>
@@ -167,11 +166,12 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F5F4F0" },
   content: { padding: 20, paddingBottom: 40 },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#F5F4F0" },
-  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20, paddingTop: 56 },
+  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20, paddingTop: 56 },
   greeting: { fontSize: 14, color: "#6B7280", fontWeight: "500" },
   name: { fontSize: 26, fontWeight: "700", color: "#1A1A1A", letterSpacing: -0.5 },
-  signOutBtn: { backgroundColor: "#1C1F26", paddingHorizontal: 14, paddingVertical: 7, borderRadius: 8, marginTop: 6 },
-  signOutText: { color: "rgba(255,255,255,0.6)", fontSize: 12, fontWeight: "600" },
+  avatar: { width: 44, height: 44, borderRadius: 22 },
+  avatarFallback: { width: 44, height: 44, borderRadius: 22, backgroundColor: "#F97316", justifyContent: "center", alignItems: "center" },
+  avatarText: { fontSize: 16, fontWeight: "700", color: "white" },
   kpiScroll: { marginBottom: 24 },
   kpiCard: { backgroundColor: "white", borderRadius: 12, padding: 16, marginRight: 10, minWidth: 130, borderWidth: 1, borderColor: "#E8E6E1" },
   kpiLabel: { fontSize: 10, color: "#9CA3AF", fontWeight: "600", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 },
