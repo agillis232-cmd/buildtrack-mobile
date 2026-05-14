@@ -23,6 +23,7 @@ export default function ScheduleScreen() {
   const [adding, setAdding] = useState(false)
   const [saving, setSaving] = useState(false)
   const [editingEvent, setEditingEvent] = useState<any>(null)
+  const [activePicker, setActivePicker] = useState<"date" | "start" | "end" | null>(null)
 
   const [title, setTitle] = useState("")
   const [type, setType] = useState("MEETING")
@@ -32,10 +33,6 @@ export default function ScheduleScreen() {
   const [location, setLocation] = useState("")
   const [notes, setNotes] = useState("")
   const [projectId, setProjectId] = useState("")
-
-  const [showDatePicker, setShowDatePicker] = useState(false)
-  const [showStartPicker, setShowStartPicker] = useState(false)
-  const [showEndPicker, setShowEndPicker] = useState(false)
 
   useEffect(() => {
     if (token) {
@@ -130,6 +127,7 @@ export default function ScheduleScreen() {
       })
       const data = await res.json()
       if (data.event) {
+        console.log("Saved event:", JSON.stringify(data.event))
         if (editingEvent) {
           setEvents(prev => prev.map(e => e.id === data.event.id ? data.event : e))
         } else {
@@ -178,18 +176,20 @@ export default function ScheduleScreen() {
   dayAfter.setDate(dayAfter.getDate() + 2)
 
   const todayEvents = events.filter(e => {
-    const d = new Date(e.date); d.setHours(0, 0, 0, 0)
-    return d.getTime() === today.getTime()
+    const d = e.date.split("T")[0]
+    const t = today.toISOString().split("T")[0]
+    return d === t
   })
   const tomorrowEvents = events.filter(e => {
-    const d = new Date(e.date); d.setHours(0, 0, 0, 0)
-    return d.getTime() === tomorrow.getTime()
+    const d = e.date.split("T")[0]
+    const t = tomorrow.toISOString().split("T")[0]
+    return d === t
   })
   const upcomingEvents = events.filter(e => {
-    const d = new Date(e.date); d.setHours(0, 0, 0, 0)
-    return d.getTime() >= dayAfter.getTime()
+    const d = e.date.split("T")[0]
+    const t = dayAfter.toISOString().split("T")[0]
+    return d >= t
   })
-
   function formatDate(dateStr: string) {
     return new Date(dateStr).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
   }
@@ -235,53 +235,29 @@ export default function ScheduleScreen() {
 
             <View style={styles.field}>
               <Text style={styles.label}>Date *</Text>
-              <TouchableOpacity style={styles.pickerBtn} onPress={() => setShowDatePicker(true)}>
+              <TouchableOpacity style={styles.pickerBtn} onPress={() => setActivePicker("date")}>
                 <Text style={styles.pickerBtnText}>
                   {selectedDate.toLocaleDateString("en-US", { weekday: "short", month: "long", day: "numeric", year: "numeric" })}
                 </Text>
               </TouchableOpacity>
-              {showDatePicker && (
-                <DateTimePicker
-                  value={selectedDate}
-                  mode="date"
-                  display="spinner"
-                  onChange={(_, date) => { setShowDatePicker(false); if (date) setSelectedDate(date) }}
-                />
-              )}
             </View>
 
             <View style={styles.timeRow}>
               <View style={[styles.field, { flex: 1 }]}>
                 <Text style={styles.label}>Start Time</Text>
-                <TouchableOpacity style={styles.pickerBtn} onPress={() => setShowStartPicker(true)}>
+                <TouchableOpacity style={styles.pickerBtn} onPress={() => setActivePicker("start")}>
                   <Text style={styles.pickerBtnText}>
                     {startTime ? startTime.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true }) : "Set time"}
                   </Text>
                 </TouchableOpacity>
-                {showStartPicker && (
-                  <DateTimePicker
-                    value={startTime || new Date()}
-                    mode="time"
-                    display="spinner"
-                    onChange={(_, date) => { setShowStartPicker(false); if (date) setStartTime(date) }}
-                  />
-                )}
               </View>
               <View style={[styles.field, { flex: 1 }]}>
                 <Text style={styles.label}>End Time</Text>
-                <TouchableOpacity style={styles.pickerBtn} onPress={() => setShowEndPicker(true)}>
+                <TouchableOpacity style={styles.pickerBtn} onPress={() => setActivePicker("end")}>
                   <Text style={styles.pickerBtnText}>
                     {endTime ? endTime.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true }) : "Set time"}
                   </Text>
                 </TouchableOpacity>
-                {showEndPicker && (
-                  <DateTimePicker
-                    value={endTime || new Date()}
-                    mode="time"
-                    display="spinner"
-                    onChange={(_, date) => { setShowEndPicker(false); if (date) setEndTime(date) }}
-                  />
-                )}
               </View>
             </View>
 
@@ -354,6 +330,35 @@ export default function ScheduleScreen() {
           </Section>
         )}
       </ScrollView>
+
+      {adding && activePicker && (
+        <Modal transparent animationType="slide">
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalCard}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>
+                  {activePicker === "date" ? "Select Date" : activePicker === "start" ? "Start Time" : "End Time"}
+                </Text>
+                <TouchableOpacity onPress={() => setActivePicker(null)} style={styles.modalDone}>
+                  <Text style={styles.modalDoneText}>Done</Text>
+                </TouchableOpacity>
+              </View>
+              <DateTimePicker
+                value={activePicker === "date" ? selectedDate : activePicker === "start" ? (startTime || new Date()) : (endTime || new Date())}
+                mode={activePicker === "date" ? "date" : "time"}
+                display="spinner"
+                style={{ width: "100%" }}
+                onChange={(_, date) => {
+                  if (!date) return
+                  if (activePicker === "date") setSelectedDate(date)
+                  else if (activePicker === "start") setStartTime(date)
+                  else setEndTime(date)
+                }}
+              />
+            </View>
+          </View>
+        </Modal>
+      )}
 
       {!adding && (
         <View style={styles.fab}>
@@ -466,4 +471,10 @@ const styles = StyleSheet.create({
   fab: { position: "absolute", bottom: 30, left: 20, right: 20 },
   fabBtn: { backgroundColor: "#F97316", borderRadius: 14, padding: 16, alignItems: "center" },
   fabText: { color: "white", fontSize: 15, fontWeight: "700" },
+  modalOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.4)" },
+  modalCard: { backgroundColor: "white", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, paddingBottom: 40 },
+  modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
+  modalTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A" },
+  modalDone: { backgroundColor: "#F97316", paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8 },
+  modalDoneText: { color: "white", fontWeight: "700", fontSize: 14 },
 })
