@@ -37,10 +37,7 @@ export default function MessagesScreen() {
     try {
       const res = await fetch(`${API_URL}/api/mobile/projects/${id}/messages`, {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
+        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ body })
       })
       const data = await res.json()
@@ -59,40 +56,52 @@ export default function MessagesScreen() {
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+      {/* Header */}
       <View style={styles.header}>
+        <View style={styles.headerCircle} />
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.title}>Messages</Text>
       </View>
 
+      {/* Messages list */}
       <ScrollView
         ref={scrollRef}
-        contentContainerStyle={styles.content}
+        style={styles.messagesList}
+        contentContainerStyle={styles.messagesContent}
         onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}
       >
         {messages.length === 0 ? (
-           <View style={styles.emptyCard}>
-            <Text style={styles.emptyTitle}>No expenses yet</Text>
-            <Text style={styles.emptySub}>Scan a receipt or add manually</Text>
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>No messages yet</Text>
+            <Text style={styles.emptySub}>Start the conversation</Text>
           </View>
         ) : (
           messages.map(msg => {
             const isMe = msg.senderId === user?.id
             return (
-              <View key={msg.id} style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleThem]}>
-                {!isMe && <Text style={styles.senderName}>{msg.sender?.name || "Unknown"}</Text>}
-                <Text style={[styles.bubbleText, isMe && styles.bubbleTextMe]}>{msg.body}</Text>
-                <Text style={[styles.bubbleTime, isMe && styles.bubbleTimeMe]}>
-                  {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                </Text>
+              <View key={msg.id} style={[styles.bubbleWrapper, isMe ? styles.bubbleWrapperMe : styles.bubbleWrapperThem]}>
+                {!isMe && (
+                  <View style={styles.senderAvatar}>
+                    <Text style={styles.senderAvatarText}>{msg.sender?.name?.charAt(0).toUpperCase() || "?"}</Text>
+                  </View>
+                )}
+                <View style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleThem]}>
+                  {!isMe && <Text style={styles.senderName}>{msg.sender?.name || "Unknown"}</Text>}
+                  <Text style={[styles.bubbleText, isMe && styles.bubbleTextMe]}>{msg.body}</Text>
+                  <Text style={[styles.bubbleTime, isMe && styles.bubbleTimeMe]}>
+                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  </Text>
+                </View>
               </View>
             )
           })
         )}
       </ScrollView>
 
-      <View style={styles.inputRow}>
+      {/* Input bar */}
+      <View style={styles.inputBar}>
         <TextInput
           style={styles.input}
           value={body}
@@ -100,9 +109,17 @@ export default function MessagesScreen() {
           placeholder="Type a message..."
           placeholderTextColor="#9CA3AF"
           multiline
+          maxLength={1000}
         />
-        <TouchableOpacity style={styles.sendBtn} onPress={sendMessage} disabled={sending || !body.trim()}>
-          {sending ? <ActivityIndicator color="white" size="small" /> : <Text style={styles.sendText}>→</Text>}
+        <TouchableOpacity
+          style={[styles.sendBtn, !body.trim() && styles.sendBtnDisabled]}
+          onPress={sendMessage}
+          disabled={sending || !body.trim()}
+        >
+          {sending
+            ? <ActivityIndicator color="white" size="small" />
+            : <Text style={styles.sendBtnText}>Send</Text>
+          }
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -111,26 +128,33 @@ export default function MessagesScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F5F4F0" },
-  header: { paddingTop: 60, paddingHorizontal: 20, paddingBottom: 12, backgroundColor: "white", borderBottomWidth: 1, borderBottomColor: "#E8E6E1" },
-  backBtn: { marginBottom: 8 },
-  backText: { color: "#F97316", fontSize: 16, fontWeight: "600" },
-  title: { fontSize: 20, fontWeight: "700", color: "#1A1A1A" },
-  content: { padding: 16, paddingBottom: 20, flexGrow: 1 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  emptyCard: { flex: 1, justifyContent: "center", alignItems: "center", paddingVertical: 80 },
-  emptyEmoji: { fontSize: 40, marginBottom: 12 },
+  header: { backgroundColor: "#1C1F26", paddingTop: 60, paddingHorizontal: 20, paddingBottom: 16, position: "relative", overflow: "hidden" },
+  headerCircle: { position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: "rgba(249,115,22,0.08)" },
+  backBtn: { marginBottom: 8 },
+  backText: { color: "rgba(255,255,255,0.6)", fontSize: 15, fontWeight: "600" },
+  title: { fontSize: 22, fontWeight: "700", color: "white", letterSpacing: -0.5 },
+  messagesList: { flex: 1 },
+  messagesContent: { padding: 16, paddingBottom: 8, flexGrow: 1 },
+  emptyState: { flex: 1, justifyContent: "center", alignItems: "center", paddingVertical: 60 },
   emptyTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 6 },
   emptySub: { fontSize: 13, color: "#9CA3AF" },
-  bubble: { maxWidth: "75%", marginBottom: 12, padding: 12, borderRadius: 16 },
-  bubbleMe: { alignSelf: "flex-end", backgroundColor: "#F97316", borderBottomRightRadius: 4 },
-  bubbleThem: { alignSelf: "flex-start", backgroundColor: "white", borderBottomLeftRadius: 4, borderWidth: 1, borderColor: "#E8E6E1" },
+  bubbleWrapper: { flexDirection: "row", marginBottom: 12, alignItems: "flex-end", gap: 8 },
+  bubbleWrapperMe: { justifyContent: "flex-end" },
+  bubbleWrapperThem: { justifyContent: "flex-start" },
+  senderAvatar: { width: 30, height: 30, borderRadius: 15, backgroundColor: "#1C1F26", justifyContent: "center", alignItems: "center", flexShrink: 0 },
+  senderAvatarText: { fontSize: 12, fontWeight: "700", color: "white" },
+  bubble: { maxWidth: "72%", borderRadius: 18, padding: 12 },
+  bubbleMe: { backgroundColor: "#F97316", borderBottomRightRadius: 4 },
+  bubbleThem: { backgroundColor: "white", borderBottomLeftRadius: 4, borderWidth: 1, borderColor: "#E8E6E1" },
   senderName: { fontSize: 11, fontWeight: "700", color: "#9CA3AF", marginBottom: 4 },
-  bubbleText: { fontSize: 15, color: "#1A1A1A", lineHeight: 20 },
+  bubbleText: { fontSize: 15, color: "#1A1A1A", lineHeight: 21 },
   bubbleTextMe: { color: "white" },
   bubbleTime: { fontSize: 10, color: "#9CA3AF", marginTop: 4, textAlign: "right" },
   bubbleTimeMe: { color: "rgba(255,255,255,0.7)" },
-  inputRow: { flexDirection: "row", padding: 12, backgroundColor: "white", borderTopWidth: 1, borderTopColor: "#E8E6E1", gap: 10, alignItems: "flex-end" },
+  inputBar: { flexDirection: "row", padding: 12, backgroundColor: "white", borderTopWidth: 1, borderTopColor: "#E8E6E1", gap: 10, alignItems: "flex-end" },
   input: { flex: 1, backgroundColor: "#F9FAFB", borderRadius: 20, paddingHorizontal: 16, paddingVertical: 10, fontSize: 15, color: "#1A1A1A", borderWidth: 1, borderColor: "#E8E6E1", maxHeight: 100 },
-  sendBtn: { width: 44, height: 44, backgroundColor: "#F97316", borderRadius: 22, justifyContent: "center", alignItems: "center" },
-  sendText: { color: "white", fontSize: 18, fontWeight: "700" },
+  sendBtn: { backgroundColor: "#F97316", borderRadius: 20, paddingHorizontal: 18, paddingVertical: 10, justifyContent: "center", alignItems: "center" },
+  sendBtnDisabled: { backgroundColor: "#E8E6E1" },
+  sendBtnText: { color: "white", fontWeight: "700", fontSize: 14 },
 })
