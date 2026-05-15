@@ -211,7 +211,12 @@ export default function DashboardScreen() {
       </Modal>
 
       {/* Projects */}
-      <Text style={styles.sectionTitle}>Active projects</Text>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Active projects</Text>
+        <TouchableOpacity onPress={() => router.push("/new-project" as any)} style={styles.newProjectBtn}>
+          <Text style={styles.newProjectBtnText}>+ New</Text>
+        </TouchableOpacity>
+      </View>
       {projects.length === 0 ? (
          <View style={styles.emptyCard}>
             <Text style={styles.emptyTitle}>No expenses yet</Text>
@@ -326,4 +331,7 @@ const styles = StyleSheet.create({
   optionSub: { fontSize: 12, color: "#9CA3AF" },
   modalDoneBtn: { backgroundColor: "#F97316", borderRadius: 12, padding: 16, alignItems: "center", marginTop: 8 },
   modalDoneBtnText: { color: "white", fontSize: 16, fontWeight: "700" },
+  sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
+  newProjectBtn: { backgroundColor: "#F97316", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
+  newProjectBtnText: { color: "white", fontSize: 12, fontWeight: "700" },
 })
