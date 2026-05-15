@@ -32,63 +32,69 @@ export default function ExpensesScreen() {
   if (loading) return <View style={styles.center}><ActivityIndicator color="#F97316" /></View>
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.pageTitle}>All Expenses</Text>
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.content}>
+        {/* Header */}
+        <View style={styles.headerBanner}>
+          <View style={styles.headerCircle} />
+          <Text style={styles.pageTitle}>Expenses</Text>
+          <Text style={styles.totalAmount}>${total.toLocaleString("en-US", { minimumFractionDigits: 2 })}</Text>
+          <Text style={styles.totalSub}>{expenses.length} expenses across all projects</Text>
+        </View>
 
-      <View style={styles.totalCard}>
-        <Text style={styles.totalLabel}>Total Spent</Text>
-        <Text style={styles.totalValue}>${total.toLocaleString("en-US", { minimumFractionDigits: 2 })}</Text>
-        <Text style={styles.totalSub}>{expenses.length} expenses across all projects</Text>
-      </View>
-
-      {expenses.length === 0 ? (
-         <View style={styles.emptyCard}>
+        {expenses.length === 0 ? (
+          <View style={styles.emptyCard}>
             <Text style={styles.emptyTitle}>No expenses yet</Text>
-            <Text style={styles.emptySub}>Scan a receipt or add manually</Text>
+            <Text style={styles.emptySub}>Add expenses from within a project</Text>
           </View>
-      ) : (
-        expenses.map(expense => (
-          <TouchableOpacity
-            key={expense.id}
-            style={styles.expenseCard}
-            onPress={() => router.push(`/project/${expense.projectId}/expenses` as any)}
-            activeOpacity={0.8}
-          >
-            <View style={styles.expenseTop}>
-              <Text style={styles.expenseVendor}>{expense.vendor}</Text>
-              <Text style={styles.expenseAmount}>${expense.amount.toLocaleString()}</Text>
-            </View>
-            <Text style={styles.expenseDesc}>{expense.description}</Text>
-            <View style={styles.expenseBottom}>
-              <Text style={styles.expenseProject}>{expense.project?.name || "Unknown project"}</Text>
-              <Text style={styles.expenseDate}>{new Date(expense.date).toLocaleDateString()}</Text>
-            </View>
-          </TouchableOpacity>
-        ))
-      )}
-    </ScrollView>
+        ) : (
+          <View style={styles.list}>
+            {expenses.map(expense => (
+              <TouchableOpacity
+                key={expense.id}
+                style={styles.expenseCard}
+                onPress={() => router.push(`/project/${expense.projectId}/expenses` as any)}
+                activeOpacity={0.8}
+              >
+                <View style={styles.expenseLeft}>
+                  <View style={styles.expenseIconBox}>
+                    <View style={styles.expenseIconDot} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.expenseVendor}>{expense.vendor}</Text>
+                    <Text style={styles.expenseDesc} numberOfLines={1}>{expense.description || expense.project?.name || ""}</Text>
+                    <Text style={styles.expenseDate}>{new Date(expense.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</Text>
+                  </View>
+                </View>
+                <Text style={styles.expenseAmount}>${expense.amount.toLocaleString()}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+      </ScrollView>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F5F4F0" },
-  content: { padding: 20, paddingBottom: 60, paddingTop: 70 },
+  content: { paddingBottom: 60 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  pageTitle: { fontSize: 28, fontWeight: "700", color: "#1A1A1A", marginBottom: 20 },
-  totalCard: { backgroundColor: "#1C1F26", borderRadius: 16, padding: 20, marginBottom: 24 },
-  totalLabel: { fontSize: 12, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 },
-  totalValue: { fontSize: 36, fontWeight: "700", color: "white", letterSpacing: -1, marginBottom: 4 },
+  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 28, marginBottom: 20, position: "relative", overflow: "hidden" },
+  headerCircle: { position: "absolute", top: -60, right: -60, width: 220, height: 220, borderRadius: 110, backgroundColor: "rgba(249,115,22,0.08)" },
+  pageTitle: { fontSize: 14, fontWeight: "600", color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 },
+  totalAmount: { fontSize: 40, fontWeight: "700", color: "white", letterSpacing: -1, marginBottom: 4 },
   totalSub: { fontSize: 13, color: "rgba(255,255,255,0.4)" },
-  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1" },
-  emptyEmoji: { fontSize: 40, marginBottom: 12 },
+  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1", marginHorizontal: 16 },
   emptyTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 6 },
   emptySub: { fontSize: 13, color: "#9CA3AF", textAlign: "center" },
-  expenseCard: { backgroundColor: "white", borderRadius: 14, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: "#E8E6E1" },
-  expenseTop: { flexDirection: "row", justifyContent: "space-between", marginBottom: 4 },
-  expenseVendor: { fontSize: 15, fontWeight: "700", color: "#1A1A1A" },
-  expenseAmount: { fontSize: 15, fontWeight: "700", color: "#F97316" },
-  expenseDesc: { fontSize: 13, color: "#6B7280", marginBottom: 8 },
-  expenseBottom: { flexDirection: "row", justifyContent: "space-between" },
-  expenseProject: { fontSize: 11, color: "#9CA3AF", fontWeight: "600" },
+  list: { paddingHorizontal: 16, gap: 8 },
+  expenseCard: { backgroundColor: "white", borderRadius: 14, padding: 14, borderWidth: 1, borderColor: "#E8E6E1", flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  expenseLeft: { flexDirection: "row", alignItems: "center", gap: 12, flex: 1, marginRight: 12 },
+  expenseIconBox: { width: 40, height: 40, borderRadius: 12, backgroundColor: "#FFF7ED", justifyContent: "center", alignItems: "center" },
+  expenseIconDot: { width: 14, height: 14, borderRadius: 4, backgroundColor: "#F97316" },
+  expenseVendor: { fontSize: 14, fontWeight: "700", color: "#1A1A1A", marginBottom: 2 },
+  expenseDesc: { fontSize: 12, color: "#9CA3AF", marginBottom: 2 },
   expenseDate: { fontSize: 11, color: "#9CA3AF" },
+  expenseAmount: { fontSize: 16, fontWeight: "700", color: "#F97316" },
 })

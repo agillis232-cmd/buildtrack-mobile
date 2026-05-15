@@ -17,11 +17,7 @@ export default function CameraScreen() {
       return
     }
 
-    const result = await ImagePicker.launchCameraAsync({
-      base64: true,
-      quality: 0.8,
-    })
-
+    const result = await ImagePicker.launchCameraAsync({ base64: true, quality: 0.8 })
     if (result.canceled) return
 
     setScanning(true)
@@ -37,7 +33,7 @@ export default function CameraScreen() {
       const data = await res.json()
       if (data.expense) {
         Alert.alert(
-          "Receipt Scanned!",
+          "Receipt Scanned",
           `Vendor: ${data.expense.vendor}\nAmount: $${data.expense.amount}\nDate: ${data.expense.date}`,
           [{ text: "OK" }]
         )
@@ -56,66 +52,91 @@ export default function CameraScreen() {
       Alert.alert("Permission needed", "Camera access is required")
       return
     }
-
-    const result = await ImagePicker.launchCameraAsync({
-      quality: 0.8,
-    })
-
+    const result = await ImagePicker.launchCameraAsync({ quality: 0.8 })
     if (!result.canceled) {
-      Alert.alert("Photo taken!", "Go to a project to upload photos to a specific job site.")
+      Alert.alert("Photo taken", "Go to a project to upload photos to a specific job site.")
     }
   }
 
+  const actions = [
+    {
+      label: "Scan Receipt",
+      sub: "AI-powered receipt scanning",
+      color: "#8B5CF6",
+      onPress: scanReceipt,
+      loading: scanning,
+    },
+    {
+      label: "Take Photo",
+      sub: "Then attach to a project",
+      color: "#3B82F6",
+      onPress: takePhoto,
+      loading: false,
+    },
+    {
+      label: "Add Daily Log",
+      sub: "Go to a project to log today",
+      color: "#16A34A",
+      onPress: () => router.push("/(tabs)"),
+      loading: false,
+    },
+    {
+      label: "New Change Order",
+      sub: "Go to a project to create",
+      color: "#F97316",
+      onPress: () => router.push("/(tabs)"),
+      loading: false,
+    },
+  ]
+
   return (
     <View style={styles.container}>
-      <Text style={styles.pageTitle}>Quick Actions</Text>
-      <Text style={styles.subtitle}>Capture receipts or photos from anywhere</Text>
+      {/* Header */}
+      <View style={styles.headerBanner}>
+        <View style={styles.headerCircle} />
+        <Text style={styles.pageTitle}>Quick Actions</Text>
+        <Text style={styles.subtitle}>Capture and log from anywhere</Text>
+      </View>
 
-      <TouchableOpacity style={styles.card} onPress={scanReceipt} disabled={scanning}>
-        <View style={styles.iconBox}>
-          <Text style={styles.icon}></Text>
-        </View>
-        <View style={styles.cardText}>
-          <Text style={styles.cardTitle}>Scan Receipt</Text>
-          <Text style={styles.cardSub}>AI-powered receipt scanning</Text>
-        </View>
-        {scanning ? <ActivityIndicator color="#F97316" /> : <Text style={styles.arrow}>→</Text>}
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.card} onPress={takePhoto}>
-        <View style={styles.iconBox}>
-          <Text style={styles.icon}></Text>
-        </View>
-        <View style={styles.cardText}>
-          <Text style={styles.cardTitle}>Take Photo</Text>
-          <Text style={styles.cardSub}>Then attach to a project</Text>
-        </View>
-        <Text style={styles.arrow}>→</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.card} onPress={() => router.push("/(tabs)")}>
-        <View style={styles.iconBox}>
-          <Text style={styles.icon}></Text>
-        </View>
-        <View style={styles.cardText}>
-          <Text style={styles.cardTitle}>Add Daily Log</Text>
-          <Text style={styles.cardSub}>Go to a project to log today</Text>
-        </View>
-        <Text style={styles.arrow}>→</Text>
-      </TouchableOpacity>
+      <View style={styles.content}>
+        {actions.map((action) => (
+          <TouchableOpacity
+            key={action.label}
+            style={styles.card}
+            onPress={action.onPress}
+            disabled={action.loading}
+            activeOpacity={0.8}
+          >
+            <View style={[styles.iconBox, { backgroundColor: action.color + "15" }]}>
+              <View style={[styles.iconDot, { backgroundColor: action.color }]} />
+            </View>
+            <View style={styles.cardText}>
+              <Text style={styles.cardTitle}>{action.label}</Text>
+              <Text style={styles.cardSub}>{action.sub}</Text>
+            </View>
+            {action.loading
+              ? <ActivityIndicator color="#F97316" />
+              : <Text style={styles.arrow}>›</Text>
+            }
+          </TouchableOpacity>
+        ))}
+      </View>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0", padding: 20, paddingTop: 70 },
-  pageTitle: { fontSize: 28, fontWeight: "700", color: "#1A1A1A", marginBottom: 6 },
-  subtitle: { fontSize: 14, color: "#9CA3AF", marginBottom: 32 },
-  card: { backgroundColor: "white", borderRadius: 16, padding: 18, marginBottom: 12, flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1", gap: 14 },
-  iconBox: { width: 48, height: 48, backgroundColor: "#FFF7ED", borderRadius: 12, justifyContent: "center", alignItems: "center" },
-  icon: { fontSize: 24 },
+  container: { flex: 1, backgroundColor: "#F5F4F0" },
+  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 24, marginBottom: 20, position: "relative", overflow: "hidden" },
+  headerCircle: { position: "absolute", top: -60, right: -60, width: 220, height: 220, borderRadius: 110, backgroundColor: "rgba(249,115,22,0.08)" },
+  pageTitle: { fontSize: 28, fontWeight: "700", color: "white", letterSpacing: -0.5, marginBottom: 4 },
+  subtitle: { fontSize: 14, color: "rgba(255,255,255,0.4)" },
+  content: { padding: 16, gap: 10 },
+  card: { backgroundColor: "white", borderRadius: 16, padding: 18, flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1", gap: 14 },
+  iconBox: { width: 48, height: 48, borderRadius: 14, justifyContent: "center", alignItems: "center" },
+  iconDot: { width: 16, height: 16, borderRadius: 5 },
   cardText: { flex: 1 },
   cardTitle: { fontSize: 15, fontWeight: "700", color: "#1A1A1A", marginBottom: 2 },
   cardSub: { fontSize: 12, color: "#9CA3AF" },
-  arrow: { fontSize: 18, color: "#D1D5DB" },
+  arrow: { fontSize: 20, color: "#D1D5DB", fontWeight: "300" },
 })
