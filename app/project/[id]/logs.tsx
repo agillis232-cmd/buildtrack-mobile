@@ -68,10 +68,7 @@ export default function LogsScreen() {
 
       const res = await fetch(url, {
         method: editingLog ? "PATCH" : "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
+        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ summary, crew, hoursWorked: parseInt(hours), weather, date })
       })
       const data = await res.json()
@@ -106,11 +103,8 @@ export default function LogsScreen() {
               method: "DELETE",
               headers: { "Authorization": `Bearer ${token}` }
             })
-            if (res.ok) {
-              setLogs(prev => prev.filter(l => l.id !== logId))
-            } else {
-              Alert.alert("Error", "Could not delete log")
-            }
+            if (res.ok) setLogs(prev => prev.filter(l => l.id !== logId))
+            else Alert.alert("Error", "Could not delete log")
           } catch (e) {
             Alert.alert("Error", "Connection error")
           }
@@ -124,27 +118,42 @@ export default function LogsScreen() {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={styles.backText}>← Back</Text>
-        </TouchableOpacity>
-
-        <Text style={styles.title}>Daily Logs</Text>
+        <View style={styles.headerBanner}>
+          <View style={styles.headerCircle} />
+          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+            <Text style={styles.backText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.title}>Daily Logs</Text>
+        </View>
 
         {adding && (
           <View style={styles.addCard}>
-            <Text style={styles.addTitle}>New Log</Text>
+            <View style={styles.addCardHeader}>
+              <Text style={styles.addTitle}>New Daily Log</Text>
+              <Text style={styles.addDate}>{new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}</Text>
+            </View>
+
             <View style={styles.field}>
               <Text style={styles.label}>Summary *</Text>
-              <TextInput style={[styles.input, styles.multiline]} value={summary} onChangeText={setSummary} placeholder="What was done today..." placeholderTextColor="#9CA3AF" multiline numberOfLines={3} />
+              <TextInput style={[styles.input, styles.multiline]} value={summary} onChangeText={setSummary} placeholder="What was accomplished today..." placeholderTextColor="#9CA3AF" multiline numberOfLines={4} />
             </View>
+
             <View style={styles.field}>
-              <Text style={styles.label}>Crew *</Text>
-              <TextInput style={styles.input} value={crew} onChangeText={setCrew} placeholder="John, Mike, Sarah" placeholderTextColor="#9CA3AF" />
+              <Text style={styles.label}>Crew Members *</Text>
+              <TextInput style={styles.input} value={crew} onChangeText={setCrew} placeholder="John Smith, Mike Jones..." placeholderTextColor="#9CA3AF" />
             </View>
-            <View style={styles.field}>
-              <Text style={styles.label}>Hours Worked *</Text>
-              <TextInput style={styles.input} value={hours} onChangeText={setHours} placeholder="8" placeholderTextColor="#9CA3AF" keyboardType="number-pad" />
+
+            <View style={styles.twoCol}>
+              <View style={[styles.field, { flex: 1 }]}>
+                <Text style={styles.label}>Hours *</Text>
+                <TextInput style={styles.input} value={hours} onChangeText={setHours} placeholder="8" placeholderTextColor="#9CA3AF" keyboardType="number-pad" />
+              </View>
+              <View style={[styles.field, { flex: 1 }]}>
+                <Text style={styles.label}>Date</Text>
+                <TextInput style={styles.input} value={date} onChangeText={setDate} placeholder="YYYY-MM-DD" placeholderTextColor="#9CA3AF" />
+              </View>
             </View>
+
             <View style={styles.field}>
               <Text style={styles.label}>Weather</Text>
               <View style={styles.weatherRow}>
@@ -155,7 +164,8 @@ export default function LogsScreen() {
                 ))}
               </View>
             </View>
-            <View style={styles.row}>
+
+            <View style={styles.formBtns}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setAdding(false)}>
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
@@ -173,16 +183,17 @@ export default function LogsScreen() {
           </View>
         ) : (
           logs.map(log => (
-            <TouchableOpacity key={log.id} style={styles.logCard} onPress={() => openEdit(log)} activeOpacity={0.8}>
+            <View key={log.id} style={styles.logCard}>
               <View style={styles.logTop}>
-                <Text style={styles.logDate}>{new Date(log.date).toLocaleDateString()}</Text>
-                <Text style={styles.logWeather}>{log.weather}</Text>
+                <View>
+                  <Text style={styles.logDate}>{new Date(log.date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}</Text>
+                  <Text style={styles.logWeather}>{log.weather} · {log.hoursWorked} hrs</Text>
+                </View>
+                <View style={styles.logCrewBadge}>
+                  <Text style={styles.logCrewText}>{log.crew.split(",")[0].trim()}</Text>
+                </View>
               </View>
               <Text style={styles.logSummary}>{log.summary}</Text>
-              <View style={styles.logMeta}>
-                <Text style={styles.logMetaText}>Crew: {log.crew}</Text>
-                <Text style={styles.logMetaText}>{log.hoursWorked} hrs</Text>
-              </View>
               <View style={styles.logActions}>
                 <TouchableOpacity style={styles.editBtn} onPress={() => openEdit(log)}>
                   <Text style={styles.editBtnText}>Edit</Text>
@@ -191,7 +202,7 @@ export default function LogsScreen() {
                   <Text style={styles.deleteBtnText}>Delete</Text>
                 </TouchableOpacity>
               </View>
-            </TouchableOpacity>
+            </View>
           ))
         )}
       </ScrollView>
@@ -204,7 +215,6 @@ export default function LogsScreen() {
         </View>
       )}
 
-      {/* Edit Modal */}
       <Modal visible={!!editingLog} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
@@ -218,9 +228,15 @@ export default function LogsScreen() {
                 <Text style={styles.label}>Crew *</Text>
                 <TextInput style={styles.input} value={crew} onChangeText={setCrew} placeholder="John, Mike..." placeholderTextColor="#9CA3AF" />
               </View>
-              <View style={styles.field}>
-                <Text style={styles.label}>Hours *</Text>
-                <TextInput style={styles.input} value={hours} onChangeText={setHours} keyboardType="number-pad" placeholder="8" placeholderTextColor="#9CA3AF" />
+              <View style={styles.twoCol}>
+                <View style={[styles.field, { flex: 1 }]}>
+                  <Text style={styles.label}>Hours *</Text>
+                  <TextInput style={styles.input} value={hours} onChangeText={setHours} keyboardType="number-pad" placeholder="8" placeholderTextColor="#9CA3AF" />
+                </View>
+                <View style={[styles.field, { flex: 1 }]}>
+                  <Text style={styles.label}>Date</Text>
+                  <TextInput style={styles.input} value={date} onChangeText={setDate} placeholder="YYYY-MM-DD" placeholderTextColor="#9CA3AF" />
+                </View>
               </View>
               <View style={styles.field}>
                 <Text style={styles.label}>Weather</Text>
@@ -232,7 +248,7 @@ export default function LogsScreen() {
                   ))}
                 </View>
               </View>
-              <View style={styles.modalBtns}>
+              <View style={styles.formBtns}>
                 <TouchableOpacity style={styles.cancelBtn} onPress={closeEdit}>
                   <Text style={styles.cancelText}>Cancel</Text>
                 </TouchableOpacity>
@@ -250,47 +266,51 @@ export default function LogsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F5F4F0" },
-  content: { padding: 20, paddingBottom: 120, paddingTop: 60 },
+  content: { paddingBottom: 120 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  backBtn: { marginBottom: 20 },
-  backText: { color: "#F97316", fontSize: 16, fontWeight: "600" },
-  title: { fontSize: 24, fontWeight: "700", color: "#1A1A1A", marginBottom: 20 },
-  addCard: { backgroundColor: "white", borderRadius: 14, padding: 16, marginBottom: 20, borderWidth: 1, borderColor: "#E8E6E1" },
-  addTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 16 },
+  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 20, marginBottom: 20, position: "relative", overflow: "hidden" },
+  headerCircle: { position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: "rgba(249,115,22,0.08)" },
+  backBtn: { marginBottom: 12 },
+  backText: { color: "rgba(255,255,255,0.6)", fontSize: 15, fontWeight: "600" },
+  title: { fontSize: 26, fontWeight: "700", color: "white", letterSpacing: -0.5 },
+  addCard: { backgroundColor: "white", borderRadius: 16, padding: 20, marginHorizontal: 16, marginBottom: 20, borderWidth: 1, borderColor: "#E8E6E1", shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 3 },
+  addCardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
+  addTitle: { fontSize: 17, fontWeight: "700", color: "#1A1A1A" },
+  addDate: { fontSize: 12, color: "#9CA3AF", fontWeight: "600" },
   field: { marginBottom: 14 },
   label: { fontSize: 13, fontWeight: "600", color: "#374151", marginBottom: 6 },
   input: { backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, fontSize: 15, color: "#1A1A1A", borderWidth: 1, borderColor: "#E8E6E1" },
-  multiline: { height: 80, textAlignVertical: "top" },
+  multiline: { height: 90, textAlignVertical: "top" },
+  twoCol: { flexDirection: "row", gap: 12 },
   weatherRow: { flexDirection: "row", gap: 8 },
-  weatherBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, backgroundColor: "#F3F4F6", borderWidth: 1, borderColor: "#E8E6E1" },
+  weatherBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99, backgroundColor: "#F3F4F6", borderWidth: 1, borderColor: "#E8E6E1" },
   weatherBtnActive: { backgroundColor: "#F97316", borderColor: "#F97316" },
   weatherBtnText: { fontSize: 13, color: "#6B7280", fontWeight: "600" },
   weatherBtnTextActive: { color: "white" },
-  row: { flexDirection: "row", gap: 10, marginTop: 8 },
+  formBtns: { flexDirection: "row", gap: 10, marginTop: 8 },
   cancelBtn: { flex: 1, backgroundColor: "#F3F4F6", borderRadius: 10, padding: 13, alignItems: "center" },
   cancelText: { fontSize: 15, fontWeight: "600", color: "#6B7280" },
   saveBtn: { flex: 1, backgroundColor: "#F97316", borderRadius: 10, padding: 13, alignItems: "center" },
   saveBtnText: { color: "white", fontSize: 15, fontWeight: "700" },
-  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1" },
+  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1", marginHorizontal: 16 },
   emptyTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 6 },
   emptySub: { fontSize: 13, color: "#9CA3AF", textAlign: "center" },
-  logCard: { backgroundColor: "white", borderRadius: 14, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: "#E8E6E1" },
-  logTop: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
-  logDate: { fontSize: 13, fontWeight: "700", color: "#1A1A1A" },
-  logWeather: { fontSize: 12, color: "#9CA3AF" },
-  logSummary: { fontSize: 14, color: "#374151", marginBottom: 10, lineHeight: 20 },
-  logMeta: { flexDirection: "row", gap: 14, marginBottom: 10 },
-  logMetaText: { fontSize: 12, color: "#6B7280" },
+  logCard: { backgroundColor: "white", borderRadius: 16, padding: 16, marginHorizontal: 16, marginBottom: 10, borderWidth: 1, borderColor: "#E8E6E1", shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 2 },
+  logTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 },
+  logDate: { fontSize: 14, fontWeight: "700", color: "#1A1A1A", marginBottom: 2 },
+  logWeather: { fontSize: 11, color: "#9CA3AF" },
+  logCrewBadge: { backgroundColor: "#F3F4F6", borderRadius: 99, paddingHorizontal: 10, paddingVertical: 4 },
+  logCrewText: { fontSize: 11, color: "#6B7280", fontWeight: "600" },
+  logSummary: { fontSize: 14, color: "#374151", lineHeight: 21, marginBottom: 12 },
   logActions: { flexDirection: "row", gap: 8, paddingTop: 10, borderTopWidth: 1, borderTopColor: "#F3F4F6" },
   editBtn: { flex: 1, backgroundColor: "#F3F4F6", borderRadius: 8, padding: 8, alignItems: "center" },
   editBtnText: { fontSize: 13, fontWeight: "600", color: "#374151" },
   deleteBtn: { flex: 1, backgroundColor: "#FEE2E2", borderRadius: 8, padding: 8, alignItems: "center" },
   deleteBtnText: { fontSize: 13, fontWeight: "600", color: "#DC2626" },
-  fab: { position: "absolute", bottom: 30, left: 20, right: 20 },
+  fab: { position: "absolute", bottom: 30, left: 16, right: 16 },
   fabBtn: { backgroundColor: "#F97316", borderRadius: 14, padding: 16, alignItems: "center" },
   fabText: { color: "white", fontSize: 15, fontWeight: "700" },
   modalOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" },
   modalCard: { backgroundColor: "white", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, paddingBottom: 40, maxHeight: "85%" },
   modalTitle: { fontSize: 18, fontWeight: "700", color: "#1A1A1A", marginBottom: 20 },
-  modalBtns: { flexDirection: "row", gap: 10, marginTop: 8 },
 })

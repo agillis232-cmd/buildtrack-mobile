@@ -23,7 +23,6 @@ export default function PhotosScreen() {
         headers: { "Authorization": `Bearer ${token}` }
       })
       const data = await res.json()
-      console.log("Photos data:", JSON.stringify(data))
       setPhotos(data.photos || [])
     } catch (e) {
       console.log("Error loading photos:", e)
@@ -51,10 +50,7 @@ export default function PhotosScreen() {
     try {
       const res = await fetch(`${API_URL}/api/mobile/projects/${id}/photos`, {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
+        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ image: result.assets[0].base64 })
       })
       const data = await res.json()
@@ -82,11 +78,16 @@ export default function PhotosScreen() {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={styles.backText}>← Back</Text>
-        </TouchableOpacity>
-
-        <Text style={styles.title}>Photos</Text>
+        <View style={styles.headerBanner}>
+          <View style={styles.headerCircle} />
+          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+            <Text style={styles.backText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.title}>Photos</Text>
+          {photos.length > 0 && (
+            <Text style={styles.photoCount}>{photos.length} photo{photos.length !== 1 ? "s" : ""}</Text>
+          )}
+        </View>
 
         {photos.length === 0 ? (
           <View style={styles.emptyCard}>
@@ -98,12 +99,19 @@ export default function PhotosScreen() {
             {photos.map(photo => (
               <TouchableOpacity
                 key={photo.id}
+                style={styles.photoWrapper}
                 onPress={() => router.push(`/project/${id}/photo-viewer?photoId=${photo.id}&url=${encodeURIComponent(photo.url)}&caption=${encodeURIComponent(photo.caption || "")}` as any)}
+                activeOpacity={0.9}
               >
                 <Image
                   source={{ uri: photo.url.replace('/upload/', '/upload/f_jpg/') }}
                   style={styles.photo}
                 />
+                {photo.caption ? (
+                  <View style={styles.captionOverlay}>
+                    <Text style={styles.captionText} numberOfLines={1}>{photo.caption}</Text>
+                  </View>
+                ) : null}
               </TouchableOpacity>
             ))}
           </View>
@@ -112,7 +120,7 @@ export default function PhotosScreen() {
 
       <View style={styles.fab}>
         <TouchableOpacity style={styles.fabBtn} onPress={pickSource} disabled={uploading}>
-         {uploading ? <ActivityIndicator color="white" /> : <Text style={styles.fabText}>Upload Photo</Text>}
+          {uploading ? <ActivityIndicator color="white" /> : <Text style={styles.fabText}>Upload Photo</Text>}
         </TouchableOpacity>
       </View>
     </View>
@@ -121,18 +129,23 @@ export default function PhotosScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F5F4F0" },
-  content: { padding: 20, paddingBottom: 120, paddingTop: 60 },
+  content: { paddingBottom: 120 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  backBtn: { marginBottom: 20 },
-  backText: { color: "#F97316", fontSize: 16, fontWeight: "600" },
-  title: { fontSize: 24, fontWeight: "700", color: "#1A1A1A", marginBottom: 20 },
-  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1" },
-  emptyEmoji: { fontSize: 40, marginBottom: 12 },
+  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 20, marginBottom: 20, position: "relative", overflow: "hidden" },
+  headerCircle: { position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: "rgba(249,115,22,0.08)" },
+  backBtn: { marginBottom: 12 },
+  backText: { color: "rgba(255,255,255,0.6)", fontSize: 15, fontWeight: "600" },
+  title: { fontSize: 26, fontWeight: "700", color: "white", letterSpacing: -0.5, marginBottom: 4 },
+  photoCount: { fontSize: 13, color: "rgba(255,255,255,0.4)", fontWeight: "600" },
+  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1", marginHorizontal: 16 },
   emptyTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 6 },
   emptySub: { fontSize: 13, color: "#9CA3AF", textAlign: "center" },
-  grid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
- photo: { width: 160, height: 160, borderRadius: 10, backgroundColor: "#E8E6E1", margin: 4 },
-  fab: { position: "absolute", bottom: 30, left: 20, right: 20 },
+  grid: { flexDirection: "row", flexWrap: "wrap", gap: 3, paddingHorizontal: 16 },
+  photoWrapper: { width: "48%", borderRadius: 12, overflow: "hidden", position: "relative" },
+  photo: { width: "100%", height: 160, backgroundColor: "#E8E6E1" },
+  captionOverlay: { position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: "rgba(0,0,0,0.55)", padding: 8 },
+  captionText: { fontSize: 11, color: "white", fontWeight: "500" },
+  fab: { position: "absolute", bottom: 30, left: 16, right: 16 },
   fabBtn: { backgroundColor: "#F97316", borderRadius: 14, padding: 16, alignItems: "center" },
   fabText: { color: "white", fontSize: 15, fontWeight: "700" },
 })

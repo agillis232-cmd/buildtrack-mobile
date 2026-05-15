@@ -43,7 +43,6 @@ export default function ExpensesScreen() {
       Alert.alert("Permission needed", "Camera access is required to scan receipts")
       return
     }
-
     const result = await ImagePicker.launchCameraAsync({ base64: true, quality: 0.8 })
     if (result.canceled) return
 
@@ -51,10 +50,7 @@ export default function ExpensesScreen() {
     try {
       const res = await fetch(`${API_URL}/api/mobile/scan-receipt`, {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
+        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ image: result.assets[0].base64, projectId: id })
       })
       const data = await res.json()
@@ -94,10 +90,7 @@ export default function ExpensesScreen() {
     try {
       const res = await fetch(`${API_URL}/api/mobile/projects/${id}/expenses/${editingExpense.id}`, {
         method: "PATCH",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
+        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ vendor, description, amount: parseFloat(amount), date })
       })
       const data = await res.json()
@@ -123,11 +116,8 @@ export default function ExpensesScreen() {
               method: "DELETE",
               headers: { "Authorization": `Bearer ${token}` }
             })
-            if (res.ok) {
-              setExpenses(prev => prev.filter(e => e.id !== expenseId))
-            } else {
-              Alert.alert("Error", "Could not delete expense")
-            }
+            if (res.ok) setExpenses(prev => prev.filter(e => e.id !== expenseId))
+            else Alert.alert("Error", "Could not delete expense")
           } catch (e) {
             Alert.alert("Error", "Connection error")
           }
@@ -143,18 +133,19 @@ export default function ExpensesScreen() {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={styles.backText}>← Back</Text>
-        </TouchableOpacity>
-
-        <Text style={styles.title}>Expenses</Text>
-
-        {expenses.length > 0 && (
-          <View style={styles.totalCard}>
-            <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.totalValue}>${total.toLocaleString("en-US", { minimumFractionDigits: 2 })}</Text>
-          </View>
-        )}
+        <View style={styles.headerBanner}>
+          <View style={styles.headerCircle} />
+          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+            <Text style={styles.backText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.title}>Expenses</Text>
+          {expenses.length > 0 && (
+            <View style={styles.headerStats}>
+              <Text style={styles.headerTotal}>${total.toLocaleString("en-US", { minimumFractionDigits: 2 })}</Text>
+              <Text style={styles.headerSub}>{expenses.length} expense{expenses.length !== 1 ? "s" : ""}</Text>
+            </View>
+          )}
+        </View>
 
         {expenses.length === 0 ? (
           <View style={styles.emptyCard}>
@@ -169,13 +160,18 @@ export default function ExpensesScreen() {
               onPress={() => openEdit(expense)}
               activeOpacity={0.8}
             >
-              <View style={styles.expenseTop}>
-                <Text style={styles.expenseVendor}>{expense.vendor}</Text>
-                <Text style={styles.expenseAmount}>${expense.amount.toLocaleString()}</Text>
+              <View style={styles.expenseLeft}>
+                <View style={styles.expenseIconBox}>
+                  <View style={styles.expenseIconDot} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.expenseVendor}>{expense.vendor}</Text>
+                  {expense.description ? <Text style={styles.expenseDesc} numberOfLines={1}>{expense.description}</Text> : null}
+                  <Text style={styles.expenseDate}>{new Date(expense.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</Text>
+                </View>
               </View>
-              <Text style={styles.expenseDesc}>{expense.description}</Text>
-              <View style={styles.expenseBottom}>
-                <Text style={styles.expenseDate}>{new Date(expense.date).toLocaleDateString()}</Text>
+              <View style={styles.expenseRight}>
+                <Text style={styles.expenseAmount}>${expense.amount.toLocaleString()}</Text>
                 <TouchableOpacity onPress={() => deleteExpense(expense.id)} style={styles.deleteBtn}>
                   <Text style={styles.deleteBtnText}>Delete</Text>
                 </TouchableOpacity>
@@ -194,35 +190,31 @@ export default function ExpensesScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Edit Modal */}
       <Modal visible={!!editingExpense} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Edit Expense</Text>
-
             <View style={styles.field}>
               <Text style={styles.label}>Vendor *</Text>
               <TextInput style={styles.input} value={vendor} onChangeText={setVendor} placeholder="Home Depot" placeholderTextColor="#9CA3AF" />
             </View>
-
             <View style={styles.field}>
               <Text style={styles.label}>Description</Text>
               <TextInput style={styles.input} value={description} onChangeText={setDescription} placeholder="Lumber, screws..." placeholderTextColor="#9CA3AF" />
             </View>
-
-            <View style={styles.field}>
-              <Text style={styles.label}>Amount *</Text>
-              <TextInput style={styles.input} value={amount} onChangeText={setAmount} keyboardType="decimal-pad" placeholder="0.00" placeholderTextColor="#9CA3AF" />
+            <View style={styles.twoCol}>
+              <View style={[styles.field, { flex: 1 }]}>
+                <Text style={styles.label}>Amount *</Text>
+                <TextInput style={styles.input} value={amount} onChangeText={setAmount} keyboardType="decimal-pad" placeholder="0.00" placeholderTextColor="#9CA3AF" />
+              </View>
+              <View style={[styles.field, { flex: 1 }]}>
+                <Text style={styles.label}>Date</Text>
+                <TextInput style={styles.input} value={date} onChangeText={setDate} placeholder="YYYY-MM-DD" placeholderTextColor="#9CA3AF" />
+              </View>
             </View>
-
-            <View style={styles.field}>
-              <Text style={styles.label}>Date</Text>
-              <TextInput style={styles.input} value={date} onChangeText={setDate} placeholder="YYYY-MM-DD" placeholderTextColor="#9CA3AF" />
-            </View>
-
             <View style={styles.modalBtns}>
               <TouchableOpacity style={styles.cancelBtn} onPress={closeEdit}>
-                <Text style={styles.cancelBtnText}>Cancel</Text>
+                <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.saveBtn} onPress={saveEdit} disabled={saving}>
                 {saving ? <ActivityIndicator color="white" size="small" /> : <Text style={styles.saveBtnText}>Save</Text>}
@@ -237,27 +229,31 @@ export default function ExpensesScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F5F4F0" },
-  content: { padding: 20, paddingBottom: 160, paddingTop: 60 },
+  content: { paddingBottom: 160 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  backBtn: { marginBottom: 20 },
-  backText: { color: "#F97316", fontSize: 16, fontWeight: "600" },
-  title: { fontSize: 24, fontWeight: "700", color: "#1A1A1A", marginBottom: 16 },
-  totalCard: { backgroundColor: "#1C1F26", borderRadius: 12, padding: 16, marginBottom: 16 },
-  totalLabel: { fontSize: 11, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 },
-  totalValue: { fontSize: 28, fontWeight: "700", color: "white" },
-  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1" },
+  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 24, marginBottom: 20, position: "relative", overflow: "hidden" },
+  headerCircle: { position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: "rgba(249,115,22,0.08)" },
+  backBtn: { marginBottom: 12 },
+  backText: { color: "rgba(255,255,255,0.6)", fontSize: 15, fontWeight: "600" },
+  title: { fontSize: 26, fontWeight: "700", color: "white", letterSpacing: -0.5, marginBottom: 6 },
+  headerStats: { gap: 2 },
+  headerTotal: { fontSize: 28, fontWeight: "700", color: "#F97316", letterSpacing: -0.5 },
+  headerSub: { fontSize: 13, color: "rgba(255,255,255,0.4)" },
+  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1", marginHorizontal: 16 },
   emptyTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 6 },
   emptySub: { fontSize: 13, color: "#9CA3AF", textAlign: "center" },
-  expenseCard: { backgroundColor: "white", borderRadius: 14, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: "#E8E6E1" },
-  expenseTop: { flexDirection: "row", justifyContent: "space-between", marginBottom: 4 },
-  expenseVendor: { fontSize: 15, fontWeight: "700", color: "#1A1A1A" },
-  expenseAmount: { fontSize: 15, fontWeight: "700", color: "#F97316" },
-  expenseDesc: { fontSize: 13, color: "#6B7280", marginBottom: 8 },
-  expenseBottom: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  expenseCard: { backgroundColor: "white", borderRadius: 16, padding: 14, marginHorizontal: 16, marginBottom: 10, borderWidth: 1, borderColor: "#E8E6E1", flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  expenseLeft: { flexDirection: "row", alignItems: "center", gap: 12, flex: 1, marginRight: 12 },
+  expenseIconBox: { width: 40, height: 40, borderRadius: 12, backgroundColor: "#FFF7ED", justifyContent: "center", alignItems: "center" },
+  expenseIconDot: { width: 14, height: 14, borderRadius: 4, backgroundColor: "#F97316" },
+  expenseVendor: { fontSize: 14, fontWeight: "700", color: "#1A1A1A", marginBottom: 2 },
+  expenseDesc: { fontSize: 12, color: "#9CA3AF", marginBottom: 2 },
   expenseDate: { fontSize: 11, color: "#9CA3AF" },
-  deleteBtn: { paddingHorizontal: 10, paddingVertical: 4, backgroundColor: "#FEE2E2", borderRadius: 6 },
-  deleteBtnText: { fontSize: 12, color: "#DC2626", fontWeight: "600" },
-  fab: { position: "absolute", bottom: 30, left: 20, right: 20, gap: 10 },
+  expenseRight: { alignItems: "flex-end", gap: 6 },
+  expenseAmount: { fontSize: 16, fontWeight: "700", color: "#F97316" },
+  deleteBtn: { backgroundColor: "#FEE2E2", borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
+  deleteBtnText: { fontSize: 11, color: "#DC2626", fontWeight: "600" },
+  fab: { position: "absolute", bottom: 30, left: 16, right: 16, gap: 10 },
   fabBtn: { backgroundColor: "#F97316", borderRadius: 14, padding: 16, alignItems: "center" },
   fabSecondary: { backgroundColor: "#1C1F26" },
   fabText: { color: "white", fontSize: 15, fontWeight: "700" },
@@ -267,9 +263,10 @@ const styles = StyleSheet.create({
   field: { marginBottom: 14 },
   label: { fontSize: 13, fontWeight: "600", color: "#374151", marginBottom: 6 },
   input: { backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, fontSize: 15, color: "#1A1A1A", borderWidth: 1, borderColor: "#E8E6E1" },
+  twoCol: { flexDirection: "row", gap: 12 },
   modalBtns: { flexDirection: "row", gap: 10, marginTop: 8 },
   cancelBtn: { flex: 1, backgroundColor: "#F3F4F6", borderRadius: 10, padding: 13, alignItems: "center" },
-  cancelBtnText: { fontSize: 15, fontWeight: "600", color: "#6B7280" },
+  cancelText: { fontSize: 15, fontWeight: "600", color: "#6B7280" },
   saveBtn: { flex: 1, backgroundColor: "#F97316", borderRadius: 10, padding: 13, alignItems: "center" },
   saveBtnText: { color: "white", fontSize: 15, fontWeight: "700" },
 })
