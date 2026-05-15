@@ -202,10 +202,13 @@ export default function ScheduleScreen() {
         contentContainerStyle={styles.content}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#F97316" />}
       >
-        <Text style={styles.pageTitle}>Schedule</Text>
-        <Text style={styles.subtitle}>
-          {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
-        </Text>
+        <View style={styles.headerBanner}>
+          <View style={styles.headerCircle} />
+          <Text style={styles.pageTitle}>Schedule</Text>
+          <Text style={styles.subtitle}>
+            {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+          </Text>
+        </View>
 
         {adding && (
           <View style={styles.addCard}>
@@ -426,8 +429,8 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F5F4F0" },
   content: { padding: 20, paddingBottom: 120, paddingTop: 70 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  pageTitle: { fontSize: 28, fontWeight: "700", color: "#1A1A1A", marginBottom: 4 },
-  subtitle: { fontSize: 14, color: "#9CA3AF", marginBottom: 24 },
+  pageTitle: { fontSize: 28, fontWeight: "700", color: "white", letterSpacing: -0.5, marginBottom: 4 },
+  subtitle: { fontSize: 14, color: "rgba(255,255,255,0.4)", marginBottom: 0 },
   addCard: { backgroundColor: "white", borderRadius: 14, padding: 16, marginBottom: 24, borderWidth: 1, borderColor: "#E8E6E1" },
   addTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 16 },
   field: { marginBottom: 14 },
@@ -477,4 +480,6 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A" },
   modalDone: { backgroundColor: "#F97316", paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8 },
   modalDoneText: { color: "white", fontWeight: "700", fontSize: 14 },
+  headerBanner: { backgroundColor: "#1C1F26", marginHorizontal: -20, marginTop: -70, paddingHorizontal: 20, paddingTop: 70, paddingBottom: 24, marginBottom: 24, position: "relative", overflow: "hidden" },
+  headerCircle: { position: "absolute", top: -60, right: -60, width: 220, height: 220, borderRadius: 110, backgroundColor: "rgba(249,115,22,0.08)" },
 })
