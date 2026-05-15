@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router"
-import { View, Text } from "react-native"
+import { View, Text, Image } from "react-native"
 
 export default function TabsLayout() {
   return (
@@ -9,15 +9,16 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: "#1C1F26",
           borderTopColor: "#2E3340",
-          height: 80,
-          paddingBottom: 16,
-          paddingTop: 8,
+          height: 85,
+          paddingBottom: 20,
+          paddingTop: 10,
         },
         tabBarActiveTintColor: "#F97316",
-        tabBarInactiveTintColor: "rgba(255,255,255,0.4)",
+        tabBarInactiveTintColor: "rgba(255,255,255,0.35)",
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: "600",
+          letterSpacing: 0.3,
         },
       }}
     >
@@ -26,7 +27,19 @@ export default function TabsLayout() {
         options={{
           title: "Dashboard",
           tabBarIcon: ({ focused }) => (
-            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>⊞</Text>
+            <View style={{ width: 24, height: 24, alignItems: "center", justifyContent: "center" }}>
+              <View style={{
+                width: 18, height: 18, borderRadius: 4,
+                borderWidth: 2,
+                borderColor: focused ? "#F97316" : "rgba(255,255,255,0.35)",
+              }}>
+                <View style={{
+                  width: 6, height: 6, borderRadius: 1,
+                  backgroundColor: focused ? "#F97316" : "rgba(255,255,255,0.35)",
+                  margin: 2
+                }} />
+              </View>
+            </View>
           ),
         }}
       />
@@ -35,14 +48,31 @@ export default function TabsLayout() {
         options={{
           title: "Schedule",
           tabBarIcon: ({ focused }) => (
-            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>◫</Text>
+            <View style={{ width: 24, height: 24, alignItems: "center", justifyContent: "center" }}>
+              <View style={{
+                width: 18, height: 16, borderRadius: 3,
+                borderWidth: 2,
+                borderColor: focused ? "#F97316" : "rgba(255,255,255,0.35)",
+              }}>
+                <View style={{
+                  height: 2, borderRadius: 1,
+                  backgroundColor: focused ? "#F97316" : "rgba(255,255,255,0.35)",
+                  margin: 2, marginTop: 3
+                }} />
+                <View style={{
+                  height: 2, borderRadius: 1,
+                  backgroundColor: focused ? "#F97316" : "rgba(255,255,255,0.35)",
+                  marginHorizontal: 2
+                }} />
+              </View>
+            </View>
           ),
         }}
       />
       <Tabs.Screen
         name="camera"
         options={{
-          title: "Camera",
+          title: "Quick Add",
           tabBarIcon: ({ focused }) => (
             <View style={{
               width: 52, height: 52, borderRadius: 26,
@@ -55,7 +85,10 @@ export default function TabsLayout() {
               shadowRadius: 8,
               elevation: 8,
             }}>
-              <Text style={{ fontSize: 22 }}>📷</Text>
+              <View style={{ width: 20, height: 20, alignItems: "center", justifyContent: "center" }}>
+                <View style={{ width: 16, height: 12, borderRadius: 3, borderWidth: 2, borderColor: "white" }} />
+                <View style={{ position: "absolute", top: 0, width: 6, height: 6, borderRadius: 3, borderWidth: 2, borderColor: "white" }} />
+              </View>
             </View>
           ),
         }}
@@ -65,7 +98,24 @@ export default function TabsLayout() {
         options={{
           title: "Expenses",
           tabBarIcon: ({ focused }) => (
-            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>💵</Text>
+            <View style={{ width: 24, height: 24, alignItems: "center", justifyContent: "center" }}>
+              <View style={{
+                width: 14, height: 18, borderRadius: 2,
+                borderWidth: 2,
+                borderColor: focused ? "#F97316" : "rgba(255,255,255,0.35)",
+              }}>
+                <View style={{
+                  height: 2, borderRadius: 1,
+                  backgroundColor: focused ? "#F97316" : "rgba(255,255,255,0.35)",
+                  margin: 2, marginTop: 3
+                }} />
+                <View style={{
+                  height: 2, borderRadius: 1,
+                  backgroundColor: focused ? "#F97316" : "rgba(255,255,255,0.35)",
+                  marginHorizontal: 2
+                }} />
+              </View>
+            </View>
           ),
         }}
       />
@@ -74,7 +124,19 @@ export default function TabsLayout() {
         options={{
           title: "Profile",
           tabBarIcon: ({ focused }) => (
-            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>◉</Text>
+            <View style={{ width: 24, height: 24, alignItems: "center", justifyContent: "center" }}>
+              <View style={{
+                width: 14, height: 14, borderRadius: 7,
+                borderWidth: 2,
+                borderColor: focused ? "#F97316" : "rgba(255,255,255,0.35)",
+                marginBottom: 2
+              }} />
+              <View style={{
+                width: 18, height: 6, borderRadius: 3,
+                borderWidth: 2,
+                borderColor: focused ? "#F97316" : "rgba(255,255,255,0.35)",
+              }} />
+            </View>
           ),
         }}
       />

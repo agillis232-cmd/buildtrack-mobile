@@ -1,9 +1,5 @@
 import { useState } from "react"
-import {
-  View, Text, TextInput, TouchableOpacity,
-  StyleSheet, KeyboardAvoidingView, Platform,
-  ActivityIndicator, Alert
-} from "react-native"
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator, Alert, Image } from "react-native"
 import { useRouter } from "expo-router"
 import { useAuth } from "@/lib/auth"
 
@@ -38,13 +34,7 @@ export default function LoginScreen() {
     >
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.logo}>
-          <Text style={styles.logoText}>BT</Text>
-        </View>
-        <View>
-          <Text style={styles.brandName}>BuildTrack</Text>
-          <Text style={styles.brandSub}>WATT HOUSE BUILDERS</Text>
-        </View>
+        <Image source={require("../assets/logo.png")} style={styles.logoImage} resizeMode="contain" />
       </View>
 
       {/* Hero text */}
@@ -106,11 +96,13 @@ const styles = StyleSheet.create({
     padding: 28,
     justifyContent: "center",
   },
-  header: {
-    flexDirection: "row",
+ header: {
     alignItems: "center",
-    gap: 10,
-    marginBottom: 40,
+    marginBottom: 32,
+  },
+  logoImage: {
+    width: 160,
+    height: 160,
   },
   logo: {
     width: 40,
