@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl, A
 import { useRouter } from "expo-router"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 
 export default function DashboardScreen() {
@@ -13,6 +14,27 @@ export default function DashboardScreen() {
   const [refreshing, setRefreshing] = useState(false)
   const [customizing, setCustomizing] = useState(false)
   const [selectedKPIs, setSelectedKPIs] = useState(["active", "contracted", "completion"])
+
+  useEffect(() => {
+    loadKPIPreferences()
+  }, [])
+
+  async function loadKPIPreferences() {
+    try {
+      const saved = await AsyncStorage.getItem("dashboard_kpis")
+      if (saved) setSelectedKPIs(JSON.parse(saved))
+    } catch (e) {
+      console.log("Error loading KPI prefs:", e)
+    }
+  }
+
+  async function saveKPIPreferences(kpis: string[]) {
+    try {
+      await AsyncStorage.setItem("dashboard_kpis", JSON.stringify(kpis))
+    } catch (e) {
+      console.log("Error saving KPI prefs:", e)
+    }
+  }
 
   const ALL_KPI_OPTIONS = [
     { key: "active", label: "Active Projects", description: "Number of active projects", color: "white" },
@@ -106,15 +128,17 @@ export default function DashboardScreen() {
               <Text style={styles.name}>{firstName}</Text>
             </View>
           </View>
-          {user?.avatarUrl ? (
-            <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
-          ) : (
-            <View style={styles.avatarFallback}>
-              <Text style={styles.avatarText}>
-                {user?.name?.split(" ").map(n => n[0]).join("").toUpperCase() || "?"}
-              </Text>
-            </View>
-          )}
+          <TouchableOpacity onPress={() => router.push("/profile" as any)}>
+            {user?.avatarUrl ? (
+              <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
+            ) : (
+              <View style={styles.avatarFallback}>
+                <Text style={styles.avatarText}>
+                  {user?.name?.split(" ").map(n => n[0]).join("").toUpperCase() || "?"}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -151,13 +175,19 @@ export default function DashboardScreen() {
                   onPress={() => {
                     if (isSelected) {
                       if (selectedKPIs.length > 1) {
-                        setSelectedKPIs(prev => prev.filter(k => k !== option.key))
+                        const updated = selectedKPIs.filter(k => k !== option.key)
+                        setSelectedKPIs(updated)
+                        saveKPIPreferences(updated)
                       }
                     } else {
                       if (selectedKPIs.length < 3) {
-                        setSelectedKPIs(prev => [...prev, option.key])
+                        const updated = [...selectedKPIs, option.key]
+                        setSelectedKPIs(updated)
+                        saveKPIPreferences(updated)
                       } else {
-                        setSelectedKPIs(prev => [...prev.slice(1), option.key])
+                        const updated = [...selectedKPIs.slice(1), option.key]
+                        setSelectedKPIs(updated)
+                        saveKPIPreferences(updated)
                       }
                     }
                   }}

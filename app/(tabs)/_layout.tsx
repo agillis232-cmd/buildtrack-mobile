@@ -120,22 +120,32 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="documents"
         options={{
-          title: "Profile",
+          title: "Documents",
           tabBarIcon: ({ focused }) => (
             <View style={{ width: 24, height: 24, alignItems: "center", justifyContent: "center" }}>
               <View style={{
-                width: 14, height: 14, borderRadius: 7,
+                width: 14, height: 18, borderRadius: 2,
                 borderWidth: 2,
                 borderColor: focused ? "#F97316" : "rgba(255,255,255,0.35)",
-                marginBottom: 2
-              }} />
-              <View style={{
-                width: 18, height: 6, borderRadius: 3,
-                borderWidth: 2,
-                borderColor: focused ? "#F97316" : "rgba(255,255,255,0.35)",
-              }} />
+              }}>
+                <View style={{
+                  height: 2, borderRadius: 1,
+                  backgroundColor: focused ? "#F97316" : "rgba(255,255,255,0.35)",
+                  margin: 2, marginTop: 3
+                }} />
+                <View style={{
+                  height: 2, borderRadius: 1,
+                  backgroundColor: focused ? "#F97316" : "rgba(255,255,255,0.35)",
+                  marginHorizontal: 2
+                }} />
+                <View style={{
+                  height: 2, borderRadius: 1,
+                  backgroundColor: focused ? "#F97316" : "rgba(255,255,255,0.35)",
+                  marginHorizontal: 2, marginTop: 2
+                }} />
+              </View>
             </View>
           ),
         }}

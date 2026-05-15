@@ -31,32 +31,21 @@ export default function ProfileScreen() {
       Alert.alert("Permission needed", "Please allow photo library access")
       return
     }
-
     const result = await ImagePicker.launchImageLibraryAsync({
-      base64: true,
-      quality: 0.8,
-      allowsEditing: true,
-      aspect: [1, 1],
+      base64: true, quality: 0.8, allowsEditing: true, aspect: [1, 1],
     })
-
     if (result.canceled) return
 
     setUploadingAvatar(true)
     try {
       const res = await fetch(`${API_URL}/api/mobile/profile/avatar`, {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
+        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ image: result.assets[0].base64 })
       })
       const data = await res.json()
-      if (data.avatarUrl) {
-        setAvatarUrl(data.avatarUrl)
-      } else {
-        Alert.alert("Error", "Could not update avatar")
-      }
+      if (data.avatarUrl) setAvatarUrl(data.avatarUrl)
+      else Alert.alert("Error", "Could not update avatar")
     } catch (e) {
       Alert.alert("Error", "Connection error")
     }
@@ -67,12 +56,13 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Header banner */}
       <View style={styles.headerBanner}>
         <View style={styles.headerCircle} />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <Text style={styles.backText}>← Back</Text>
+        </TouchableOpacity>
         <Text style={styles.pageTitle}>Profile</Text>
 
-        {/* Avatar */}
         <View style={styles.avatarSection}>
           <TouchableOpacity onPress={changeAvatar} disabled={uploadingAvatar} style={styles.avatarWrapper}>
             {avatarUrl ? (
@@ -97,7 +87,6 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      {/* Info cards */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Account</Text>
         <View style={styles.card}>
@@ -139,6 +128,8 @@ const styles = StyleSheet.create({
   content: { paddingBottom: 60 },
   headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 30, marginBottom: 24, position: "relative", overflow: "hidden" },
   headerCircle: { position: "absolute", top: -60, right: -60, width: 220, height: 220, borderRadius: 110, backgroundColor: "rgba(249,115,22,0.08)" },
+  backBtn: { marginBottom: 16 },
+  backText: { color: "rgba(255,255,255,0.6)", fontSize: 15, fontWeight: "600" },
   pageTitle: { fontSize: 28, fontWeight: "700", color: "white", marginBottom: 20, letterSpacing: -0.5 },
   avatarSection: { alignItems: "center" },
   avatarWrapper: { position: "relative", marginBottom: 12 },
