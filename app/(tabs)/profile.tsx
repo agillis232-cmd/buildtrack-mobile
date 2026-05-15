@@ -67,52 +67,54 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.pageTitle}>Profile</Text>
+      {/* Header banner */}
+      <View style={styles.headerBanner}>
+        <View style={styles.headerCircle} />
+        <Text style={styles.pageTitle}>Profile</Text>
 
-      {/* Avatar */}
-      <View style={styles.avatarSection}>
-        <TouchableOpacity onPress={changeAvatar} disabled={uploadingAvatar}>
-          {avatarUrl ? (
-            <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
-          ) : (
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{initials}</Text>
+        {/* Avatar */}
+        <View style={styles.avatarSection}>
+          <TouchableOpacity onPress={changeAvatar} disabled={uploadingAvatar} style={styles.avatarWrapper}>
+            {avatarUrl ? (
+              <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
+            ) : (
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>{initials}</Text>
+              </View>
+            )}
+            <View style={styles.avatarEditBadge}>
+              {uploadingAvatar
+                ? <ActivityIndicator color="white" size="small" />
+                : <Text style={styles.avatarEditText}>Edit</Text>
+              }
             </View>
-          )}
-          <View style={styles.avatarEditBadge}>
-            {uploadingAvatar
-              ? <ActivityIndicator color="white" size="small" />
-              :<Text style={styles.avatarEditText}>Edit</Text>
-            }
+          </TouchableOpacity>
+          <Text style={styles.name}>{user?.name}</Text>
+          <Text style={styles.email}>{user?.email}</Text>
+          <View style={styles.roleBadge}>
+            <Text style={styles.roleText}>{user?.role || "ADMIN"}</Text>
           </View>
-        </TouchableOpacity>
-        <Text style={styles.name}>{user?.name}</Text>
-        <Text style={styles.email}>{user?.email}</Text>
-        <View style={styles.roleBadge}>
-          <Text style={styles.roleText}>{user?.role || "ADMIN"}</Text>
         </View>
       </View>
 
       {/* Info cards */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Account Info</Text>
+        <Text style={styles.sectionTitle}>Account</Text>
         <View style={styles.card}>
           <Row label="Full Name" value={user?.name || "-"} />
           <Row label="Email" value={user?.email || "-"} />
-          <Row label="Role" value={user?.role || "ADMIN"} />
+          <Row label="Role" value={user?.role || "ADMIN"} last />
         </View>
       </View>
 
-      {/* App info */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>App</Text>
         <View style={styles.card}>
           <Row label="Version" value="1.0.0" />
-          <Row label="Build" value="BuildTrack Pro" />
+          <Row label="Platform" value="BuildTrack Pro" last />
         </View>
       </View>
 
-      {/* Sign out */}
       <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut} disabled={signingOut}>
         {signingOut
           ? <ActivityIndicator color="white" />
@@ -123,9 +125,9 @@ export default function ProfileScreen() {
   )
 }
 
-function Row({ label, value }: { label: string, value: string }) {
+function Row({ label, value, last }: { label: string, value: string, last?: boolean }) {
   return (
-    <View style={styles.row}>
+    <View style={[styles.row, last && { borderBottomWidth: 0 }]}>
       <Text style={styles.rowLabel}>{label}</Text>
       <Text style={styles.rowValue}>{value}</Text>
     </View>
@@ -134,24 +136,27 @@ function Row({ label, value }: { label: string, value: string }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F5F4F0" },
-  content: { padding: 20, paddingBottom: 60, paddingTop: 60 },
-  pageTitle: { fontSize: 28, fontWeight: "700", color: "#1A1A1A", marginBottom: 24 },
-  avatarSection: { alignItems: "center", marginBottom: 32 },
-  avatarImage: { width: 80, height: 80, borderRadius: 40, marginBottom: 12 },
-  avatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: "#F97316", justifyContent: "center", alignItems: "center", marginBottom: 12 },
-  avatarText: { fontSize: 28, fontWeight: "700", color: "white" },
-  avatarEditBadge: { position: "absolute", bottom: 12, right: -4, width: 26, height: 26, borderRadius: 13, backgroundColor: "#1C1F26", justifyContent: "center", alignItems: "center", borderWidth: 2, borderColor: "#F5F4F0" },
-  avatarEditText: { fontSize: 12 },
-  name: { fontSize: 20, fontWeight: "700", color: "#1A1A1A", marginBottom: 4 },
-  email: { fontSize: 14, color: "#6B7280", marginBottom: 8 },
-  roleBadge: { backgroundColor: "#FEF3C7", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 99 },
-  roleText: { fontSize: 12, fontWeight: "700", color: "#D97706" },
-  section: { marginBottom: 24 },
-  sectionTitle: { fontSize: 13, fontWeight: "700", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 },
-  card: { backgroundColor: "white", borderRadius: 14, borderWidth: 1, borderColor: "#E8E6E1" },
+  content: { paddingBottom: 60 },
+  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 30, marginBottom: 24, position: "relative", overflow: "hidden" },
+  headerCircle: { position: "absolute", top: -60, right: -60, width: 220, height: 220, borderRadius: 110, backgroundColor: "rgba(249,115,22,0.08)" },
+  pageTitle: { fontSize: 28, fontWeight: "700", color: "white", marginBottom: 20, letterSpacing: -0.5 },
+  avatarSection: { alignItems: "center" },
+  avatarWrapper: { position: "relative", marginBottom: 12 },
+  avatarImage: { width: 84, height: 84, borderRadius: 42, borderWidth: 3, borderColor: "rgba(255,255,255,0.2)" },
+  avatar: { width: 84, height: 84, borderRadius: 42, backgroundColor: "#F97316", justifyContent: "center", alignItems: "center", borderWidth: 3, borderColor: "rgba(255,255,255,0.2)" },
+  avatarText: { fontSize: 30, fontWeight: "700", color: "white" },
+  avatarEditBadge: { position: "absolute", bottom: 0, right: -4, backgroundColor: "#1C1F26", borderRadius: 99, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 2, borderColor: "#F5F4F0" },
+  avatarEditText: { fontSize: 10, color: "#F97316", fontWeight: "700" },
+  name: { fontSize: 20, fontWeight: "700", color: "white", marginBottom: 4 },
+  email: { fontSize: 13, color: "rgba(255,255,255,0.5)", marginBottom: 10 },
+  roleBadge: { backgroundColor: "rgba(249,115,22,0.2)", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 99, borderWidth: 1, borderColor: "rgba(249,115,22,0.3)" },
+  roleText: { fontSize: 11, fontWeight: "700", color: "#F97316" },
+  section: { paddingHorizontal: 16, marginBottom: 20 },
+  sectionTitle: { fontSize: 11, fontWeight: "700", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 },
+  card: { backgroundColor: "white", borderRadius: 14, borderWidth: 1, borderColor: "#E8E6E1", overflow: "hidden" },
   row: { flexDirection: "row", justifyContent: "space-between", padding: 14, borderBottomWidth: 1, borderBottomColor: "#F3F4F6" },
   rowLabel: { fontSize: 14, color: "#6B7280" },
   rowValue: { fontSize: 14, fontWeight: "600", color: "#1A1A1A", maxWidth: "60%", textAlign: "right" },
-  signOutBtn: { backgroundColor: "#DC2626", borderRadius: 14, padding: 16, alignItems: "center", marginTop: 8 },
+  signOutBtn: { backgroundColor: "#DC2626", borderRadius: 14, padding: 16, alignItems: "center", marginHorizontal: 16, marginTop: 8 },
   signOutText: { color: "white", fontSize: 16, fontWeight: "700" },
 })
