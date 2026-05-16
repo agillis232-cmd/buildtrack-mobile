@@ -14,7 +14,7 @@ interface AuthContextType {
   user: User | null
   token: string | null
   loading: boolean
-  signIn: (email: string, password: string) => Promise<string | null>
+  signIn: (email: string, password: string, onSuccess?: (role: string) => void) => Promise<string | null>
   signOut: () => Promise<void>
 }
 
@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(false)
   }
 
-  async function signIn(email: string, password: string): Promise<string | null> {
+  async function signIn(email: string, password: string, onSuccess?: (role: string) => void): Promise<string | null> {
     console.log("signIn function called!")
     console.log("Fetching:", `${API_URL}/api/mobile/auth`)
     try {
@@ -69,6 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await SecureStore.setItemAsync("auth_user", JSON.stringify(data.user))
       setToken(data.token)
       setUser(data.user)
+      if (onSuccess) onSuccess(data.user.role)
       return null
     } catch (e) {
       console.log("FETCH ERROR:", JSON.stringify(e))

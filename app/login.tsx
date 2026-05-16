@@ -20,12 +20,16 @@ export default function LoginScreen() {
       return
     }
     setLoading(true)
-    const error = await signIn(email, password)
+    const error = await signIn(email, password, (role) => {
+      if (role === "CLIENT") {
+        router.replace("/(client-tabs)" as any)
+      } else {
+        router.replace("/(tabs)")
+      }
+    })
     setLoading(false)
     if (error) {
       Alert.alert("Login failed", error)
-    } else {
-      router.replace("/(tabs)")
     }
   }
 

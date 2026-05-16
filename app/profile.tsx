@@ -53,7 +53,7 @@ export default function ProfileScreen() {
   }
 
   const initials = user?.name?.split(" ").map(n => n[0]).join("").toUpperCase() || "?"
-
+console.log("User role:", user?.role)
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.headerBanner}>
@@ -103,7 +103,19 @@ export default function ProfileScreen() {
           <Row label="Platform" value="BuildTrack Pro" last />
         </View>
       </View>
+{user?.role === "ADMIN" && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Admin</Text>
+          <View style={styles.card}>
+            <TouchableOpacity style={styles.adminRow} onPress={() => router.push("/admin-users" as any)}>
+              <Text style={styles.adminRowLabel}>Team Management</Text>
+              <Text style={styles.adminRowArrow}>›</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
+      
       <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut} disabled={signingOut}>
         {signingOut
           ? <ActivityIndicator color="white" />
@@ -148,8 +160,7 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", justifyContent: "space-between", padding: 14, borderBottomWidth: 1, borderBottomColor: "#F3F4F6" },
   rowLabel: { fontSize: 14, color: "#6B7280" },
   rowValue: { fontSize: 14, fontWeight: "600", color: "#1A1A1A", maxWidth: "60%", textAlign: "right" },
-  signOutBtn: { backgroundColor: "#DC2626", borderRadius: 14, padding: 16, alignItems: "center", marginHorizontal: 16, marginTop: 8 },
-  signOutText: { color: "white", fontSize: 16, fontWeight: "700" },
+ signOutBtn: { backgroundColor: "#DC2626", borderRadius: 14, padding: 16, alignItems: "center", marginHorizontal: 16 },
   adminRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 14 },
   adminRowLabel: { fontSize: 14, fontWeight: "600", color: "#1A1A1A" },
   adminRowArrow: { fontSize: 20, color: "#D1D5DB" },
