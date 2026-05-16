@@ -93,8 +93,12 @@ export default function LoginScreen() {
             )}
           </TouchableOpacity>
         </View>
+        
 
         <Text style={styles.footer}>Watt House Builders · BuildTrack Pro</Text>
+         <TouchableOpacity onPress={() => router.push("/signup" as any)} style={styles.signupLink}>
+          <Text style={styles.signupLinkText}>New team member? Request access →</Text>
+        </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   )
@@ -119,4 +123,6 @@ const styles = StyleSheet.create({
   buttonDisabled: { backgroundColor: "#6B7280", shadowOpacity: 0 },
   buttonText: { color: "white", fontSize: 16, fontWeight: "700" },
   footer: { textAlign: "center", fontSize: 12, color: "rgba(255,255,255,0.2)", fontWeight: "500" },
+  signupLink: { alignItems: "center", marginTop: 16 },
+  signupLinkText: { color: "rgba(255,255,255,0.4)", fontSize: 14 },
 })

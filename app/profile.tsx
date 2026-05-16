@@ -150,4 +150,7 @@ const styles = StyleSheet.create({
   rowValue: { fontSize: 14, fontWeight: "600", color: "#1A1A1A", maxWidth: "60%", textAlign: "right" },
   signOutBtn: { backgroundColor: "#DC2626", borderRadius: 14, padding: 16, alignItems: "center", marginHorizontal: 16, marginTop: 8 },
   signOutText: { color: "white", fontSize: 16, fontWeight: "700" },
+  adminRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 14 },
+  adminRowLabel: { fontSize: 14, fontWeight: "600", color: "#1A1A1A" },
+  adminRowArrow: { fontSize: 20, color: "#D1D5DB" },
 })
