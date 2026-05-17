@@ -107,7 +107,7 @@ console.log("User role:", user?.role)
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Admin</Text>
           <View style={styles.card}>
-            <TouchableOpacity style={styles.adminRow} onPress={() => router.push("/admin-users" as any)}>
+             <TouchableOpacity style={styles.adminRow} onPress={() => router.push("/team" as any)}>
               <Text style={styles.adminRowLabel}>Team Management</Text>
               <Text style={styles.adminRowArrow}>›</Text>
             </TouchableOpacity>

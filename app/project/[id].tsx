@@ -38,6 +38,7 @@ export default function ProjectDetailScreen() {
     { label: "Expenses", sub: "Scan receipts & track costs", route: `/project/${id}/expenses`, color: "#8B5CF6" },
     { label: "Photos", sub: "Upload job site photos", route: `/project/${id}/photos`, color: "#3B82F6" },
     { label: "Daily Logs", sub: "View & add daily reports", route: `/project/${id}/logs`, color: "#16A34A" },
+    { label: "Documents", sub: "Contracts, plans & permits", route: `/project/${id}/documents`, color: "#F59E0B" },
     ...(isAdmin ? [{ label: "Change Orders", sub: "View & create change orders", route: `/project/${id}/change-orders`, color: "#F97316" }] : []),
     { label: "Messages", sub: "Notes & communication", route: `/project/${id}/messages`, color: "#EC4899" },
   ]
