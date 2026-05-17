@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
 import DateTimePicker from "@react-native-community/datetimepicker"
+import { Linking } from "react-native"
 
 const EVENT_TYPES = ["MEETING", "INSPECTION", "DELIVERY", "ORDER", "OTHER"]
 
@@ -33,11 +34,14 @@ export default function ScheduleScreen() {
   const [location, setLocation] = useState("")
   const [notes, setNotes] = useState("")
   const [projectId, setProjectId] = useState("")
+  const [calendarConnected, setCalendarConnected] = useState(false)
+  const [syncing, setSyncing] = useState(false)
 
   useEffect(() => {
     if (token) {
       loadEvents()
       loadProjects()
+      checkCalendarStatus()
     }
   }, [token])
 
@@ -68,6 +72,87 @@ export default function ScheduleScreen() {
       setProjects(data.projects || [])
     } catch (e) {
       console.log("Error loading projects:", e)
+    }
+  }
+  async function checkCalendarStatus() {
+    try {
+      const res = await fetch(`${API_URL}/api/google-calendar/status`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      })
+      const data = await res.json()
+      setCalendarConnected(data.connected)
+    } catch (e) {
+      console.log("Error checking calendar status:", e)
+    }
+  }
+
+  async function connectCalendar() {
+    try {
+      const res = await fetch(`${API_URL}/api/google-calendar/connect`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      })
+      const data = await res.json()
+      if (data.authUrl) {
+        Linking.openURL(data.authUrl)
+      } else {
+        Alert.alert("Error", "Could not connect to Google Calendar")
+      }
+    } catch (e) {
+      Alert.alert("Error", "Could not connect to Google Calendar")
+    }
+  }
+
+  async function disconnectCalendar() {
+    Alert.alert("Disconnect", "Disconnect Google Calendar?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Disconnect", style: "destructive", onPress: async () => {
+          try {
+            await fetch(`${API_URL}/api/google-calendar/status`, {
+              method: "DELETE",
+              headers: { "Authorization": `Bearer ${token}` }
+            })
+            setCalendarConnected(false)
+          } catch (e) {
+            Alert.alert("Error", "Could not disconnect")
+          }
+        }
+      }
+    ])
+  }
+
+  async function syncFromGoogle() {
+    setSyncing(true)
+    try {
+      const res = await fetch(`${API_URL}/api/google-calendar/sync`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "pull" })
+      })
+      const data = await res.json()
+      if (data.success) {
+        Alert.alert("Synced!", `Imported ${data.imported} event${data.imported !== 1 ? "s" : ""} from Google Calendar`)
+        loadEvents()
+      }
+    } catch (e) {
+      Alert.alert("Error", "Could not sync from Google Calendar")
+    }
+    setSyncing(false)
+  }
+
+  async function pushToGoogle(eventId: string) {
+    try {
+      const res = await fetch(`${API_URL}/api/google-calendar/sync`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "push", eventId })
+      })
+      const data = await res.json()
+      if (data.success) {
+        Alert.alert("Success", "Event added to Google Calendar")
+      }
+    } catch (e) {
+      Alert.alert("Error", "Could not push to Google Calendar")
     }
   }
 
@@ -206,8 +291,24 @@ export default function ScheduleScreen() {
           <View style={styles.headerCircle} />
           <Text style={styles.pageTitle}>Schedule</Text>
           <Text style={styles.subtitle}>
-            {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
-          </Text>
+          {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+        </Text>
+        <View style={styles.calendarRow}>
+          {calendarConnected ? (
+            <View style={styles.calendarConnected}>
+              <TouchableOpacity style={styles.syncBtn} onPress={syncFromGoogle} disabled={syncing}>
+                {syncing ? <ActivityIndicator color="white" size="small" /> : <Text style={styles.syncBtnText}>Sync from Google</Text>}
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.disconnectBtn} onPress={disconnectCalendar}>
+                <Text style={styles.disconnectBtnText}>Disconnect</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity style={styles.connectBtn} onPress={connectCalendar}>
+              <Text style={styles.connectBtnText}>Connect Google Calendar</Text>
+            </TouchableOpacity>
+          )}
+        </View>
         </View>
 
         {adding && (
@@ -311,25 +412,18 @@ export default function ScheduleScreen() {
         <Section title="Today" count={todayEvents.length}>
           {todayEvents.length === 0
             ? <Text style={styles.emptySection}>No events today</Text>
-            : todayEvents.map(e => <EventCard key={e.id} event={e} onEdit={openEdit} onDelete={deleteEvent} />)
-          }
+            : todayEvents.map(e => <EventCard key={e.id} event={e} onEdit={openEdit} onDelete={deleteEvent} onPushToGoogle={calendarConnected ? pushToGoogle : undefined} />)}
         </Section>
 
         <Section title="Tomorrow" count={tomorrowEvents.length}>
           {tomorrowEvents.length === 0
             ? <Text style={styles.emptySection}>No events tomorrow</Text>
-            : tomorrowEvents.map(e => <EventCard key={e.id} event={e} onEdit={openEdit} onDelete={deleteEvent} />)
-          }
+            : tomorrowEvents.map(e => <EventCard key={e.id} event={e} onEdit={openEdit} onDelete={deleteEvent} onPushToGoogle={calendarConnected ? pushToGoogle : undefined} />)}
         </Section>
 
         {upcomingEvents.length > 0 && (
           <Section title="Upcoming" count={upcomingEvents.length}>
-            {upcomingEvents.map(e => (
-              <View key={e.id}>
-                <Text style={styles.upcomingDate}>{formatDate(e.date)}</Text>
-                <EventCard event={e} onEdit={openEdit} onDelete={deleteEvent} />
-              </View>
-            ))}
+           {upcomingEvents.map(e => <EventCard key={e.id} event={e} onEdit={openEdit} onDelete={deleteEvent} onPushToGoogle={calendarConnected ? pushToGoogle : undefined} />)}
           </Section>
         )}
       </ScrollView>
@@ -388,7 +482,12 @@ function Section({ title, count, children }: { title: string, count: number, chi
   )
 }
 
-function EventCard({ event, onEdit, onDelete }: { event: any, onEdit: (e: any) => void, onDelete: (id: string) => void }) {
+function EventCard({ event, onEdit, onDelete, onPushToGoogle }: { 
+  event: any, 
+  onEdit: (e: any) => void, 
+  onDelete: (id: string) => void,
+  onPushToGoogle?: (id: string) => void
+}) {
   const color = EVENT_COLORS[event.type] || "#6B7280"
   const [expanded, setExpanded] = useState(false)
 
@@ -416,6 +515,11 @@ function EventCard({ event, onEdit, onDelete }: { event: any, onEdit: (e: any) =
           <TouchableOpacity style={styles.editBtn} onPress={() => onEdit(event)}>
             <Text style={styles.editBtnText}>Edit</Text>
           </TouchableOpacity>
+          {onPushToGoogle && (
+            <TouchableOpacity style={styles.googleBtn} onPress={() => onPushToGoogle(event.id)}>
+              <Text style={styles.googleBtnText}>→ Google</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity style={styles.deleteBtn} onPress={() => onDelete(event.id)}>
             <Text style={styles.deleteBtnText}>Delete</Text>
           </TouchableOpacity>
@@ -482,4 +586,14 @@ const styles = StyleSheet.create({
   modalDoneText: { color: "white", fontWeight: "700", fontSize: 14 },
   headerBanner: { backgroundColor: "#1C1F26", marginHorizontal: -20, marginTop: -70, paddingHorizontal: 20, paddingTop: 70, paddingBottom: 24, marginBottom: 24, position: "relative", overflow: "hidden" },
   headerCircle: { position: "absolute", top: -60, right: -60, width: 220, height: 220, borderRadius: 110, backgroundColor: "rgba(249,115,22,0.08)" },
+  calendarRow: { marginTop: 12 },
+  calendarConnected: { flexDirection: "row", gap: 8 },
+  connectBtn: { backgroundColor: "rgba(255,255,255,0.1)", borderRadius: 10, padding: 10, borderWidth: 1, borderColor: "rgba(255,255,255,0.2)", alignItems: "center" },
+  connectBtnText: { color: "white", fontSize: 13, fontWeight: "600" },
+  syncBtn: { flex: 1, backgroundColor: "#4285F4", borderRadius: 10, padding: 10, alignItems: "center" },
+  syncBtnText: { color: "white", fontSize: 12, fontWeight: "600" },
+  disconnectBtn: { backgroundColor: "rgba(255,255,255,0.1)", borderRadius: 10, padding: 10, borderWidth: 1, borderColor: "rgba(255,255,255,0.2)", alignItems: "center" },
+  disconnectBtnText: { color: "rgba(255,255,255,0.6)", fontSize: 12, fontWeight: "600" },
+  googleBtn: { flex: 1, backgroundColor: "#4285F420", borderRadius: 8, padding: 8, alignItems: "center", borderWidth: 1, borderColor: "#4285F4" },
+  googleBtnText: { fontSize: 12, fontWeight: "600", color: "#4285F4" },
 })
