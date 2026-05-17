@@ -6,7 +6,7 @@ import { API_URL } from "@/lib/api"
 import * as ImagePicker from "expo-image-picker"
 
 export default function CameraScreen() {
-  const { token } = useAuth()
+  const { token, user } = useAuth()
   const router = useRouter()
   const [scanning, setScanning] = useState(false)
 
@@ -80,13 +80,13 @@ export default function CameraScreen() {
       onPress: () => router.push("/(tabs)"),
       loading: false,
     },
-    {
+    ...(user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER" ? [{
       label: "New Change Order",
       sub: "Go to a project to create",
       color: "#F97316",
       onPress: () => router.push("/(tabs)"),
       loading: false,
-    },
+    }] : []),
   ]
 
   return (

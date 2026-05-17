@@ -13,7 +13,11 @@ export default function DashboardScreen() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [customizing, setCustomizing] = useState(false)
-  const [selectedKPIs, setSelectedKPIs] = useState(["active", "contracted", "completion"])
+   const [selectedKPIs, setSelectedKPIs] = useState(
+    user?.role === "FIELD_WORKER" 
+      ? ["active", "completion"] 
+      : ["active", "contracted", "completion"]
+  )
 
   useEffect(() => {
     loadKPIPreferences()
@@ -36,9 +40,11 @@ export default function DashboardScreen() {
     }
   }
 
-  const ALL_KPI_OPTIONS = [
+ const ALL_KPI_OPTIONS = [
     { key: "active", label: "Active Projects", description: "Number of active projects", color: "white" },
-    { key: "contracted", label: "Total Contracted", description: "Sum of all contract values", color: "#F97316" },
+    ...(user?.role !== "FIELD_WORKER" ? [
+      { key: "contracted", label: "Total Contracted", description: "Sum of all contract values", color: "#F97316" },
+    ] : []),
     { key: "completion", label: "Avg Completion", description: "Average completion across projects", color: "#16A34A" },
     { key: "preconstruction", label: "Pre-Construction", description: "Projects in pre-construction", color: "#3B82F6" },
     { key: "totalLogs", label: "Total Logs", description: "Daily logs across all projects", color: "#8B5CF6" },
@@ -213,9 +219,11 @@ export default function DashboardScreen() {
       {/* Projects */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Active projects</Text>
-        <TouchableOpacity onPress={() => router.push("/new-project" as any)} style={styles.newProjectBtn}>
-          <Text style={styles.newProjectBtnText}>+ New</Text>
-        </TouchableOpacity>
+        {(user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER") && (
+          <TouchableOpacity onPress={() => router.push("/new-project" as any)} style={styles.newProjectBtn}>
+            <Text style={styles.newProjectBtnText}>+ New</Text>
+          </TouchableOpacity>
+        )}
       </View>
       {projects.length === 0 ? (
          <View style={styles.emptyCard}>
@@ -261,9 +269,11 @@ export default function DashboardScreen() {
             </View>
 
           <View style={styles.projectStats}>
-              <View style={styles.statPill}>
-                <Text style={styles.statPillText}>Contract: ${(project.contractValue / 1000).toFixed(0)}k</Text>
-              </View>
+              {(user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER") && (
+                <View style={styles.statPill}>
+                  <Text style={styles.statPillText}>Contract: ${(project.contractValue / 1000).toFixed(0)}k</Text>
+                </View>
+              )}
               <View style={styles.statPill}>
                 <Text style={styles.statPillText}>Logs: {project._count?.dailyLogs || 0}</Text>
               </View>

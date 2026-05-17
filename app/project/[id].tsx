@@ -10,6 +10,7 @@ export default function ProjectDetailScreen() {
   const router = useRouter()
   const [project, setProject] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const { user } = useAuth()
 
   useEffect(() => {
     if (token && id) loadProject()
@@ -31,11 +32,13 @@ export default function ProjectDetailScreen() {
   if (loading) return <View style={styles.center}><ActivityIndicator color="#F97316" /></View>
   if (!project) return <View style={styles.center}><Text style={styles.errorText}>Project not found</Text></View>
 
+  const isAdmin = user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER"
+
   const sections = [
     { label: "Expenses", sub: "Scan receipts & track costs", route: `/project/${id}/expenses`, color: "#8B5CF6" },
     { label: "Photos", sub: "Upload job site photos", route: `/project/${id}/photos`, color: "#3B82F6" },
     { label: "Daily Logs", sub: "View & add daily reports", route: `/project/${id}/logs`, color: "#16A34A" },
-    { label: "Change Orders", sub: "View & create change orders", route: `/project/${id}/change-orders`, color: "#F97316" },
+    ...(isAdmin ? [{ label: "Change Orders", sub: "View & create change orders", route: `/project/${id}/change-orders`, color: "#F97316" }] : []),
     { label: "Messages", sub: "Notes & communication", route: `/project/${id}/messages`, color: "#EC4899" },
   ]
 
@@ -70,11 +73,13 @@ export default function ProjectDetailScreen() {
       </View>
 
       {/* Stats row */}
-      <View style={styles.statsRow}>
-        <View style={styles.statCard}>
-          <Text style={styles.statValue}>${(project.contractValue / 1000).toFixed(0)}k</Text>
-          <Text style={styles.statLabel}>Contract</Text>
-        </View>
+     <View style={styles.statsRow}>
+          {(user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER") && (
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>${(project.contractValue / 1000).toFixed(0)}k</Text>
+              <Text style={styles.statLabel}>Contract</Text>
+            </View>
+          )}
         <View style={styles.statCard}>
           <Text style={styles.statValue}>{project._count?.dailyLogs || 0}</Text>
           <Text style={styles.statLabel}>Daily Logs</Text>

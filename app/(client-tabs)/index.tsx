@@ -1,8 +1,18 @@
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl, TouchableOpacity } from "react-native"
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl, TouchableOpacity, Modal } from "react-native"
 import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { useRouter } from "expo-router"
 import { API_URL } from "@/lib/api"
+import AsyncStorage from "@react-native-async-storage/async-storage"
+
+const CLIENT_KPI_OPTIONS = [
+  { key: "contract", label: "Contract Total", description: "Total contract value including approved COs", color: "white" },
+  { key: "completion", label: "Completion", description: "Overall project completion percentage", color: "#F97316" },
+  { key: "pending_cos", label: "Pending Approvals", description: "Change orders awaiting your approval", color: "#D97706" },
+  { key: "approved_cos", label: "Approved COs", description: "Number of approved change orders", color: "#16A34A" },
+  { key: "photos", label: "Site Photos", description: "Total photos uploaded", color: "#3B82F6" },
+  { key: "logs", label: "Site Updates", description: "Daily log entries", color: "#8B5CF6" },
+]
 
 export default function ClientDashboard() {
   const { token, user } = useAuth()
@@ -10,21 +20,40 @@ export default function ClientDashboard() {
   const [project, setProject] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [customizing, setCustomizing] = useState(false)
+  const [selectedKPIs, setSelectedKPIs] = useState(["contract", "pending_cos"])
+
+  useEffect(() => {
+    loadKPIPreferences()
+  }, [])
 
   useEffect(() => {
     if (token) loadProject()
   }, [token])
 
+  async function loadKPIPreferences() {
+    try {
+      const saved = await AsyncStorage.getItem("client_dashboard_kpis")
+      if (saved) setSelectedKPIs(JSON.parse(saved))
+    } catch (e) {
+      console.log("Error loading KPI prefs:", e)
+    }
+  }
+
+  async function saveKPIPreferences(kpis: string[]) {
+    try {
+      await AsyncStorage.setItem("client_dashboard_kpis", JSON.stringify(kpis))
+    } catch (e) {
+      console.log("Error saving KPI prefs:", e)
+    }
+  }
+
   async function loadProject() {
-    console.log("loadProject called with token:", !!token)
     try {
       const res = await fetch(`${API_URL}/api/mobile/client/project`, {
         headers: { "Authorization": `Bearer ${token}` }
       })
       const data = await res.json()
-      console.log("Logs:", data.project?.dailyLogs?.length)
-      console.log("Photos:", data.project?.photos?.length)
-      console.log("COs:", data.project?.changeOrders?.length)
       setProject(data.project)
     } catch (e) {
       console.log("Error loading client project:", e)
@@ -33,20 +62,30 @@ export default function ClientDashboard() {
     setRefreshing(false)
   }
 
-   if (loading) return (
-    <View style={styles.center}>
-      <ActivityIndicator color="#F97316" />
-      <TouchableOpacity onPress={loadProject} style={{marginTop: 20, padding: 16, backgroundColor: "#F97316", borderRadius: 10}}>
-        <Text style={{color: "white"}}>Force Load</Text>
-      </TouchableOpacity>
-    </View>
-  )
   if (loading) return <View style={styles.center}><ActivityIndicator color="#F97316" /></View>
 
   const firstName = user?.name?.split(" ")[0] || "there"
   const pendingCOs = project?.changeOrders?.filter((co: any) => co.status === "PENDING_APPROVAL") || []
   const approvedCOs = project?.changeOrders?.filter((co: any) => co.status === "APPROVED") || []
   const totalCOValue = approvedCOs.reduce((sum: number, co: any) => sum + co.costImpact, 0)
+
+  function getKPIValue(key: string) {
+    if (!project) return "0"
+    switch (key) {
+      case "contract": return `$${((project.contractValue || 0) + totalCOValue).toLocaleString()}`
+      case "completion": return `${project.completionPct || 0}%`
+      case "pending_cos": return pendingCOs.length.toString()
+      case "approved_cos": return approvedCOs.length.toString()
+      case "photos": return (project.photos?.length || 0).toString()
+      case "logs": return (project._count?.dailyLogs || 0).toString()
+      default: return "0"
+    }
+  }
+
+  const kpiTiles = selectedKPIs.slice(0, 2).map(key => {
+    const option = CLIENT_KPI_OPTIONS.find(o => o.key === key)!
+    return { key, label: option.label, value: getKPIValue(key), color: option.color }
+  })
 
   return (
     <ScrollView
@@ -102,19 +141,19 @@ export default function ClientDashboard() {
             </TouchableOpacity>
           )}
 
+          {/* KPI tiles */}
           <View style={styles.financeRow}>
-            <View style={styles.financeCard}>
-              <Text style={styles.financeLabel}>Contract Total</Text>
-              <Text style={styles.financeValue}>${(project.contractValue + totalCOValue).toLocaleString()}</Text>
-              {approvedCOs.length > 0 && (
-                <Text style={styles.financeSub}>incl. {approvedCOs.length} CO{approvedCOs.length > 1 ? "s" : ""}</Text>
-              )}
-            </View>
-            <View style={styles.financeCard}>
-              <Text style={styles.financeLabel}>Completion</Text>
-              <Text style={[styles.financeValue, { color: "#F97316" }]}>{project.completionPct}%</Text>
-              <Text style={styles.financeSub}>{project._count?.dailyLogs || 0} site updates</Text>
-            </View>
+            {kpiTiles.map(tile => (
+              <TouchableOpacity
+                key={tile.key}
+                style={styles.financeCard}
+                onPress={() => setCustomizing(true)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.financeLabel}>{tile.label}</Text>
+                <Text style={[styles.financeValue, { color: tile.color }]}>{tile.value}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
 
           {project.dailyLogs?.length > 0 && (
@@ -139,7 +178,9 @@ export default function ClientDashboard() {
                     <Text style={styles.coTitle}>{co.title}</Text>
                     <Text style={styles.coCost}>+${co.costImpact.toLocaleString()}</Text>
                   </View>
-                  <Text style={[styles.coStatus, { color: co.status === "APPROVED" ? "#16A34A" : co.status === "PENDING_APPROVAL" ? "#D97706" : "#6B7280" }]}>
+                  <Text style={[styles.coStatus, {
+                    color: co.status === "APPROVED" ? "#16A34A" : co.status === "PENDING_APPROVAL" ? "#D97706" : "#6B7280"
+                  }]}>
                     {co.status.replace("_", " ")}
                   </Text>
                 </View>
@@ -166,6 +207,53 @@ export default function ClientDashboard() {
           )}
         </>
       )}
+
+      {/* Customize Modal */}
+      <Modal visible={customizing} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Customize Dashboard</Text>
+            <Text style={styles.modalSub}>Choose 2 metrics to display</Text>
+            {CLIENT_KPI_OPTIONS.map(option => {
+              const isSelected = selectedKPIs.includes(option.key)
+              const selectedIndex = selectedKPIs.indexOf(option.key)
+              return (
+                <TouchableOpacity
+                  key={option.key}
+                  style={[styles.optionRow, isSelected && styles.optionRowSelected]}
+                  onPress={() => {
+                    let updated
+                    if (isSelected) {
+                      if (selectedKPIs.length > 1) {
+                        updated = selectedKPIs.filter(k => k !== option.key)
+                      } else return
+                    } else {
+                      if (selectedKPIs.length < 2) {
+                        updated = [...selectedKPIs, option.key]
+                      } else {
+                        updated = [...selectedKPIs.slice(1), option.key]
+                      }
+                    }
+                    setSelectedKPIs(updated)
+                    saveKPIPreferences(updated)
+                  }}
+                >
+                  <View style={[styles.optionCheck, isSelected && styles.optionCheckSelected]}>
+                    {isSelected && <Text style={styles.optionCheckText}>{selectedIndex + 1}</Text>}
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.optionLabel, isSelected && styles.optionLabelSelected]}>{option.label}</Text>
+                    <Text style={styles.optionSub}>{option.description}</Text>
+                  </View>
+                </TouchableOpacity>
+              )
+            })}
+            <TouchableOpacity style={styles.modalDoneBtn} onPress={() => setCustomizing(false)}>
+              <Text style={styles.modalDoneBtnText}>Done</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   )
 }
@@ -202,7 +290,6 @@ const styles = StyleSheet.create({
   financeCard: { flex: 1, backgroundColor: "#1C1F26", borderRadius: 14, padding: 14 },
   financeLabel: { fontSize: 10, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 },
   financeValue: { fontSize: 20, fontWeight: "700", color: "white", marginBottom: 2 },
-  financeSub: { fontSize: 11, color: "rgba(255,255,255,0.3)" },
   section: { paddingHorizontal: 16, marginBottom: 20 },
   sectionTitle: { fontSize: 13, fontWeight: "700", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 },
   logCard: { backgroundColor: "white", borderRadius: 12, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: "#E8E6E1" },
@@ -220,4 +307,18 @@ const styles = StyleSheet.create({
   eventDay: { fontSize: 18, fontWeight: "700", color: "#1A1A1A" },
   eventTitle: { fontSize: 14, fontWeight: "600", color: "#1A1A1A", marginBottom: 2 },
   eventType: { fontSize: 12, color: "#9CA3AF" },
+  modalOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" },
+  modalCard: { backgroundColor: "white", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, paddingBottom: 40 },
+  modalTitle: { fontSize: 18, fontWeight: "700", color: "#1A1A1A", marginBottom: 4 },
+  modalSub: { fontSize: 13, color: "#9CA3AF", marginBottom: 20 },
+  optionRow: { flexDirection: "row", alignItems: "center", gap: 14, padding: 14, borderRadius: 12, marginBottom: 8, backgroundColor: "#F9FAFB", borderWidth: 1, borderColor: "#E8E6E1" },
+  optionRowSelected: { backgroundColor: "#FFF7ED", borderColor: "#F97316" },
+  optionCheck: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: "#E8E6E1", justifyContent: "center", alignItems: "center" },
+  optionCheckSelected: { backgroundColor: "#F97316", borderColor: "#F97316" },
+  optionCheckText: { fontSize: 12, fontWeight: "700", color: "white" },
+  optionLabel: { fontSize: 14, fontWeight: "600", color: "#1A1A1A", marginBottom: 2 },
+  optionLabelSelected: { color: "#F97316" },
+  optionSub: { fontSize: 12, color: "#9CA3AF" },
+  modalDoneBtn: { backgroundColor: "#F97316", borderRadius: 12, padding: 16, alignItems: "center", marginTop: 8 },
+  modalDoneBtnText: { color: "white", fontSize: 16, fontWeight: "700" },
 })
