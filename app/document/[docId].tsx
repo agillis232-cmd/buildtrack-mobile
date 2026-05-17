@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator
 import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
+import { openDocument as openInBluebeam } from "@/lib/openDocument"
 
 const CATEGORIES = ["contract", "plans", "permit", "invoice", "photo", "report", "other"]
 
@@ -108,13 +109,35 @@ export default function DocumentViewerScreen() {
     ])
   }
 
-  function openDocument() {
+ function openDocument() {
     if (document?.fileUrl) {
+      openInBluebeam(document.fileUrl, document.mimeType)
+    }
+  }
+
+    const isPDF = document.mimeType?.includes("pdf")
+
+    if (isPDF) {
+      const bluebeamUrl = `bluebeam://open?url=${encodeURIComponent(document.fileUrl)}`
+      const canOpen = await Linking.canOpenURL(bluebeamUrl)
+      if (canOpen) {
+        Linking.openURL(bluebeamUrl)
+      } else {
+        Alert.alert(
+          "Open PDF",
+          "How would you like to open this file?",
+          [
+            { text: "Browser", onPress: () => Linking.openURL(document.fileUrl) },
+            { text: "Cancel", style: "cancel" }
+          ]
+        )
+      }
+    } else {
       Linking.openURL(document.fileUrl)
     }
   }
 
-  function getFileIcon(mimeType: string) {
+  async function getFileIcon(mimeType: string) {
     if (mimeType?.includes("pdf")) return "PDF"
     if (mimeType?.includes("image")) return "IMG"
     if (mimeType?.includes("word") || mimeType?.includes("doc")) return "DOC"
@@ -122,7 +145,7 @@ export default function DocumentViewerScreen() {
     return "FILE"
   }
 
-  function getFileColor(mimeType: string) {
+  async function getFileColor(mimeType: string) {
     if (mimeType?.includes("pdf")) return "#DC2626"
     if (mimeType?.includes("image")) return "#3B82F6"
     if (mimeType?.includes("word") || mimeType?.includes("doc")) return "#1D4ED8"
@@ -130,7 +153,7 @@ export default function DocumentViewerScreen() {
     return "#6B7280"
   }
 
-  function formatSize(bytes: number) {
+  async function formatSize(bytes: number) {
     if (bytes < 1024) return `${bytes} B`
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`

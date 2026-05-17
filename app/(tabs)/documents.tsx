@@ -4,6 +4,8 @@ import { useAuth } from "@/lib/auth"
 import { useRouter } from "expo-router"
 import { API_URL } from "@/lib/api"
 import * as DocumentPicker from "expo-document-picker"
+import { openDocument as openInBluebeam } from "@/lib/openDocument"
+
 
 export default function DocumentsScreen() {
   const { token } = useAuth()
