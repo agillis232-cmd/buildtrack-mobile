@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router"
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, TextInput, Modal, Linking } from "react-native"
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, TextInput, Modal } from "react-native"
 import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
@@ -17,7 +17,6 @@ export default function DocumentViewerScreen() {
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [projects, setProjects] = useState<any[]>([])
-
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
   const [category, setCategory] = useState("other")
@@ -109,35 +108,13 @@ export default function DocumentViewerScreen() {
     ])
   }
 
- function openDocument() {
+  function openDocument() {
     if (document?.fileUrl) {
       openInBluebeam(document.fileUrl, document.mimeType)
     }
   }
 
-    const isPDF = document.mimeType?.includes("pdf")
-
-    if (isPDF) {
-      const bluebeamUrl = `bluebeam://open?url=${encodeURIComponent(document.fileUrl)}`
-      const canOpen = await Linking.canOpenURL(bluebeamUrl)
-      if (canOpen) {
-        Linking.openURL(bluebeamUrl)
-      } else {
-        Alert.alert(
-          "Open PDF",
-          "How would you like to open this file?",
-          [
-            { text: "Browser", onPress: () => Linking.openURL(document.fileUrl) },
-            { text: "Cancel", style: "cancel" }
-          ]
-        )
-      }
-    } else {
-      Linking.openURL(document.fileUrl)
-    }
-  }
-
-  async function getFileIcon(mimeType: string) {
+  function getFileIcon(mimeType: string) {
     if (mimeType?.includes("pdf")) return "PDF"
     if (mimeType?.includes("image")) return "IMG"
     if (mimeType?.includes("word") || mimeType?.includes("doc")) return "DOC"
@@ -145,7 +122,7 @@ export default function DocumentViewerScreen() {
     return "FILE"
   }
 
-  async function getFileColor(mimeType: string) {
+  function getFileColor(mimeType: string) {
     if (mimeType?.includes("pdf")) return "#DC2626"
     if (mimeType?.includes("image")) return "#3B82F6"
     if (mimeType?.includes("word") || mimeType?.includes("doc")) return "#1D4ED8"
@@ -153,7 +130,7 @@ export default function DocumentViewerScreen() {
     return "#6B7280"
   }
 
-  async function formatSize(bytes: number) {
+  function formatSize(bytes: number) {
     if (bytes < 1024) return `${bytes} B`
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
@@ -167,7 +144,6 @@ export default function DocumentViewerScreen() {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Header */}
         <View style={styles.headerBanner}>
           <View style={styles.headerCircle} />
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
@@ -176,7 +152,6 @@ export default function DocumentViewerScreen() {
           <Text style={styles.title}>Document</Text>
         </View>
 
-        {/* File card */}
         <View style={styles.fileCard}>
           <View style={[styles.fileIconBox, { backgroundColor: fileColor + "15" }]}>
             <Text style={[styles.fileIconText, { color: fileColor }]}>{getFileIcon(document.mimeType)}</Text>
@@ -188,13 +163,11 @@ export default function DocumentViewerScreen() {
               <Text style={styles.projectBadgeText}>{document.project.name}</Text>
             </View>
           )}
-
           <TouchableOpacity style={styles.openBtn} onPress={openDocument}>
             <Text style={styles.openBtnText}>Open Document</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Details */}
         <View style={styles.detailsCard}>
           <Text style={styles.detailsTitle}>Details</Text>
           <Row label="Category" value={document.category} />
@@ -211,7 +184,6 @@ export default function DocumentViewerScreen() {
           </View>
         ) : null}
 
-        {/* Actions */}
         <View style={styles.actionsRow}>
           <TouchableOpacity style={styles.editBtn} onPress={() => setEditing(true)}>
             <Text style={styles.editBtnText}>Edit Details</Text>
@@ -222,7 +194,6 @@ export default function DocumentViewerScreen() {
         </View>
       </ScrollView>
 
-      {/* Edit Modal */}
       <Modal visible={editing} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
@@ -232,12 +203,10 @@ export default function DocumentViewerScreen() {
                 <Text style={styles.label}>Name</Text>
                 <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="Document name" placeholderTextColor="#9CA3AF" />
               </View>
-
               <View style={styles.field}>
                 <Text style={styles.label}>Description</Text>
                 <TextInput style={[styles.input, styles.multiline]} value={description} onChangeText={setDescription} placeholder="Optional description..." placeholderTextColor="#9CA3AF" multiline numberOfLines={3} />
               </View>
-
               <View style={styles.field}>
                 <Text style={styles.label}>Category</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -256,7 +225,6 @@ export default function DocumentViewerScreen() {
                   </View>
                 </ScrollView>
               </View>
-
               <View style={styles.field}>
                 <Text style={styles.label}>Link to Project</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -279,7 +247,6 @@ export default function DocumentViewerScreen() {
                   </View>
                 </ScrollView>
               </View>
-
               <View style={styles.field}>
                 <Text style={styles.label}>Share with client</Text>
                 <View style={styles.toggleRow}>
@@ -297,7 +264,6 @@ export default function DocumentViewerScreen() {
                   </TouchableOpacity>
                 </View>
               </View>
-
               <View style={styles.modalBtns}>
                 <TouchableOpacity style={styles.cancelBtn} onPress={() => setEditing(false)}>
                   <Text style={styles.cancelText}>Cancel</Text>
