@@ -1,14 +1,12 @@
 {
   "cli": {
-    "version": ">= 18.11.0"
+    "version": ">= 18.13.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "env": {
-        "NODE_ENV": "development"
-      },
       "ios": {
         "resourceClass": "m-medium"
       },
@@ -17,9 +15,17 @@
       }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "ios": {
+        "simulator": false,
+        "resourceClass": "m-medium"
+      }
     },
-    "production": {}
+    "production": {
+      "ios": {
+        "resourceClass": "m-medium"
+      }
+    }
   },
   "submit": {
     "production": {}
