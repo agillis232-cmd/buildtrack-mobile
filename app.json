@@ -15,7 +15,7 @@
       "bundleIdentifier": "com.watthouse.buildtrack",
       "supportsTablet": true,
       "infoPlist": {
-        "LSApplicationQueriesSchemes": ["bluebeam", "bluebeamcloud"]
+        "LSApplicationQueriesSchemes": ["bluebeam", "bluebeamcloud"],
         "ITSAppUsesNonExemptEncryption": false
       }
     },
