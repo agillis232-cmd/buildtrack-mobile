@@ -11,13 +11,16 @@
       "resizeMode": "contain",
       "backgroundColor": "#1C1F26"
     },
+   {
+  "expo": {
     "ios": {
-      "supportsTablet": false,
       "bundleIdentifier": "com.watthouse.buildtrack",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "LSApplicationQueriesSchemes": ["bluebeam"]
       }
-    },
+    }
+  }
+}
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
