@@ -9,17 +9,8 @@ export function openDocument(fileUrl: string, mimeType: string) {
   }
 
   const encodedUrl = encodeURIComponent(fileUrl)
-  const bluebeamUrl = `bluebeam://open?url=${encodedUrl}`
 
   Alert.alert(
-    "Open PDF",
-    "How would you like to open this file?",
-    [
-      {
-        text: "Bluebeam Revu",
-        onPress: () => {
-          Linking.openURL(bluebeamUrl).catch(() => {
-           Alert.alert(
     "Open PDF",
     "How would you like to open this file?",
     [
@@ -56,3 +47,4 @@ export function openDocument(fileUrl: string, mimeType: string) {
       { text: "Cancel", style: "cancel" }
     ]
   )
+}
