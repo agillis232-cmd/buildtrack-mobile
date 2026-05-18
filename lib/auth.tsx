@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react"
 import * as SecureStore from "expo-secure-store"
 import { API_URL } from "./api"
+import * as Notifications from "expo-notifications"
 
 interface User {
   id: string
@@ -26,6 +27,24 @@ const AuthContext = createContext<AuthContextType>({
   signOut: async () => {},
 })
 
+async function savePushToken(authToken: string) {
+  try {
+    const { status } = await Notifications.getPermissionsAsync()
+    if (status !== "granted") return
+    const pushTokenData = await Notifications.getExpoPushTokenAsync({
+      projectId: "65041af5-d938-4922-96e8-734b54a9ed8e"
+    })
+    await fetch(`${API_URL}/api/mobile/profile/push-token`, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${authToken}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ pushToken: pushTokenData.data })
+    })
+    console.log("Push token saved:", pushTokenData.data)
+  } catch (e) {
+    console.log("Error saving push token:", e)
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
@@ -35,19 +54,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkSession()
   }, [])
 
- async function checkSession() {
+  async function checkSession() {
     try {
       const savedToken = await SecureStore.getItemAsync("auth_token")
       const savedUser = await SecureStore.getItemAsync("auth_user")
-      console.log("Saved token:", savedToken)  // ADD THIS
-      console.log("Saved user:", savedUser)     // ADD THIS
+      console.log("Saved token:", savedToken)
+      console.log("Saved user:", savedUser)
       if (savedToken && savedUser) {
         setToken(savedToken)
         setUser(JSON.parse(savedUser))
       }
     } catch (e) {
-      console.log("SignIn catch error:", e)  // CHANGE THIS
-      return "Connection error — check your internet"
+      console.log("Session check error:", e)
     }
     setLoading(false)
   }
@@ -69,6 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await SecureStore.setItemAsync("auth_user", JSON.stringify(data.user))
       setToken(data.token)
       setUser(data.user)
+      savePushToken(data.token)
       if (onSuccess) onSuccess(data.user.role)
       return null
     } catch (e) {
