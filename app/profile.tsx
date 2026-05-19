@@ -105,10 +105,10 @@ console.log("User role:", user?.role)
       </View>
 {user?.role === "ADMIN" && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Admin</Text>
+          <Text style={styles.sectionTitle}>Company</Text>
           <View style={styles.card}>
-             <TouchableOpacity style={styles.adminRow} onPress={() => router.push("/team" as any)}>
-              <Text style={styles.adminRowLabel}>Team Management</Text>
+            <TouchableOpacity style={styles.adminRow} onPress={() => router.push("/organization" as any)}>
+              <Text style={styles.adminRowLabel}>Company Profile</Text>
               <Text style={styles.adminRowArrow}>›</Text>
             </TouchableOpacity>
           </View>
