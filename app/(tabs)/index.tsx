@@ -289,12 +289,12 @@ export default function DashboardScreen() {
         <View style={styles.estimatesSection}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Estimates</Text>
-            <TouchableOpacity onPress={() => router.push("/estimates" as any)} style={styles.newProjectBtn}>
+            <TouchableOpacity onPress={() => router.push("/new-estimate" as any)} style={styles.newProjectBtn}>
               <Text style={styles.newProjectBtnText}>+ New</Text>
             </TouchableOpacity>
           </View>
           <TouchableOpacity style={styles.estimatesCard} onPress={() => router.push("/estimates" as any)}>
-            <Text style={styles.estimatesCardText}>View all estimates →</Text>
+            <Text style={styles.estimatesCardText}>View & manage all estimates →</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -359,6 +359,6 @@ const styles = StyleSheet.create({
   newProjectBtn: { backgroundColor: "#F97316", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
   newProjectBtnText: { color: "white", fontSize: 12, fontWeight: "700" },
   estimatesSection: { marginBottom: 24 },
-  estimatesCard: { backgroundColor: "white", borderRadius: 14, padding: 16, marginHorizontal: 16, borderWidth: 1, borderColor: "#E8E6E1" },
+  estimatesCard: { backgroundColor: "white", borderRadius: 14, padding: 16, borderWidth: 1, borderColor: "#E8E6E1" },
   estimatesCardText: { fontSize: 14, fontWeight: "600", color: "#F97316" },
 })
