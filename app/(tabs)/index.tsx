@@ -284,6 +284,20 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         ))
       )}
+      {/* Estimates */}
+      {(user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER") && (
+        <View style={styles.estimatesSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Estimates</Text>
+            <TouchableOpacity onPress={() => router.push("/estimates" as any)} style={styles.newProjectBtn}>
+              <Text style={styles.newProjectBtnText}>+ New</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity style={styles.estimatesCard} onPress={() => router.push("/estimates" as any)}>
+            <Text style={styles.estimatesCardText}>View all estimates →</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </ScrollView>
   )
 }
@@ -344,4 +358,7 @@ const styles = StyleSheet.create({
   sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
   newProjectBtn: { backgroundColor: "#F97316", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
   newProjectBtnText: { color: "white", fontSize: 12, fontWeight: "700" },
+  estimatesSection: { marginBottom: 24 },
+  estimatesCard: { backgroundColor: "white", borderRadius: 14, padding: 16, marginHorizontal: 16, borderWidth: 1, borderColor: "#E8E6E1" },
+  estimatesCardText: { fontSize: 14, fontWeight: "600", color: "#F97316" },
 })
