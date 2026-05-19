@@ -298,6 +298,19 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         </View>
       )}
+      {(user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER") && (
+        <View style={styles.estimatesSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Vendor Invoices</Text>
+            <TouchableOpacity onPress={() => router.push("/vendor-invoices" as any)} style={styles.newProjectBtn}>
+              <Text style={styles.newProjectBtnText}>View All</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity style={styles.estimatesCard} onPress={() => router.push("/vendor-invoices" as any)}>
+            <Text style={styles.estimatesCardText}>Track incoming invoices & lien waivers →</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </ScrollView>
   )
 }
