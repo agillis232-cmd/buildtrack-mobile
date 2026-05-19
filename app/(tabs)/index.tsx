@@ -311,6 +311,16 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         </View>
       )}
+      {(user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER") && (
+        <View style={styles.estimatesSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Company Financials</Text>
+          </View>
+          <TouchableOpacity style={styles.estimatesCard} onPress={() => router.push("/financials" as any)}>
+            <Text style={styles.estimatesCardText}>View company financial health →</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </ScrollView>
   )
 }
