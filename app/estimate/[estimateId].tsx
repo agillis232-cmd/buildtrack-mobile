@@ -24,6 +24,10 @@ export default function EstimateDetailScreen() {
   const [projectWeeks, setProjectWeeks] = useState("12")
   const [startDate, setStartDate] = useState("")
   const [generatingSchedule, setGeneratingSchedule] = useState(false)
+  const [showSendModal, setShowSendModal] = useState(false)
+  const [sendTo, setSendTo] = useState("")
+  const [sendMessage, setSendMessage] = useState("")
+  const [sending, setSending] = useState(false)
 
   useEffect(() => {
     if (token && estimateId) {
@@ -98,6 +102,31 @@ export default function EstimateDetailScreen() {
       Alert.alert("Error", "Could not generate schedule")
     }
     setGeneratingSchedule(false)
+  }
+  async function sendEstimate() {
+    if (!sendTo) {
+      Alert.alert("Error", "Please enter an email address")
+      return
+    }
+    setSending(true)
+    try {
+      const res = await fetch(`${API_URL}/api/mobile/estimates/${estimateId}/send`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ to: sendTo, message: sendMessage })
+      })
+      const data = await res.json()
+      if (data.success) {
+        setEstimate((prev: any) => ({ ...prev, status: "SENT" }))
+        setShowSendModal(false)
+        Alert.alert("Sent!", `Estimate emailed to ${sendTo}`)
+      } else {
+        Alert.alert("Error", "Could not send email")
+      }
+    } catch (e) {
+      Alert.alert("Error", "Connection error")
+    }
+    setSending(false)
   }
 
   async function deleteEstimate() {
@@ -238,6 +267,9 @@ export default function EstimateDetailScreen() {
 
         {/* Actions */}
         <View style={styles.actions}>
+         <TouchableOpacity style={styles.sendBtn} onPress={() => { setSendTo(estimate.clientEmail || ""); setShowSendModal(true) }}>
+            <Text style={styles.sendBtnText}>Email to Client</Text>
+          </TouchableOpacity>
           <TouchableOpacity 
             style={styles.pdfBtn} 
             onPress={() => Linking.openURL(`https://buildtrackpro.app/estimates/${estimateId}`)}
@@ -319,6 +351,45 @@ export default function EstimateDetailScreen() {
               </TouchableOpacity>
             </View>
           </View>
+          <Modal visible={showSendModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Email Estimate</Text>
+            <Text style={styles.modalSub}>Send {estimate?.estimateNumber} to client</Text>
+            <View style={styles.field}>
+              <Text style={styles.fieldLabel}>To *</Text>
+              <TextInput
+                style={styles.input}
+                value={sendTo}
+                onChangeText={setSendTo}
+                placeholder="client@email.com"
+                placeholderTextColor="#9CA3AF"
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
+            <View style={styles.field}>
+              <Text style={styles.fieldLabel}>Message (optional)</Text>
+              <TextInput
+                style={[styles.input, { height: 80, textAlignVertical: "top" }]}
+                value={sendMessage}
+                onChangeText={setSendMessage}
+                placeholder="Please review the attached estimate..."
+                placeholderTextColor="#9CA3AF"
+                multiline
+              />
+            </View>
+            <View style={styles.modalBtns}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowSendModal(false)}>
+                <Text style={styles.cancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.saveBtn} onPress={sendEstimate} disabled={sending}>
+                {sending ? <ActivityIndicator color="white" size="small" /> : <Text style={styles.saveBtnText}>Send Email</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
         </View>
       </Modal>
     </View>
@@ -410,4 +481,6 @@ const styles = StyleSheet.create({
   saveBtnText: { color: "white", fontSize: 15, fontWeight: "700" },
   pdfBtn: { backgroundColor: "#1C1F26", borderRadius: 12, padding: 14, alignItems: "center", marginBottom: 10 },
   pdfBtnText: { color: "white", fontWeight: "700", fontSize: 15 },
+  sendBtn: { backgroundColor: "#3B82F6", borderRadius: 12, padding: 14, alignItems: "center", marginBottom: 10 },
+  sendBtnText: { color: "white", fontWeight: "700", fontSize: 15 },
 })
