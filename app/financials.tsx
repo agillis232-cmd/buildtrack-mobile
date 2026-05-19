@@ -111,7 +111,11 @@ export default function CompanyFinancialsScreen() {
           >
             <View style={styles.projectTop}>
               <Text style={styles.projectName}>{project.name}</Text>
-              <View style={[styles.statusDot, { backgroundColor: project.status === "ACTIVE" ? "#16A34A" : "#9CA3AF" }]} />
+              <View style={[styles.statusPill, { backgroundColor: project.status === "ACTIVE" ? "#DCFCE7" : project.status === "COMPLETED" ? "#DBEAFE" : "#F3F4F6" }]}>
+                <Text style={[styles.statusPillText, { color: project.status === "ACTIVE" ? "#16A34A" : project.status === "COMPLETED" ? "#3B82F6" : "#6B7280" }]}>
+                  {project.status}
+                </Text>
+              </View>
             </View>
             <View style={styles.projectStats}>
               <View style={styles.projectStat}>
@@ -191,7 +195,8 @@ const styles = StyleSheet.create({
   rowValue: { fontSize: 14, fontWeight: "600" },
   rowValueBold: { fontSize: 16, fontWeight: "700" },
   projectCard: { backgroundColor: "white", borderRadius: 14, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: "#E8E6E1" },
-  projectTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
+ statusPill: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 },
+  statusPillText: { fontSize: 11, fontWeight: "700" },
   projectName: { fontSize: 15, fontWeight: "700", color: "#1A1A1A", flex: 1 },
   statusDot: { width: 8, height: 8, borderRadius: 4 },
   projectStats: { flexDirection: "row", marginBottom: 10 },
