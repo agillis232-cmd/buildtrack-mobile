@@ -348,6 +348,9 @@ export default function NewEstimateScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Add Category</Text>
+            <Text style={{ fontSize: 12, color: "red", marginBottom: 8 }}>
+              Saved: {JSON.stringify(savedCategories)}
+            </Text>
             <ScrollView style={{ maxHeight: 300 }}>
               {DEFAULT_CATEGORIES.filter(c => !categories.find(cat => cat.name === c)).map(cat => (
                 <TouchableOpacity key={cat} style={styles.catOption} onPress={() => addCategory(cat)}>
