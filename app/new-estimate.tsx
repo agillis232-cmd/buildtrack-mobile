@@ -3,6 +3,7 @@ import { useState, useEffect } from "react"
 import { useAuth } from "@/lib/auth"
 import { useRouter } from "expo-router"
 import { API_URL } from "@/lib/api"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 const DEFAULT_CATEGORIES = [
   "Demolition & Site Preparation",
@@ -78,6 +79,10 @@ export default function NewEstimateScreen() {
     setCategories(prev => [...prev, { name, lineItems: [] }])
     setShowCategoryPicker(false)
     setNewCategoryName("")
+    // Save if it's a custom category not in defaults
+    if (!DEFAULT_CATEGORIES.includes(name)) {
+      saveCustomCategory(name)
+    }
   }
 
   function removeCategory(index: number) {
@@ -121,6 +126,30 @@ export default function NewEstimateScreen() {
         return s + (item.quantity * item.unitPrice)
       }, 0)
     }, 0)
+    const [savedCategories, setSavedCategories] = useState<string[]>([])
+
+  useEffect(() => {
+    loadSavedCategories()
+  }, [])
+
+  async function loadSavedCategories() {
+    try {
+      const saved = await AsyncStorage.getItem("custom_estimate_categories")
+      if (saved) setSavedCategories(JSON.parse(saved))
+    } catch (e) {
+      console.log("Error loading categories:", e)
+    }
+  }
+
+  async function saveCustomCategory(name: string) {
+    try {
+      const all = [...new Set([...savedCategories, name])]
+      setSavedCategories(all)
+      await AsyncStorage.setItem("custom_estimate_categories", JSON.stringify(all))
+    } catch (e) {
+      console.log("Error saving category:", e)
+    }
+  }
   }
 
   async function saveEstimate() {
@@ -342,9 +371,16 @@ export default function NewEstimateScreen() {
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Add Category</Text>
             <ScrollView style={{ maxHeight: 300 }}>
+              {/* Default categories not yet added */}
               {DEFAULT_CATEGORIES.filter(c => !categories.find(cat => cat.name === c)).map(cat => (
                 <TouchableOpacity key={cat} style={styles.catOption} onPress={() => addCategory(cat)}>
                   <Text style={styles.catOptionText}>{cat}</Text>
+                </TouchableOpacity>
+              ))}
+              {/* Custom saved categories */}
+              {savedCategories.filter(c => !DEFAULT_CATEGORIES.includes(c) && !categories.find(cat => cat.name === c)).map(cat => (
+                <TouchableOpacity key={cat} style={[styles.catOption, { borderColor: "#F97316" }]} onPress={() => addCategory(cat)}>
+                  <Text style={[styles.catOptionText, { color: "#F97316" }]}>{cat} ★</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
