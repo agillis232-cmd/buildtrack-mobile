@@ -105,8 +105,16 @@ console.log("User role:", user?.role)
       </View>
 {user?.role === "ADMIN" && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Company</Text>
+          <Text style={styles.sectionTitle}>Admin</Text>
           <View style={styles.card}>
+            <TouchableOpacity style={styles.adminRow} onPress={() => router.push("/team" as any)}>
+              <Text style={styles.adminRowLabel}>Team Management</Text>
+              <Text style={styles.adminRowArrow}>›</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.adminRow} onPress={() => router.push("/financials" as any)}>
+              <Text style={styles.adminRowLabel}>Company Financials</Text>
+              <Text style={styles.adminRowArrow}>›</Text>
+            </TouchableOpacity>
             <TouchableOpacity style={styles.adminRow} onPress={() => router.push("/organization" as any)}>
               <Text style={styles.adminRowLabel}>Company Profile</Text>
               <Text style={styles.adminRowArrow}>›</Text>
@@ -114,8 +122,6 @@ console.log("User role:", user?.role)
           </View>
         </View>
       )}
-
-      
       <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut} disabled={signingOut}>
         {signingOut
           ? <ActivityIndicator color="white" />
