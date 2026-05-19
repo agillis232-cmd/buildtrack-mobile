@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router"
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from "react-native"
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Alert } from "react-native"
 import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
@@ -30,6 +30,40 @@ export default function ProjectFinancialsScreen() {
     setRefreshing(false)
   }
 
+  async function markPaymentReceived(payment: any) {
+    if (payment.status === "PAID") return
+    Alert.alert(
+      `Mark Payment ${payment.number} Received`,
+      `$${payment.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })} — ${payment.description}`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Mark Received",
+          onPress: async () => {
+            try {
+              const res = await fetch(`${API_URL}/api/mobile/payments/${payment.id}`, {
+                method: "PATCH",
+                headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ status: "PAID", paidAmount: payment.amount, method: "CHECK" })
+              })
+              if (res.ok) {
+                setFinancials((prev: any) => ({
+                  ...prev,
+                  paymentSchedule: prev.paymentSchedule.map((p: any) =>
+                    p.id === payment.id ? { ...p, status: "PAID" } : p
+                  ),
+                  totalReceived: prev.totalReceived + payment.amount
+                }))
+              }
+            } catch (e) {
+              Alert.alert("Error", "Could not update payment")
+            }
+          }
+        }
+      ]
+    )
+  }
+
   if (loading) return <View style={styles.center}><ActivityIndicator color="#F97316" /></View>
   if (!financials) return <View style={styles.center}><Text style={styles.errorText}>Could not load financials</Text></View>
 
@@ -47,8 +81,6 @@ export default function ProjectFinancialsScreen() {
           <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.title}>Job Financials</Text>
-
-        {/* Profit summary */}
         <View style={styles.profitRow}>
           <View style={styles.profitCard}>
             <Text style={styles.profitLabel}>Projected Profit</Text>
@@ -69,7 +101,6 @@ export default function ProjectFinancialsScreen() {
         </View>
       </View>
 
-      {/* Contract breakdown */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Contract</Text>
         <View style={styles.card}>
@@ -79,7 +110,6 @@ export default function ProjectFinancialsScreen() {
         </View>
       </View>
 
-      {/* Receivables */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Receivables (Client Payments)</Text>
         <View style={styles.card}>
@@ -90,7 +120,6 @@ export default function ProjectFinancialsScreen() {
         </View>
       </View>
 
-      {/* Expenses */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Expenses & Payables</Text>
         <View style={styles.card}>
@@ -101,7 +130,6 @@ export default function ProjectFinancialsScreen() {
         </View>
       </View>
 
-      {/* Lien waivers warning */}
       {financials.lienWaiversRequired > 0 && (
         <View style={styles.lienWarning}>
           <Text style={styles.lienWarningTitle}>⚠ Lien Waivers Needed</Text>
@@ -112,12 +140,16 @@ export default function ProjectFinancialsScreen() {
         </View>
       )}
 
-      {/* Payment Schedule */}
       {financials.paymentSchedule?.length > 0 && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Payment Schedule</Text>
           {financials.paymentSchedule.map((payment: any) => (
-            <View key={payment.id} style={[styles.paymentRow, payment.status === "PAID" && styles.paymentRowPaid]}>
+            <TouchableOpacity
+              key={payment.id}
+              style={[styles.paymentRow, payment.status === "PAID" && styles.paymentRowPaid]}
+              onPress={() => markPaymentReceived(payment)}
+              activeOpacity={payment.status === "PAID" ? 1 : 0.7}
+            >
               <View style={styles.paymentLeft}>
                 <Text style={styles.paymentNumber}>Payment {payment.number}</Text>
                 <Text style={styles.paymentDesc}>{payment.description}</Text>
@@ -131,16 +163,15 @@ export default function ProjectFinancialsScreen() {
                 <Text style={styles.paymentAmount}>${payment.amount.toLocaleString(undefined, { minimumFractionDigits: 0 })}</Text>
                 <View style={[styles.paymentStatus, { backgroundColor: payment.status === "PAID" ? "#DCFCE7" : "#FEF3C7" }]}>
                   <Text style={[styles.paymentStatusText, { color: payment.status === "PAID" ? "#16A34A" : "#D97706" }]}>
-                    {payment.status}
+                    {payment.status === "PAID" ? "✓ RECEIVED" : "TAP TO MARK PAID"}
                   </Text>
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
       )}
 
-      {/* Quick links */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Quick Actions</Text>
         <TouchableOpacity style={styles.linkCard} onPress={() => router.push(`/project/${id}/expenses` as any)}>
