@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth"
 import { useRouter } from "expo-router"
 import { API_URL } from "@/lib/api"
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import DatePicker from "@/components/DatePicker"
 
 const DEFAULT_CATEGORIES = [
   "Demolition & Site Preparation",
@@ -55,6 +56,7 @@ export default function NewEstimateScreen() {
   const [showCategoryPicker, setShowCategoryPicker] = useState(false)
   const [showProjectPicker, setShowProjectPicker] = useState(false)
   const [newCategoryName, setNewCategoryName] = useState("")
+  const [validUntil, setValidUntil] = useState("")
 
   useEffect(() => {
     if (token) loadProjects()
@@ -147,10 +149,11 @@ export default function NewEstimateScreen() {
       const res = await fetch(`${API_URL}/api/mobile/estimates`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
+       body: JSON.stringify({
           clientName, clientEmail, clientPhone, clientAddress,
           projectAddress, projectId: projectId || null,
           notes, excludedItems,
+          validUntil: validUntil || null,
           categories: categories.map(cat => ({
             name: cat.name,
             lineItems: cat.lineItems.map(item => ({
@@ -295,6 +298,10 @@ export default function NewEstimateScreen() {
             <Text style={styles.addCategoryBtnText}>+ Add Category</Text>
           </TouchableOpacity>
         </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>Valid Until (optional)</Text>
+          <DatePicker label="" value={validUntil} onChange={setValidUntil} placeholder="Select expiry date..." />
+        </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Notes & Exclusions</Text>
@@ -348,9 +355,6 @@ export default function NewEstimateScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Add Category</Text>
-            <Text style={{ fontSize: 12, color: "red", marginBottom: 8 }}>
-              Saved: {JSON.stringify(savedCategories)}
-            </Text>
             <ScrollView style={{ maxHeight: 300 }}>
               {DEFAULT_CATEGORIES.filter(c => !categories.find(cat => cat.name === c)).map(cat => (
                 <TouchableOpacity key={cat} style={styles.catOption} onPress={() => addCategory(cat)}>

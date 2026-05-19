@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { useRouter } from "expo-router"
 import { API_URL } from "@/lib/api"
+import DatePicker from "@/components/DatePicker"
 
 const STATUS_COLORS: Record<string, string> = {
   UNPAID: "#DC2626",
@@ -283,10 +284,7 @@ export default function VendorInvoicesScreen() {
                 <Text style={styles.label}>Amount *</Text>
                 <TextInput style={styles.input} value={amount} onChangeText={setAmount} placeholder="0.00" keyboardType="decimal-pad" placeholderTextColor="#9CA3AF" />
               </View>
-              <View style={styles.field}>
-                <Text style={styles.label}>Due Date</Text>
-                <TextInput style={styles.input} value={dueDate} onChangeText={setDueDate} placeholder="YYYY-MM-DD" placeholderTextColor="#9CA3AF" />
-              </View>
+              <DatePicker label="Due Date" value={dueDate} onChange={setDueDate} placeholder="Select due date..." />
               <View style={styles.field}>
                 <Text style={styles.label}>Link to Project</Text>
                 <TouchableOpacity style={styles.selectBtn} onPress={() => setShowProjectPicker(true)}>
