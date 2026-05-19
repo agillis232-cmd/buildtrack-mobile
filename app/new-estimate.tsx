@@ -37,8 +37,8 @@ export default function NewEstimateScreen() {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [projects, setProjects] = useState<any[]>([])
+  const [savedCategories, setSavedCategories] = useState<string[]>([])
 
-  // Client info
   const [clientName, setClientName] = useState("")
   const [clientEmail, setClientEmail] = useState("")
   const [clientPhone, setClientPhone] = useState("")
@@ -48,19 +48,17 @@ export default function NewEstimateScreen() {
   const [notes, setNotes] = useState("")
   const [excludedItems, setExcludedItems] = useState("")
 
-  // Categories and line items
   const [categories, setCategories] = useState<Category[]>([
     { name: "Demolition & Site Preparation", lineItems: [] },
   ])
 
-  // UI state
-  const [activeCategoryIndex, setActiveCategoryIndex] = useState<number | null>(null)
   const [showCategoryPicker, setShowCategoryPicker] = useState(false)
   const [showProjectPicker, setShowProjectPicker] = useState(false)
   const [newCategoryName, setNewCategoryName] = useState("")
 
   useEffect(() => {
     if (token) loadProjects()
+    loadSavedCategories()
   }, [token])
 
   async function loadProjects() {
@@ -75,11 +73,31 @@ export default function NewEstimateScreen() {
     }
   }
 
+  async function loadSavedCategories() {
+    try {
+      const saved = await AsyncStorage.getItem("custom_estimate_categories")
+      console.log("Loaded saved categories:", saved)
+      if (saved) setSavedCategories(JSON.parse(saved))
+    } catch (e) {
+      console.log("Error loading categories:", e)
+    }
+  }
+
+  async function saveCustomCategory(name: string) {
+    try {
+      const all = [...new Set([...savedCategories, name])]
+      console.log("Saving categories:", all)
+      setSavedCategories(all)
+      await AsyncStorage.setItem("custom_estimate_categories", JSON.stringify(all))
+    } catch (e) {
+      console.log("Error saving category:", e)
+    }
+  }
+
   function addCategory(name: string) {
     setCategories(prev => [...prev, { name, lineItems: [] }])
     setShowCategoryPicker(false)
     setNewCategoryName("")
-    // Save if it's a custom category not in defaults
     if (!DEFAULT_CATEGORIES.includes(name)) {
       saveCustomCategory(name)
     }
@@ -92,23 +110,14 @@ export default function NewEstimateScreen() {
   function addLineItem(catIndex: number) {
     setCategories(prev => prev.map((cat, i) => {
       if (i !== catIndex) return cat
-      return {
-        ...cat,
-        lineItems: [...cat.lineItems, { description: "", quantity: 1, unit: "ea", unitPrice: 0, excluded: false }]
-      }
+      return { ...cat, lineItems: [...cat.lineItems, { description: "", quantity: 1, unit: "ea", unitPrice: 0, excluded: false }] }
     }))
   }
 
   function updateLineItem(catIndex: number, itemIndex: number, field: string, value: any) {
     setCategories(prev => prev.map((cat, i) => {
       if (i !== catIndex) return cat
-      return {
-        ...cat,
-        lineItems: cat.lineItems.map((item, j) => {
-          if (j !== itemIndex) return item
-          return { ...item, [field]: value }
-        })
-      }
+      return { ...cat, lineItems: cat.lineItems.map((item, j) => j !== itemIndex ? item : { ...item, [field]: value }) }
     }))
   }
 
@@ -126,30 +135,6 @@ export default function NewEstimateScreen() {
         return s + (item.quantity * item.unitPrice)
       }, 0)
     }, 0)
-    const [savedCategories, setSavedCategories] = useState<string[]>([])
-
-  useEffect(() => {
-    loadSavedCategories()
-  }, [])
-
-  async function loadSavedCategories() {
-    try {
-      const saved = await AsyncStorage.getItem("custom_estimate_categories")
-      if (saved) setSavedCategories(JSON.parse(saved))
-    } catch (e) {
-      console.log("Error loading categories:", e)
-    }
-  }
-
-  async function saveCustomCategory(name: string) {
-    try {
-      const all = [...new Set([...savedCategories, name])]
-      setSavedCategories(all)
-      await AsyncStorage.setItem("custom_estimate_categories", JSON.stringify(all))
-    } catch (e) {
-      console.log("Error saving category:", e)
-    }
-  }
   }
 
   async function saveEstimate() {
@@ -191,6 +176,7 @@ export default function NewEstimateScreen() {
   }
 
   const total = calculateTotal()
+  const customSaved = savedCategories.filter(c => !DEFAULT_CATEGORIES.includes(c))
 
   return (
     <View style={styles.container}>
@@ -206,7 +192,6 @@ export default function NewEstimateScreen() {
           )}
         </View>
 
-        {/* Client Info */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Client Information</Text>
           <View style={styles.card}>
@@ -218,7 +203,6 @@ export default function NewEstimateScreen() {
           </View>
         </View>
 
-        {/* Link to project */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Link to Project (optional)</Text>
           <TouchableOpacity style={styles.selectBtn} onPress={() => setShowProjectPicker(true)}>
@@ -229,7 +213,6 @@ export default function NewEstimateScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Line Items by Category */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Scope of Work</Text>
 
@@ -265,7 +248,6 @@ export default function NewEstimateScreen() {
                         value={item.quantity.toString()}
                         onChangeText={v => updateLineItem(catIndex, itemIndex, "quantity", parseFloat(v) || 0)}
                         keyboardType="decimal-pad"
-                        placeholderTextColor="#9CA3AF"
                       />
                     </View>
                     <View style={styles.numField}>
@@ -285,7 +267,6 @@ export default function NewEstimateScreen() {
                         value={item.unitPrice.toString()}
                         onChangeText={v => updateLineItem(catIndex, itemIndex, "unitPrice", parseFloat(v) || 0)}
                         keyboardType="decimal-pad"
-                        placeholderTextColor="#9CA3AF"
                       />
                     </View>
                     <View style={styles.numField}>
@@ -315,7 +296,6 @@ export default function NewEstimateScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Notes */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Notes & Exclusions</Text>
           <View style={styles.card}>
@@ -346,7 +326,6 @@ export default function NewEstimateScreen() {
           </View>
         </View>
 
-        {/* Total summary */}
         {total > 0 && (
           <View style={styles.totalCard}>
             <Text style={styles.totalLabel}>Estimate Total</Text>
@@ -355,7 +334,6 @@ export default function NewEstimateScreen() {
         )}
       </ScrollView>
 
-      {/* Footer */}
       <View style={styles.footer}>
         <TouchableOpacity style={styles.cancelBtn} onPress={() => router.back()}>
           <Text style={styles.cancelText}>Cancel</Text>
@@ -371,16 +349,17 @@ export default function NewEstimateScreen() {
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Add Category</Text>
             <ScrollView style={{ maxHeight: 300 }}>
-              {/* Default categories not yet added */}
               {DEFAULT_CATEGORIES.filter(c => !categories.find(cat => cat.name === c)).map(cat => (
                 <TouchableOpacity key={cat} style={styles.catOption} onPress={() => addCategory(cat)}>
                   <Text style={styles.catOptionText}>{cat}</Text>
                 </TouchableOpacity>
               ))}
-              {/* Custom saved categories */}
-              {savedCategories.filter(c => !DEFAULT_CATEGORIES.includes(c) && !categories.find(cat => cat.name === c)).map(cat => (
-                <TouchableOpacity key={cat} style={[styles.catOption, { borderColor: "#F97316" }]} onPress={() => addCategory(cat)}>
-                  <Text style={[styles.catOptionText, { color: "#F97316" }]}>{cat} ★</Text>
+              {customSaved.filter(c => !categories.find(cat => cat.name === c)).length > 0 && (
+                <Text style={styles.savedLabel}>Your Saved Categories</Text>
+              )}
+              {customSaved.filter(c => !categories.find(cat => cat.name === c)).map(cat => (
+                <TouchableOpacity key={cat} style={[styles.catOption, styles.catOptionSaved]} onPress={() => addCategory(cat)}>
+                  <Text style={[styles.catOptionText, styles.catOptionTextSaved]}>{cat} ★</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -506,8 +485,11 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: 18, fontWeight: "700", color: "#1A1A1A", marginBottom: 16 },
   catOption: { padding: 14, borderRadius: 10, backgroundColor: "#F9FAFB", borderWidth: 1, borderColor: "#E8E6E1", marginBottom: 8 },
   catOptionActive: { backgroundColor: "#FFF7ED", borderColor: "#F97316" },
+  catOptionSaved: { borderColor: "#F97316", backgroundColor: "#FFF7ED" },
   catOptionText: { fontSize: 14, color: "#1A1A1A", fontWeight: "500" },
   catOptionTextActive: { color: "#F97316", fontWeight: "700" },
+  catOptionTextSaved: { color: "#F97316", fontWeight: "600" },
+  savedLabel: { fontSize: 11, fontWeight: "700", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5, marginVertical: 10 },
   orLabel: { fontSize: 12, color: "#9CA3AF", marginVertical: 12, textAlign: "center" },
   modalBtns: { flexDirection: "row", gap: 10, marginTop: 12 },
 })
