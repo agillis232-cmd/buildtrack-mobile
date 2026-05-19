@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router"
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Modal, TextInput } from "react-native"
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Modal, TextInput, Linking } from "react-native"
 import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
@@ -238,6 +238,12 @@ export default function EstimateDetailScreen() {
 
         {/* Actions */}
         <View style={styles.actions}>
+          <TouchableOpacity 
+            style={styles.pdfBtn} 
+            onPress={() => Linking.openURL(`https://buildtrackpro.app/estimates/${estimateId}`)}
+          >
+            <Text style={styles.pdfBtnText}>View / Print PDF</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.deleteBtn} onPress={deleteEstimate}>
             <Text style={styles.deleteBtnText}>Delete Estimate</Text>
           </TouchableOpacity>
@@ -402,4 +408,6 @@ const styles = StyleSheet.create({
   cancelBtnText: { fontSize: 15, fontWeight: "600", color: "#6B7280" },
   saveBtn: { flex: 1, backgroundColor: "#F97316", borderRadius: 12, padding: 14, alignItems: "center" },
   saveBtnText: { color: "white", fontSize: 15, fontWeight: "700" },
+  pdfBtn: { backgroundColor: "#1C1F26", borderRadius: 12, padding: 14, alignItems: "center", marginBottom: 10 },
+  pdfBtnText: { color: "white", fontWeight: "700", fontSize: 15 },
 })
