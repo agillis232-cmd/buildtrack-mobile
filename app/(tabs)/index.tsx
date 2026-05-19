@@ -301,6 +301,19 @@ export default function DashboardScreen() {
       {(user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER") && (
         <View style={styles.estimatesSection}>
           <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Invoices</Text>
+            <TouchableOpacity onPress={() => router.push("/invoices" as any)} style={styles.newProjectBtn}>
+              <Text style={styles.newProjectBtnText}>View All</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity style={styles.estimatesCard} onPress={() => router.push("/invoices" as any)}>
+            <Text style={styles.estimatesCardText}>Track client payments & invoices →</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+      {(user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER") && (
+        <View style={styles.estimatesSection}>
+          <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Vendor Invoices</Text>
             <TouchableOpacity onPress={() => router.push("/vendor-invoices" as any)} style={styles.newProjectBtn}>
               <Text style={styles.newProjectBtnText}>View All</Text>
