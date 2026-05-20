@@ -36,6 +36,7 @@
     "plugins": [
       "expo-router",
       "expo-camera",
+      "expo-document-picker"
       [
         "expo-image-picker",
         {
