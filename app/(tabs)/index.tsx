@@ -227,8 +227,8 @@ export default function DashboardScreen() {
       </View>
       {projects.length === 0 ? (
          <View style={styles.emptyCard}>
-            <Text style={styles.emptyTitle}>No expenses yet</Text>
-            <Text style={styles.emptySub}>Scan a receipt or add manually</Text>
+            <Text style={styles.emptyTitle}>No projects yet</Text>
+            <Text style={styles.emptySub}>Tap + New to create your first project</Text>
           </View>
       ) : (
         projects.map(project => (
