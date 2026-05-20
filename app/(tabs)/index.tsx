@@ -334,6 +334,19 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         </View>
       )}
+      {(user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER" || user?.role === "ARCHITECT") && (
+        <View style={styles.estimatesSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>RFIs</Text>
+            <TouchableOpacity onPress={() => router.push("/rfis" as any)} style={styles.newProjectBtn}>
+              <Text style={styles.newProjectBtnText}>View All</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity style={styles.estimatesCard} onPress={() => router.push("/rfis" as any)}>
+            <Text style={styles.estimatesCardText}>Requests for information →</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </ScrollView>
   )
 }
