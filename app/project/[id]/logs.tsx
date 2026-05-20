@@ -3,6 +3,12 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator
 import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
+import DatePicker from "@/components/DatePicker"
+
+function todayString() {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
+}
 
 export default function LogsScreen() {
   const { id } = useLocalSearchParams()
@@ -18,7 +24,7 @@ export default function LogsScreen() {
   const [crew, setCrew] = useState("")
   const [hours, setHours] = useState("")
   const [weather, setWeather] = useState("Clear")
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0])
+  const [date, setDate] = useState(todayString())
 
   useEffect(() => {
     if (token && id) loadLogs()
@@ -52,7 +58,7 @@ export default function LogsScreen() {
     setCrew("")
     setHours("")
     setWeather("Clear")
-    setDate(new Date().toISOString().split("T")[0])
+    setDate(todayString())
   }
 
   async function saveLog() {
@@ -82,6 +88,7 @@ export default function LogsScreen() {
           setCrew("")
           setHours("")
           setWeather("Clear")
+          setDate(todayString())
           setAdding(false)
         }
       } else {
@@ -149,8 +156,7 @@ export default function LogsScreen() {
                 <TextInput style={styles.input} value={hours} onChangeText={setHours} placeholder="8" placeholderTextColor="#9CA3AF" keyboardType="number-pad" />
               </View>
               <View style={[styles.field, { flex: 1 }]}>
-                <Text style={styles.label}>Date</Text>
-                <TextInput style={styles.input} value={date} onChangeText={setDate} placeholder="YYYY-MM-DD" placeholderTextColor="#9CA3AF" />
+                <DatePicker label="Date" value={date} onChange={setDate} />
               </View>
             </View>
 
@@ -234,8 +240,7 @@ export default function LogsScreen() {
                   <TextInput style={styles.input} value={hours} onChangeText={setHours} keyboardType="number-pad" placeholder="8" placeholderTextColor="#9CA3AF" />
                 </View>
                 <View style={[styles.field, { flex: 1 }]}>
-                  <Text style={styles.label}>Date</Text>
-                  <TextInput style={styles.input} value={date} onChangeText={setDate} placeholder="YYYY-MM-DD" placeholderTextColor="#9CA3AF" />
+                  <DatePicker label="Date" value={date} onChange={setDate} />
                 </View>
               </View>
               <View style={styles.field}>
