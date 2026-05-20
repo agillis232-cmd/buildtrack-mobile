@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Modal, TextInput, Alert } from "react-native"
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Modal, TextInput, Alert, Linking } from "react-native"
 import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { useRouter } from "expo-router"
 import { API_URL } from "@/lib/api"
 import DatePicker from "@/components/DatePicker"
+import * as DocumentPicker from "expo-document-picker"
 
 const STATUS_COLORS: Record<string, string> = {
   OPEN: "#3B82F6",
@@ -31,6 +32,7 @@ export default function RFIsScreen() {
   const [saving, setSaving] = useState(false)
   const [responding, setResponding] = useState(false)
   const [filter, setFilter] = useState<"ALL" | "OPEN" | "ANSWERED" | "CLOSED">("OPEN")
+  const [uploadingDoc, setUploadingDoc] = useState(false)
 
   // Add form
   const [projectId, setProjectId] = useState("")
@@ -114,6 +116,40 @@ export default function RFIsScreen() {
       Alert.alert("Error", "Connection error")
     }
     setSaving(false)
+  }
+  async function uploadDocument(rfiId: string) {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ["application/pdf", "image/*"],
+        copyToCacheDirectory: true,
+        base64: true,
+      })
+      if (result.canceled) return
+
+      const file = result.assets[0]
+      setUploadingDoc(true)
+
+      const res = await fetch(`${API_URL}/api/mobile/rfis/${rfiId}/documents`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: file.name,
+          file: file.base64,
+          mimeType: file.mimeType || "application/octet-stream"
+        })
+      })
+      const data = await res.json()
+      if (data.document) {
+        setShowDetailModal((prev: any) => ({
+          ...prev,
+          documents: [...(prev.documents || []), data.document]
+        }))
+        Alert.alert("Uploaded!", `${file.name} attached to RFI`)
+      }
+    } catch (e) {
+      Alert.alert("Error", "Could not upload document")
+    }
+    setUploadingDoc(false)
   }
 
   async function submitResponse() {
@@ -369,6 +405,34 @@ export default function RFIsScreen() {
                   <Text style={styles.detailInfoValue}>{new Date(showDetailModal.dueDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</Text>
                 </View>
               )}
+              {/* Documents */}
+              <View style={styles.docsSection}>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                  <Text style={styles.responsesTitle}>Attachments</Text>
+                  <TouchableOpacity
+                    style={styles.attachBtn}
+                    onPress={() => uploadDocument(showDetailModal.id)}
+                    disabled={uploadingDoc}
+                  >
+                    {uploadingDoc ? <ActivityIndicator size="small" color="#F97316" /> : <Text style={styles.attachBtnText}>+ Attach</Text>}
+                  </TouchableOpacity>
+                </View>
+                {showDetailModal?.documents?.length > 0 ? (
+                  showDetailModal.documents.map((doc: any) => (
+                    <TouchableOpacity
+                      key={doc.id}
+                      style={styles.docRow}
+                      onPress={() => Linking.openURL(doc.url)}
+                    >
+                      <Text style={styles.docIcon}>📎</Text>
+                      <Text style={styles.docName} numberOfLines={1}>{doc.name}</Text>
+                      <Text style={styles.docOpen}>Open →</Text>
+                    </TouchableOpacity>
+                  ))
+                ) : (
+                  <Text style={styles.noDocsText}>No attachments yet</Text>
+                )}
+              </View>
 
               {/* Responses */}
               {showDetailModal?.responses?.length > 0 && (
@@ -538,4 +602,12 @@ const styles = StyleSheet.create({
   pickerOption: { padding: 14, borderRadius: 10, backgroundColor: "#F9FAFB", borderWidth: 1, borderColor: "#E8E6E1", marginBottom: 8 },
   pickerOptionActive: { backgroundColor: "#FFF7ED", borderColor: "#F97316" },
   pickerOptionText: { fontSize: 14, color: "#1A1A1A", fontWeight: "500" },
+  docsSection: { marginTop: 16, marginBottom: 8 },
+  attachBtn: { backgroundColor: "#FFF7ED", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: "#FED7AA" },
+  attachBtnText: { fontSize: 12, fontWeight: "700", color: "#F97316" },
+  docRow: { flexDirection: "row", alignItems: "center", gap: 8, padding: 10, backgroundColor: "#F9FAFB", borderRadius: 8, marginBottom: 6, borderWidth: 1, borderColor: "#E8E6E1" },
+  docIcon: { fontSize: 16 },
+  docName: { flex: 1, fontSize: 13, color: "#374151", fontWeight: "500" },
+  docOpen: { fontSize: 12, color: "#F97316", fontWeight: "600" },
+  noDocsText: { fontSize: 13, color: "#9CA3AF", fontStyle: "italic" },
 })
