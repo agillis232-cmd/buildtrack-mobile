@@ -7,6 +7,7 @@ const ROLES = [
   { key: "FIELD_WORKER", label: "Field Worker", sub: "Add logs, photos and expenses" },
   { key: "PROJECT_MANAGER", label: "Project Manager", sub: "Full access to manage projects" },
   { key: "CLIENT", label: "Client", sub: "View project progress and approve change orders" },
+  { key: "ARCHITECT", label: "Architect / Engineer", sub: "RFIs, documents, project review" }
 ]
 
 export default function SignupScreen() {
