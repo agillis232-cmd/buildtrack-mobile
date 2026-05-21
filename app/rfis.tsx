@@ -432,6 +432,12 @@ export default function RFIsScreen() {
                 ) : (
                   <Text style={styles.noDocsText}>No attachments yet</Text>
                 )}
+                <TouchableOpacity
+                style={styles.pdfBtn}
+                onPress={() => Linking.openURL(`https://buildtrackpro.app/rfis/${showDetailModal.id}`)}
+              >
+                <Text style={styles.pdfBtnText}>View / Print PDF</Text>
+              </TouchableOpacity>
               </View>
 
               {/* Responses */}
@@ -610,4 +616,6 @@ const styles = StyleSheet.create({
   docName: { flex: 1, fontSize: 13, color: "#374151", fontWeight: "500" },
   docOpen: { fontSize: 12, color: "#F97316", fontWeight: "600" },
   noDocsText: { fontSize: 13, color: "#9CA3AF", fontStyle: "italic" },
+  pdfBtn: { backgroundColor: "#1C1F26", borderRadius: 10, padding: 12, alignItems: "center", marginBottom: 12 },
+  pdfBtnText: { color: "white", fontWeight: "700", fontSize: 14 },
 })

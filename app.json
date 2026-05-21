@@ -2,7 +2,7 @@
   "expo": {
     "name": "BuildTrack",
     "slug": "buildtrack-mobile",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -13,6 +13,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.watthouse.buildtrack",
+      "buildNumber": "2",
       "supportsTablet": true,
       "infoPlist": {
         "LSApplicationQueriesSchemes": ["bluebeam", "bluebeamcloud"],
@@ -36,7 +37,7 @@
     "plugins": [
       "expo-router",
       "expo-camera",
-      "expo-document-picker"
+      "expo-document-picker",
       [
         "expo-image-picker",
         {
