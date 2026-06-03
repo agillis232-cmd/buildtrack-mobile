@@ -188,6 +188,28 @@ export default function ProjectDetailScreen() {
                 </TouchableOpacity>
               ))}
             </View>
+            {/* Floating Assistant Button */}
+      <TouchableOpacity
+        onPress={() => router.push({ pathname: "/assistant", params: { projectId: project.id, projectName: project.name } })}
+        style={{
+          position: "absolute",
+          bottom: 24,
+          right: 24,
+          width: 56,
+          height: 56,
+          borderRadius: 16,
+          backgroundColor: "#F97316",
+          alignItems: "center",
+          justifyContent: "center",
+          shadowColor: "#F97316",
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.4,
+          shadowRadius: 8,
+          elevation: 8,
+        }}
+      >
+        <Text style={{ fontSize: 26 }}>🤖</Text>
+      </TouchableOpacity>
 
             <View style={styles.modalBtns}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowUpdateModal(false)}>

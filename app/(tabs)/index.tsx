@@ -147,6 +147,27 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         </View>
       </View>
+      <TouchableOpacity
+        onPress={() => router.push("/assistant")}
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 10,
+          backgroundColor: "#1C1F26",
+          padding: 14,
+          borderRadius: 12,
+          marginBottom: 16,
+        }}
+      >
+        <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "#F97316", alignItems: "center", justifyContent: "center" }}>
+          <Text style={{ fontSize: 20 }}>🤖</Text>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={{ color: "white", fontSize: 14, fontWeight: "700" }}>BuildTrack Assistant</Text>
+          <Text style={{ color: "rgba(255,255,255,0.4)", fontSize: 11 }}>Brain dump, create tasks, notes & more</Text>
+        </View>
+        <Text style={{ color: "rgba(255,255,255,0.3)", fontSize: 16 }}>→</Text>
+      </TouchableOpacity>
 
       {/* KPI strip */}
       <View style={styles.kpiRow}>
