@@ -4,7 +4,7 @@ import {
   KeyboardAvoidingView, Platform, ActivityIndicator, SafeAreaView
 } from "react-native"
 import { useLocalSearchParams, router } from "expo-router"
-import AsyncStorage from "@react-native-async-storage/async-storage"
+import * as SecureStore from "expo-secure-store"
 
 const API = "https://buildtrackpro.app"
 
@@ -33,7 +33,13 @@ export default function AssistantScreen() {
     setLoading(true)
 
     try {
-      const token = await AsyncStorage.getItem("token")
+      const token = await SecureStore.getItemAsync("auth_token")
+      console.log("Token:", token ? token.substring(0, 20) + "..." : "NULL")
+      if (!token) {
+        setMessages(prev => [...prev, { role: "assistant", content: "Not logged in — please sign out and sign back in.", actions: [] }])
+        setLoading(false)
+        return
+      }
       const res = await fetch(`${API}/api/mobile/assistant`, {
         method: "POST",
         headers: {

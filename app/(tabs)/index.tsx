@@ -169,6 +169,38 @@ export default function DashboardScreen() {
         <Text style={{ color: "rgba(255,255,255,0.3)", fontSize: 16 }}>→</Text>
       </TouchableOpacity>
 
+      {/* Tasks & Notes quick links */}
+      <View style={{ flexDirection: "row", gap: 10, marginBottom: 16 }}>
+        <TouchableOpacity
+          onPress={() => router.push("/tasks")}
+          style={{
+            flex: 1, flexDirection: "row", alignItems: "center", gap: 10,
+            backgroundColor: "white", padding: 14, borderRadius: 12,
+            borderWidth: 1, borderColor: "#E8E6E1",
+          }}
+        >
+          <Text style={{ fontSize: 20 }}>✅</Text>
+          <View>
+            <Text style={{ fontSize: 13, fontWeight: "700", color: "#1C1F26" }}>Tasks</Text>
+            <Text style={{ fontSize: 10, color: "#999" }}>Manage to-dos</Text>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => router.push("/notes")}
+          style={{
+            flex: 1, flexDirection: "row", alignItems: "center", gap: 10,
+            backgroundColor: "white", padding: 14, borderRadius: 12,
+            borderWidth: 1, borderColor: "#E8E6E1",
+          }}
+        >
+          <Text style={{ fontSize: 20 }}>📝</Text>
+          <View>
+            <Text style={{ fontSize: 13, fontWeight: "700", color: "#1C1F26" }}>Notes</Text>
+            <Text style={{ fontSize: 10, color: "#999" }}>View & pin notes</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+
       {/* KPI strip */}
       <View style={styles.kpiRow}>
         {kpiTiles.map((tile, index) => (
