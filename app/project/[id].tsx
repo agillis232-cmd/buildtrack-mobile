@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator
 import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
+import { Ionicons } from "@expo/vector-icons"
 
 export default function ProjectDetailScreen() {
   const { id } = useLocalSearchParams()
@@ -175,7 +176,7 @@ export default function ProjectDetailScreen() {
           zIndex: 999,
         }}
       >
-        <Text style={{ fontSize: 26 }}>🤖</Text>
+        <Ionicons name="hardware-chip-outline" size={26} color="white" />
       </TouchableOpacity>
 
       <Modal visible={showUpdateModal} animationType="slide" transparent>

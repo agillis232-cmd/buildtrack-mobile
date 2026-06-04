@@ -5,6 +5,7 @@ import {
 } from "react-native"
 import { useLocalSearchParams, router } from "expo-router"
 import * as SecureStore from "expo-secure-store"
+import { Ionicons } from "@expo/vector-icons"
 
 const API = "https://buildtrackpro.app"
 
@@ -87,7 +88,7 @@ export default function AssistantScreen() {
             backgroundColor: "#F97316",
             alignItems: "center", justifyContent: "center",
           }}>
-            <Text style={{ fontSize: 22 }}>🤖</Text>
+            <Ionicons name="hardware-chip-outline" size={22} color="white" />
           </View>
           <View>
             <Text style={{ color: "white", fontSize: 17, fontWeight: "700" }}>BuildTrack Assistant</Text>
@@ -112,7 +113,7 @@ export default function AssistantScreen() {
         >
           {messages.length === 0 && (
             <View style={{ alignItems: "center", justifyContent: "center", paddingTop: 60, paddingBottom: 30 }}>
-              <Text style={{ fontSize: 48, marginBottom: 16 }}>🏗️</Text>
+              <Ionicons name="construct-outline" size={48} color="#F97316" style={{ marginBottom: 16 }} />
               <Text style={{ fontSize: 17, fontWeight: "700", color: "#1C1F26", marginBottom: 6, textAlign: "center" }}>
                 Hey! I'm your BuildTrack Assistant
               </Text>
@@ -151,7 +152,7 @@ export default function AssistantScreen() {
                     backgroundColor: "#F97316",
                     alignItems: "center", justifyContent: "center",
                   }}>
-                    <Text style={{ fontSize: 14 }}>🤖</Text>
+                    <Ionicons name="hardware-chip-outline" size={14} color="white" />
                   </View>
                 )}
                 <View style={{

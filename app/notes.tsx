@@ -6,9 +6,14 @@ import {
 import { router } from "expo-router"
 import * as SecureStore from "expo-secure-store"
 import { API_URL } from "@/lib/api"
+import { Ionicons } from "@expo/vector-icons"
 
 const CATEGORY_ICONS: Record<string, string> = {
-  general: "📝", meeting: "🤝", decision: "⚖️", reminder: "🔔", idea: "💡"
+  general: "document-text-outline",
+  meeting: "people-outline",
+  decision: "scale-outline",
+  reminder: "notifications-outline",
+  idea: "bulb-outline"
 }
 
 export default function NotesScreen() {
@@ -106,7 +111,7 @@ export default function NotesScreen() {
       >
         {filtered.length === 0 ? (
           <View style={{ alignItems: "center", paddingTop: 60 }}>
-            <Text style={{ fontSize: 40, marginBottom: 12 }}>📝</Text>
+            <Ionicons name="document-text-outline" size={40} color="#F97316" style={{ marginBottom: 12 }} />
             <Text style={{ fontSize: 16, fontWeight: "700", color: "#1C1F26" }}>No notes yet</Text>
             <Text style={{ fontSize: 13, color: "#999", marginTop: 4 }}>Use the assistant to capture notes</Text>
           </View>
@@ -168,7 +173,7 @@ export default function NotesScreen() {
           shadowOpacity: 0.4, shadowRadius: 8, elevation: 8,
         }}
       >
-        <Text style={{ fontSize: 26 }}>🤖</Text>
+        <Ionicons name="hardware-chip-outline" size={26} color="white" />
       </TouchableOpacity>
     </SafeAreaView>
   )

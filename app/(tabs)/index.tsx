@@ -4,6 +4,7 @@ import { useRouter } from "expo-router"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import { Ionicons } from "@expo/vector-icons"
 
 
 export default function DashboardScreen() {
@@ -160,7 +161,7 @@ export default function DashboardScreen() {
         }}
       >
         <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "#F97316", alignItems: "center", justifyContent: "center" }}>
-          <Text style={{ fontSize: 20 }}>🤖</Text>
+          <Ionicons name="hardware-chip-outline" size={20} color="white" />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={{ color: "white", fontSize: 14, fontWeight: "700" }}>BuildTrack Assistant</Text>
@@ -179,7 +180,7 @@ export default function DashboardScreen() {
             borderWidth: 1, borderColor: "#E8E6E1",
           }}
         >
-          <Text style={{ fontSize: 20 }}>✅</Text>
+          <Ionicons name="checkmark-circle-outline" size={20} color="#F97316" />
           <View>
             <Text style={{ fontSize: 13, fontWeight: "700", color: "#1C1F26" }}>Tasks</Text>
             <Text style={{ fontSize: 10, color: "#999" }}>Manage to-dos</Text>
@@ -193,7 +194,7 @@ export default function DashboardScreen() {
             borderWidth: 1, borderColor: "#E8E6E1",
           }}
         >
-          <Text style={{ fontSize: 20 }}>📝</Text>
+          <Ionicons name="document-text-outline" size={20} color="#F97316" />
           <View>
             <Text style={{ fontSize: 13, fontWeight: "700", color: "#1C1F26" }}>Notes</Text>
             <Text style={{ fontSize: 10, color: "#999" }}>View & pin notes</Text>

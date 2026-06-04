@@ -6,6 +6,7 @@ import {
 import { router } from "expo-router"
 import * as SecureStore from "expo-secure-store"
 import { API_URL } from "@/lib/api"
+import { Ionicons } from "@expo/vector-icons"
 
 const STATUS_COLORS: Record<string, string> = { TODO: "#D97706", IN_PROGRESS: "#3B82F6", REVIEW: "#8B5CF6", DONE: "#16A34A" }
 const STATUS_LABELS: Record<string, string> = { TODO: "To Do", IN_PROGRESS: "In Progress", REVIEW: "Review", DONE: "Done" }
@@ -99,7 +100,7 @@ export default function TasksScreen() {
       >
         {filtered.length === 0 ? (
           <View style={{ alignItems: "center", paddingTop: 60 }}>
-            <Text style={{ fontSize: 40, marginBottom: 12 }}>✅</Text>
+            <Ionicons name="checkmark-circle-outline" size={40} color="#F97316" style={{ marginBottom: 12 }} />
             <Text style={{ fontSize: 16, fontWeight: "700", color: "#1C1F26" }}>No tasks</Text>
             <Text style={{ fontSize: 13, color: "#999", marginTop: 4 }}>Use the assistant to create tasks</Text>
           </View>
@@ -177,7 +178,7 @@ export default function TasksScreen() {
           shadowOpacity: 0.4, shadowRadius: 8, elevation: 8,
         }}
       >
-        <Text style={{ fontSize: 26 }}>🤖</Text>
+        <Ionicons name="hardware-chip-outline" size={26} color="white" />
       </TouchableOpacity>
     </SafeAreaView>
   )
