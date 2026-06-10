@@ -201,6 +201,23 @@ export default function DashboardScreen() {
           </View>
         </TouchableOpacity>
       </View>
+      </View>
+      {/* Time tracking link */}
+      <TouchableOpacity
+        onPress={() => router.push("/time")}
+        style={{
+          flexDirection: "row", alignItems: "center", gap: 10,
+          backgroundColor: "white", padding: 14, borderRadius: 12,
+          marginBottom: 16, borderWidth: 1, borderColor: "#E8E6E1",
+        }}
+      >
+        <Ionicons name="time-outline" size={20} color="#F97316" />
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 13, fontWeight: "700", color: "#1C1F26" }}>Time tracking</Text>
+          <Text style={{ fontSize: 10, color: "#999" }}>Log hours & approve timesheets</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
+      </TouchableOpacity>
 
       {/* KPI strip */}
       <View style={styles.kpiRow}>
