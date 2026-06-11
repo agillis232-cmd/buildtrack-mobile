@@ -6,7 +6,6 @@ import { API_URL } from "@/lib/api"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { Ionicons } from "@expo/vector-icons"
 
-
 export default function DashboardScreen() {
   const { user, signOut, token } = useAuth()
   const router = useRouter()
@@ -14,34 +13,28 @@ export default function DashboardScreen() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [customizing, setCustomizing] = useState(false)
-   const [selectedKPIs, setSelectedKPIs] = useState(
-    user?.role === "FIELD_WORKER" 
-      ? ["active", "completion"] 
+  const [selectedKPIs, setSelectedKPIs] = useState(
+    user?.role === "FIELD_WORKER"
+      ? ["active", "completion"]
       : ["active", "contracted", "completion"]
   )
 
-  useEffect(() => {
-    loadKPIPreferences()
-  }, [])
+  useEffect(() => { loadKPIPreferences() }, [])
 
   async function loadKPIPreferences() {
     try {
       const saved = await AsyncStorage.getItem("dashboard_kpis")
       if (saved) setSelectedKPIs(JSON.parse(saved))
-    } catch (e) {
-      console.log("Error loading KPI prefs:", e)
-    }
+    } catch (e) { console.log("Error loading KPI prefs:", e) }
   }
 
   async function saveKPIPreferences(kpis: string[]) {
     try {
       await AsyncStorage.setItem("dashboard_kpis", JSON.stringify(kpis))
-    } catch (e) {
-      console.log("Error saving KPI prefs:", e)
-    }
+    } catch (e) { console.log("Error saving KPI prefs:", e) }
   }
 
- const ALL_KPI_OPTIONS = [
+  const ALL_KPI_OPTIONS = [
     { key: "active", label: "Active Projects", description: "Number of active projects", color: "white" },
     ...(user?.role !== "FIELD_WORKER" ? [
       { key: "contracted", label: "Total Contracted", description: "Sum of all contract values", color: "#F97316" },
@@ -72,39 +65,23 @@ export default function DashboardScreen() {
   })
 
   useEffect(() => {
-    if (token) {
-      loadProjects()
-    } else {
-      setLoading(false)
-    }
+    if (token) { loadProjects() } else { setLoading(false) }
   }, [token])
 
   async function loadProjects() {
     try {
       const res = await fetch(`${API_URL}/api/mobile/projects`, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
+        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" }
       })
-      if (!res.ok) {
-        setLoading(false)
-        setRefreshing(false)
-        return
-      }
+      if (!res.ok) { setLoading(false); setRefreshing(false); return }
       const data = await res.json()
       setProjects(data.projects || [])
-    } catch (e) {
-      console.log("Error loading projects:", e)
-    }
+    } catch (e) { console.log("Error loading projects:", e) }
     setLoading(false)
     setRefreshing(false)
   }
 
-  function onRefresh() {
-    setRefreshing(true)
-    loadProjects()
-  }
+  function onRefresh() { setRefreshing(true); loadProjects() }
 
   const firstName = user?.name?.split(" ")[0] || "there"
   const hour = new Date().getHours()
@@ -148,16 +125,13 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Assistant button */}
       <TouchableOpacity
         onPress={() => router.push("/assistant")}
         style={{
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 10,
-          backgroundColor: "#1C1F26",
-          padding: 14,
-          borderRadius: 12,
-          marginBottom: 16,
+          flexDirection: "row", alignItems: "center", gap: 10,
+          backgroundColor: "#1C1F26", padding: 14, borderRadius: 12, marginBottom: 16,
         }}
       >
         <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "#F97316", alignItems: "center", justifyContent: "center" }}>
@@ -171,7 +145,7 @@ export default function DashboardScreen() {
       </TouchableOpacity>
 
       {/* Tasks & Notes quick links */}
-      <View style={{ flexDirection: "row", gap: 10, marginBottom: 16 }}>
+      <View style={{ flexDirection: "row", gap: 10, marginBottom: 10 }}>
         <TouchableOpacity
           onPress={() => router.push("/tasks")}
           style={{
@@ -201,7 +175,7 @@ export default function DashboardScreen() {
           </View>
         </TouchableOpacity>
       </View>
-      </View>
+
       {/* Time tracking link */}
       <TouchableOpacity
         onPress={() => router.push("/time")}
@@ -221,7 +195,7 @@ export default function DashboardScreen() {
 
       {/* KPI strip */}
       <View style={styles.kpiRow}>
-        {kpiTiles.map((tile, index) => (
+        {kpiTiles.map((tile) => (
           <TouchableOpacity
             key={tile.key}
             style={styles.kpiCard}
@@ -241,7 +215,6 @@ export default function DashboardScreen() {
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Customize Dashboard</Text>
             <Text style={styles.modalSub}>Choose 3 metrics to display</Text>
-
             {ALL_KPI_OPTIONS.map(option => {
               const isSelected = selectedKPIs.includes(option.key)
               const selectedIndex = selectedKPIs.indexOf(option.key)
@@ -279,7 +252,6 @@ export default function DashboardScreen() {
                 </TouchableOpacity>
               )
             })}
-
             <TouchableOpacity style={styles.modalDoneBtn} onPress={() => setCustomizing(false)}>
               <Text style={styles.modalDoneBtnText}>Done</Text>
             </TouchableOpacity>
@@ -297,10 +269,10 @@ export default function DashboardScreen() {
         )}
       </View>
       {projects.length === 0 ? (
-         <View style={styles.emptyCard}>
-            <Text style={styles.emptyTitle}>No projects yet</Text>
-            <Text style={styles.emptySub}>Tap + New to create your first project</Text>
-          </View>
+        <View style={styles.emptyCard}>
+          <Text style={styles.emptyTitle}>No projects yet</Text>
+          <Text style={styles.emptySub}>Tap + New to create your first project</Text>
+        </View>
       ) : (
         projects.map(project => (
           <TouchableOpacity
@@ -328,7 +300,6 @@ export default function DashboardScreen() {
                 </Text>
               </View>
             </View>
-
             <View style={styles.progressRow}>
               <View style={styles.progressBar}>
                 <View style={[styles.progressFill, {
@@ -338,8 +309,7 @@ export default function DashboardScreen() {
               </View>
               <Text style={styles.progressText}>{project.completionPct}%</Text>
             </View>
-
-          <View style={styles.projectStats}>
+            <View style={styles.projectStats}>
               {(user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER") && (
                 <View style={styles.statPill}>
                   <Text style={styles.statPillText}>Contract: ${(project.contractValue / 1000).toFixed(0)}k</Text>
@@ -355,6 +325,7 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         ))
       )}
+
       {/* Estimates */}
       {(user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER") && (
         <View style={styles.estimatesSection}>
@@ -436,12 +407,12 @@ const styles = StyleSheet.create({
   avatar: { width: 40, height: 40, borderRadius: 20 },
   avatarFallback: { width: 40, height: 40, borderRadius: 20, backgroundColor: "#F97316", justifyContent: "center", alignItems: "center" },
   avatarText: { fontSize: 14, fontWeight: "700", color: "white" },
- kpiRow: { flexDirection: "row", gap: 8, marginBottom: 24 },
+  kpiRow: { flexDirection: "row", gap: 8, marginBottom: 24 },
   kpiCard: { flex: 1, backgroundColor: "#1C1F26", borderRadius: 14, padding: 12, position: "relative", overflow: "hidden" },
   kpiCircle: { position: "absolute", top: -30, right: -30, width: 100, height: 100, borderRadius: 50, backgroundColor: "rgba(249,115,22,0.08)" },
   kpiLabel: { fontSize: 9, color: "rgba(255,255,255,0.4)", fontWeight: "600", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 },
   kpiValue: { fontSize: 20, fontWeight: "700", color: "white", letterSpacing: -0.5 },
- sectionTitle: { fontSize: 13, fontWeight: "700", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 },
+  sectionTitle: { fontSize: 13, fontWeight: "700", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 },
   projectCard: { backgroundColor: "white", borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: "#E8E6E1", shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 3 },
   projectTop: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 12 },
   projectDot: { width: 28, height: 28, borderRadius: 6 },
@@ -454,9 +425,7 @@ const styles = StyleSheet.create({
   progressFill: { height: "100%", borderRadius: 99 },
   progressText: { fontSize: 12, fontWeight: "700", color: "#6B7280", minWidth: 32, textAlign: "right" },
   projectStats: { flexDirection: "row", gap: 14 },
-  statItem: { fontSize: 12, color: "#6B7280", fontWeight: "500" },
   emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1" },
-  emptyEmoji: { fontSize: 40, marginBottom: 12 },
   emptyTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 6 },
   emptySub: { fontSize: 13, color: "#9CA3AF", textAlign: "center" },
   statPill: { backgroundColor: "#F3F4F6", borderRadius: 99, paddingHorizontal: 10, paddingVertical: 4 },
