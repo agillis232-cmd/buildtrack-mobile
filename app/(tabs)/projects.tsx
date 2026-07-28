@@ -59,7 +59,7 @@ export default function ScheduleScreen() {
   const [saving, setSaving] = useState(false)
   const [editingEvent, setEditingEvent] = useState<any>(null)
   const [activePicker, setActivePicker] = useState<"date" | "start" | "end" | null>(null)
-  const [viewMode, setViewMode] = useState<"week" | "day">("week")
+  const [viewMode, setViewMode] = useState<"week" | "day" | "gantt">("week")
   const [selectedDay, setSelectedDay] = useState(new Date())
   const [weekBase, setWeekBase] = useState(new Date())
 
@@ -250,6 +250,13 @@ export default function ScheduleScreen() {
             <View>
               <Text style={s.headerTitle}>Schedule</Text>
               <Text style={s.headerSub}>{events.length} events across {projectsInView.length} projects</Text>
+            <View style={{ flexDirection: "row", gap: 6, marginTop: 8 }}>
+                  {(["week", "gantt"] as const).map(mode => (
+                    <TouchableOpacity key={mode} onPress={() => setViewMode(mode)} style={{ paddingHorizontal: 12, paddingVertical: 5, borderRadius: 99, backgroundColor: viewMode === mode ? "#F97316" : "rgba(255,255,255,0.1)", borderWidth: 1, borderColor: viewMode === mode ? "#F97316" : "rgba(255,255,255,0.15)" }}>
+                      <Text style={{ fontSize: 11, fontWeight: "600", color: viewMode === mode ? "white" : "rgba(255,255,255,0.5)" }}>{mode === "week" ? "Calendar" : "Gantt"}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
             </View>
             <View style={s.headerActions}>
               {calendarConnected ? (
@@ -269,7 +276,9 @@ export default function ScheduleScreen() {
               )}
             </View>
           </View>
-
+          {viewMode !== "gantt" ? (
+            <></>
+         
           {/* Week Navigation */}
           <View style={s.weekNav}>
             <TouchableOpacity onPress={() => shiftWeek(-1)} style={s.weekArrow}>
@@ -520,7 +529,10 @@ export default function ScheduleScreen() {
             </View>
           </View>
         </Modal>
+        
       )}
+      
+     </ScrollView>
 
       {/* FAB */}
       {!adding && (
@@ -532,92 +544,6 @@ export default function ScheduleScreen() {
     </View>
   )
 }
-
-const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
-  scrollContent: { paddingBottom: 120 },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-
-  // Header
-  header: { backgroundColor: "#1C1F26", paddingTop: 60, paddingBottom: 8, paddingHorizontal: 20, position: "relative", overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -60, right: -60, width: 220, height: 220, borderRadius: 110, backgroundColor: "rgba(249,115,22,0.08)" },
-  headerTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 },
-  headerTitle: { fontSize: 24, fontWeight: "700", color: "white", letterSpacing: -0.5 },
-  headerSub: { fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 2 },
-  headerActions: { flexDirection: "row", gap: 8 },
-  syncChip: { flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "#4285F4", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 },
-  connectChip: { flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "rgba(255,255,255,0.1)", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: "rgba(255,255,255,0.2)" },
-  syncChipText: { color: "white", fontSize: 12, fontWeight: "600" },
-
-  // Week nav
-  weekNav: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
-  weekArrow: { padding: 4 },
-  weekLabel: { fontSize: 13, fontWeight: "600", color: "rgba(255,255,255,0.7)" },
-
-  // Week strip
-  weekStrip: { flexDirection: "row", gap: 4, marginBottom: 12 },
-  dayCell: { flex: 1, alignItems: "center", paddingVertical: 8, borderRadius: 10, backgroundColor: "rgba(255,255,255,0.05)" },
-  dayCellSelected: { backgroundColor: "#F97316" },
-  dayCellToday: { backgroundColor: "rgba(249,115,22,0.2)" },
-  dayName: { fontSize: 10, fontWeight: "600", color: "rgba(255,255,255,0.4)", marginBottom: 4 },
-  dayNameSelected: { color: "rgba(255,255,255,0.8)" },
-  dayNum: { fontSize: 16, fontWeight: "700", color: "rgba(255,255,255,0.7)", marginBottom: 4 },
-  dayNumSelected: { color: "white" },
-  dayNumToday: { color: "#F97316" },
-  dotRow: { flexDirection: "row", gap: 2, height: 6, alignItems: "center" },
-  dot: { width: 5, height: 5, borderRadius: 3 },
-  dotMore: { fontSize: 8, color: "rgba(255,255,255,0.4)", fontWeight: "700" },
-
-  // Day header
-  dayHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12 },
-  dayHeaderText: { fontSize: 16, fontWeight: "700", color: "#1C1F26" },
-  dayHeaderCount: { fontSize: 12, color: "#9CA3AF", fontWeight: "600" },
-
-  // Empty day
-  emptyDay: { alignItems: "center", paddingTop: 40, paddingBottom: 20 },
-  emptyDayTitle: { fontSize: 16, fontWeight: "700", color: "#9CA3AF", marginTop: 12 },
-  emptyDaySub: { fontSize: 13, color: "#D1D5DB", marginTop: 4 },
-
-  // Event card
-  eventCard: { backgroundColor: "white", borderRadius: 12, marginHorizontal: 20, marginBottom: 10, borderWidth: 1, borderColor: "#E8E6E1", borderLeftWidth: 4, overflow: "hidden" },
-  eventRow: { flexDirection: "row", padding: 14, gap: 12 },
-  eventIconBox: { width: 38, height: 38, borderRadius: 10, alignItems: "center", justifyContent: "center" },
-  eventContent: { flex: 1 },
-  eventTopRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 },
-  eventTitle: { fontSize: 15, fontWeight: "700", color: "#1C1F26", flex: 1, marginRight: 8 },
-  eventTime: { fontSize: 12, color: "#6B7280", fontWeight: "600", backgroundColor: "#F3F4F6", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 99 },
-  eventProjectRow: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 2 },
-  eventProject: { fontSize: 12, color: "#F97316", fontWeight: "600" },
-  eventLocation: { fontSize: 12, color: "#6B7280" },
-  eventNotes: { fontSize: 12, color: "#9CA3AF", marginTop: 4 },
-
-  // Event actions
-  eventActions: { flexDirection: "row", borderTopWidth: 1, borderTopColor: "#F3F4F6" },
-  actionBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4, paddingVertical: 10 },
-  actionBtnText: { fontSize: 12, fontWeight: "600", color: "#374151" },
-  actionBtnDanger: { borderLeftWidth: 1, borderLeftColor: "#F3F4F6" },
-
-  // Add card
-  addCard: { backgroundColor: "white", borderRadius: 14, padding: 16, marginHorizontal: 20, marginBottom: 20, borderWidth: 1, borderColor: "#E8E6E1" },
-  addHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
-  addTitle: { fontSize: 17, fontWeight: "700", color: "#1C1F26" },
-  field: { marginBottom: 14 },
-  label: { fontSize: 13, fontWeight: "600", color: "#374151", marginBottom: 6 },
-  input: { backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, fontSize: 15, color: "#1A1A1A", borderWidth: 1, borderColor: "#E8E6E1" },
-  pickerBtn: { backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, borderWidth: 1, borderColor: "#E8E6E1", flexDirection: "row", alignItems: "center", gap: 8 },
-  pickerBtnText: { fontSize: 15, color: "#1A1A1A", fontWeight: "500" },
-  timeRow: { flexDirection: "row", gap: 10 },
-  typeRow: { flexDirection: "row", gap: 8, paddingBottom: 4 },
-  typeBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 99, backgroundColor: "#F3F4F6", borderWidth: 1, borderColor: "#E8E6E1" },
-  typeBtnActive: { backgroundColor: "#1C1F26", borderColor: "#1C1F26" },
-  typeBtnText: { fontSize: 12, color: "#6B7280", fontWeight: "600" },
-  typeBtnTextActive: { color: "white" },
-  btnRow: { flexDirection: "row", gap: 10, marginTop: 8 },
-  cancelBtn: { flex: 1, backgroundColor: "#F3F4F6", borderRadius: 10, padding: 13, alignItems: "center" },
-  cancelText: { fontSize: 15, fontWeight: "600", color: "#6B7280" },
-  saveBtn: { flex: 1, backgroundColor: "#F97316", borderRadius: 10, padding: 13, alignItems: "center" },
-  saveBtnText: { color: "white", fontSize: 15, fontWeight: "700" },
-
   // Modal
   modalOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.4)" },
   modalCard: { backgroundColor: "white", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, paddingBottom: 40 },

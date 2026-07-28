@@ -61,6 +61,29 @@ export default function ProjectDetailScreen() {
   if (!project) return <View style={styles.center}><Text style={styles.errorText}>Project not found</Text></View>
 
   const isAdmin = user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER"
+async function deleteProject() {
+    Alert.alert("Delete Project", "Are you sure? This will permanently delete this project and all its data.", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete", style: "destructive", onPress: async () => {
+          try {
+            const res = await fetch(`${API_URL}/api/mobile/projects/${id}`, {
+              method: "DELETE",
+              headers: { "Authorization": `Bearer ${token}` }
+            })
+            const data = await res.json()
+            if (data.success) {
+              router.replace("/(tabs)")
+            } else {
+              Alert.alert("Error", data.error || "Could not delete project")
+            }
+          } catch (e) {
+            Alert.alert("Error", "Connection error")
+          }
+        }
+      }
+    ])
+  }
 
   const sections = [
     { label: "Expenses", sub: "Scan receipts & track costs", route: `/project/${id}/expenses`, color: "#8B5CF6" },
@@ -153,6 +176,13 @@ export default function ProjectDetailScreen() {
             <Text style={styles.arrow}>›</Text>
           </TouchableOpacity>
         ))}
+
+          {/* Delete project */}
+          {isAdmin && (
+            <TouchableOpacity onPress={deleteProject} style={{ marginHorizontal: 16, marginTop: 20, marginBottom: 30, padding: 14, borderRadius: 12, backgroundColor: "#FEE2E2", borderWidth: 1, borderColor: "#FECACA", alignItems: "center" }}>
+              <Text style={{ fontSize: 14, fontWeight: "600", color: "#DC2626" }}>Delete project</Text>
+            </TouchableOpacity>
+          )}
       </ScrollView>
 
       {/* Floating Assistant Button */}
