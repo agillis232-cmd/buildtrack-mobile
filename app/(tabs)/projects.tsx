@@ -275,6 +275,7 @@ export default function ScheduleScreen() {
           </View>
         </View>
 
+        <View style={{ backgroundColor: "#1C1F26", marginTop: -1, paddingTop: 8, paddingBottom: 16, borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }}>
         {viewMode !== "gantt" ? (
           <>
             {/* Week Navigation */}
@@ -456,6 +457,7 @@ export default function ScheduleScreen() {
             })()}
           </View>
         )}
+        </View>
 
         {/* Add/Edit Form */}
         {adding && (
