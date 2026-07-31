@@ -356,6 +356,7 @@ export default function ScheduleScreen() {
                         {event.notes && <Text style={s.eventNotes}>{event.notes}</Text>}
                       </View>
                     </View>
+                    {user?.role !== "CLIENT" && (
                     <View style={s.eventActions}>
                       {!event.completed && (
                         <TouchableOpacity style={s.actionBtn} onPress={() => completeEvent(event.id)}>
@@ -383,6 +384,7 @@ export default function ScheduleScreen() {
                         <Text style={[s.actionBtnText, { color: "#DC2626" }]}>Delete</Text>
                       </TouchableOpacity>
                     </View>
+                    )}
                   </View>
                 )
               })
@@ -602,7 +604,7 @@ export default function ScheduleScreen() {
       </ScrollView>
 
       {/* FAB */}
-      {!adding && (
+      {!adding && user?.role !== "CLIENT" && (
         <TouchableOpacity style={s.fab} onPress={() => { setSelectedDate(selectedDay); setAdding(true) }}>
           <Ionicons name="add" size={24} color="white" />
           <Text style={s.fabText}>Add Event</Text>
