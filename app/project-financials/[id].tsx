@@ -111,13 +111,18 @@ export default function ProjectFinancialsScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Receivables (Client Payments)</Text>
-        <View style={styles.card}>
-          <FinancialRow label="Total Scheduled" value={financials.totalScheduled} />
-          <FinancialRow label="Received" value={financials.totalReceived} positive />
-          <FinancialRow label="Outstanding" value={financials.totalScheduled - financials.totalReceived} warning={financials.totalScheduled - financials.totalReceived > 0} />
-          <FinancialRow label="Remaining to Invoice" value={financials.remainingToInvoice} />
-        </View>
+      <Text style={styles.sectionTitle}>Receivables (Client Payments)</Text>
+          <View style={styles.card}>
+            <FinancialRow label="Invoiced" value={financials.invoicesSent} />
+            <FinancialRow label="Invoice Payments" value={financials.invoicesReceived} positive />
+            <FinancialRow label="Invoice Outstanding" value={financials.invoicesOutstanding} warning={financials.invoicesOutstanding > 0} />
+            <View style={{ height: 1, backgroundColor: "#E8E6E1", marginVertical: 8 }} />
+            <FinancialRow label="Draws Scheduled" value={financials.totalScheduled} />
+            <FinancialRow label="Draws Received" value={financials.drawsReceived} positive />
+            <View style={{ height: 1, backgroundColor: "#E8E6E1", marginVertical: 8 }} />
+            <FinancialRow label="Total Received" value={financials.totalReceived} positive />
+            <FinancialRow label="Remaining to Invoice" value={financials.remainingToInvoice} />
+          </View>
       </View>
 
       <View style={styles.section}>

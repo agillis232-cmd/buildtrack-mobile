@@ -86,12 +86,12 @@ async function deleteProject() {
   }
 
   const sections = [
-    { label: "Expenses", sub: "Scan receipts & track costs", route: `/project/${id}/expenses`, color: "#8B5CF6" },
-    { label: "Photos", sub: "Upload job site photos", route: `/project/${id}/photos`, color: "#3B82F6" },
-    { label: "Daily Logs", sub: "View & add daily reports", route: `/project/${id}/logs`, color: "#16A34A" },
-    { label: "Documents", sub: "Contracts, plans & permits", route: `/project/${id}/documents`, color: "#F59E0B" },
-    ...(isAdmin ? [{ label: "Job Financials", sub: "Revenue, expenses & profit", route: `/project-financials/${id}`, color: "#16A34A" }] : []),
-    { label: "Messages", sub: "Notes & communication", route: `/project/${id}/messages`, color: "#EC4899" },
+    { label: "Expenses", sub: "Scan receipts & track costs", route: `/project/${id}/expenses`, icon: "receipt-outline" },
+    { label: "Photos", sub: "Upload job site photos", route: `/project/${id}/photos`, icon: "camera-outline" },
+    { label: "Daily Logs", sub: "View & add daily reports", route: `/project/${id}/logs`, icon: "document-text-outline" },
+    { label: "Documents", sub: "Contracts, plans & permits", route: `/project/${id}/documents`, icon: "folder-outline" },
+    ...(isAdmin ? [{ label: "Job Financials", sub: "Revenue, expenses & profit", route: `/project-financials/${id}`, icon: "stats-chart-outline" }] : []),
+    { label: "Messages", sub: "Notes & communication", route: `/project/${id}/messages`, icon: "chatbubble-outline" },
   ]
 
   const statusColor = project.status === "ACTIVE" ? "#16A34A" : project.status === "PRE_CONSTRUCTION" ? "#D97706" : project.status === "ON_HOLD" ? "#DC2626" : "#6B7280"
@@ -159,24 +159,28 @@ async function deleteProject() {
 
         <Text style={styles.sectionTitle}>Project Actions</Text>
 
-        {sections.map((section) => (
-          <TouchableOpacity
-            key={section.route}
-            style={styles.sectionCard}
-            onPress={() => router.push(section.route as any)}
-            activeOpacity={0.8}
-          >
-            <View style={[styles.sectionIconBox, { backgroundColor: section.color + "15" }]}>
-              <View style={[styles.sectionIconDot, { backgroundColor: section.color }]} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.sectionLabel}>{section.label}</Text>
-              <Text style={styles.sectionSub}>{section.sub}</Text>
-            </View>
-            <Text style={styles.arrow}>›</Text>
-          </TouchableOpacity>
-        ))}
+<View style={{ marginHorizontal: 16, borderRadius: 14, overflow: "hidden", borderWidth: 1, borderColor: "#E8E6E1", marginBottom: 20 }}>
 
+</View>
+        <View style={{ marginHorizontal: 16, borderRadius: 14, overflow: "hidden", borderWidth: 1, borderColor: "#E8E6E1", marginBottom: 20 }}>
+          {sections.map((section) => (
+            <TouchableOpacity
+              key={section.route}
+              style={styles.sectionCard}
+              onPress={() => router.push(section.route as any)}
+              activeOpacity={0.7}
+            >
+              <View style={styles.sectionIconBox}>
+                <Ionicons name={section.icon as any} size={20} color="#6B7280" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.sectionLabel}>{section.label}</Text>
+                <Text style={styles.sectionSub}>{section.sub}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
+            </TouchableOpacity>
+          ))}
+        </View>
           {/* Delete project */}
           {isAdmin && (
             <TouchableOpacity onPress={deleteProject} style={{ marginHorizontal: 16, marginTop: 20, marginBottom: 30, padding: 14, borderRadius: 12, backgroundColor: "#FEE2E2", borderWidth: 1, borderColor: "#FECACA", alignItems: "center" }}>
@@ -284,12 +288,11 @@ const styles = StyleSheet.create({
   statValue: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 2 },
   statLabel: { fontSize: 9, color: "#9CA3AF", textTransform: "uppercase", fontWeight: "600", textAlign: "center" },
   sectionTitle: { fontSize: 13, fontWeight: "700", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12, paddingHorizontal: 16 },
-  sectionCard: { backgroundColor: "white", borderRadius: 14, padding: 16, marginHorizontal: 16, marginBottom: 10, flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1", gap: 14 },
-  sectionIconBox: { width: 42, height: 42, borderRadius: 12, justifyContent: "center", alignItems: "center" },
-  sectionIconDot: { width: 14, height: 14, borderRadius: 4 },
+ sectionCard: { backgroundColor: "white", paddingVertical: 14, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", gap: 14, borderBottomWidth: 1, borderBottomColor: "#F3F4F6" },
+  sectionIconBox: { width: 36, height: 36, borderRadius: 10, backgroundColor: "#F3F4F6", justifyContent: "center", alignItems: "center" },
   sectionLabel: { fontSize: 15, fontWeight: "700", color: "#1A1A1A", marginBottom: 2 },
   sectionSub: { fontSize: 12, color: "#9CA3AF" },
-  arrow: { fontSize: 20, color: "#D1D5DB", fontWeight: "300" },
+  arrow: { color: "#D1D5DB" },
   modalOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" },
   modalCard: { backgroundColor: "white", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, paddingBottom: 40 },
   modalTitle: { fontSize: 18, fontWeight: "700", color: "#1A1A1A", marginBottom: 20 },
