@@ -204,7 +204,8 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", gap: 12 },
   categoryList: {
     marginTop: 8, borderRadius: 10, borderWidth: 1, borderColor: "#E8E6E1",
-    backgroundColor: "white", overflow: "hidden",
+    backgroundColor: "white", overflow: "hidden", zIndex: 10, position: "relative",
+    marginBottom: 60,
   },
   categoryItem: {
     flexDirection: "row", alignItems: "center", gap: 10, padding: 12,

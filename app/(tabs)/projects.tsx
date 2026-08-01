@@ -6,13 +6,14 @@ import DateTimePicker from "@react-native-community/datetimepicker"
 import { Linking } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
-const EVENT_TYPES = ["MEETING", "INSPECTION", "DELIVERY", "ORDER", "OTHER"]
+const EVENT_TYPES = ["MEETING", "INSPECTION", "DELIVERY", "ORDER", "WORK", "OTHER"]
 const SCREEN_WIDTH = Dimensions.get("window").width
 const EVENT_COLORS: Record<string, string> = {
   MEETING: "#3B82F6",
   INSPECTION: "#F97316",
   DELIVERY: "#16A34A",
   ORDER: "#8B5CF6",
+  WORK: "#D97706",
   MILESTONE: "#EC4899",
   DEADLINE: "#DC2626",
   OTHER: "#6B7280",
@@ -22,6 +23,7 @@ const EVENT_ICONS: Record<string, string> = {
   INSPECTION: "search-outline",
   DELIVERY: "cube-outline",
   ORDER: "cart-outline",
+  WORK: "hammer-outline",
   MILESTONE: "flag-outline",
   DEADLINE: "alarm-outline",
   OTHER: "ellipse-outline",
