@@ -38,8 +38,8 @@ export default function AssistantScreen() {
       const token = await SecureStore.getItemAsync("auth_token")
       if (!token) return
       const url = projectId
-        ? `${API}/api/assistant/threads?projectId=${projectId}`
-        : `${API}/api/assistant/threads`
+        ? `${API}/api/mobile/assistant/threads?projectId=${projectId}`
+        : `${API}/api/mobile/assistant/threads`
       const res = await fetch(url, {
         headers: { "Authorization": `Bearer ${token}` }
       })
