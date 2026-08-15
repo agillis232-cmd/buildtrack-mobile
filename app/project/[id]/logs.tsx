@@ -68,7 +68,7 @@ export default function LogsScreen() {
 
   function startEdit(log: any) {
     setEditingLog(log)
-    setDate(new Date(log.date).toISOString().split("T")[0])
+    setDate(log.date.split("T")[0])
     setSummary(log.summary || "")
     setCrew(log.crew || "")
     setHours(String(log.hoursWorked || 8))
@@ -354,7 +354,7 @@ export default function LogsScreen() {
               <View style={s.logTop}>
                 <View style={{ flex: 1 }}>
                   <Text style={s.logDate}>
-                    {new Date(log.date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                    {new Date(log.date.split("T")[0] + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
                   </Text>
                   <Text style={s.logMeta}>
                     {log.weather} · {log.hoursWorked}h · {log.crew}
@@ -407,7 +407,7 @@ export default function LogsScreen() {
                     <View>
                       <Text style={s.modalTitle}>Daily report</Text>
                       <Text style={{ fontSize: 12, color: "#9CA3AF" }}>
-                        {new Date(viewingLog.date).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+                        {new Date(viewingLog.date.split("T")[0] + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
                       </Text>
                     </View>
                     <TouchableOpacity onPress={() => setViewingLog(null)}>
