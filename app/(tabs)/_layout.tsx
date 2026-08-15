@@ -1,9 +1,12 @@
 import { Tabs } from "expo-router"
 import { View, Text, Image } from "react-native"
+import OfflineBanner from "../../components/OfflineBanner"
 
 export default function TabsLayout() {
   return (
-    <Tabs
+    <View style={{ flex: 1 }}>
+      <OfflineBanner />
+      <Tabs
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
@@ -151,5 +154,6 @@ export default function TabsLayout() {
         }}
       />
     </Tabs>
+    </View>
   )
 }
