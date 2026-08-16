@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router"
 import { View, Text, Image } from "react-native"
-import OfflineBanner from "../../components/OfflineBanner"
+import OfflineBanner from "../components/OfflineBanner"
 
 export default function TabsLayout() {
   return (
