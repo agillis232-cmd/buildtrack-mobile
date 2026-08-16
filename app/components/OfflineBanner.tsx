@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { View, Text, TouchableOpacity, Animated } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
-import { isOnline, onNetworkChange, getQueueCount, syncQueue } from "../lib/offline"
+import { isOnline, onNetworkChange, getQueueCount, syncQueue } from "../../lib/offline"
 
 export default function OfflineBanner() {
   const [online, setOnline] = useState(true)
