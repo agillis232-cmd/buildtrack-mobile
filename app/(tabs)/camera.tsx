@@ -135,7 +135,7 @@ export default function QuickActionsScreen() {
       Alert.alert("Permission needed", "Please allow camera access")
       return
     }
-    const result = await ImagePicker.launchCameraAsync({ base64: true, quality: 0.8 })
+    const result = await ImagePicker.launchCameraAsync({ base64: true, quality: 0.6, maxWidth: 1920, maxHeight: 1920 })
     if (result.canceled) return
 
     setUploading(true)
@@ -166,7 +166,7 @@ export default function QuickActionsScreen() {
       Alert.alert("Permission needed", "Please allow camera access")
       return
     }
-    const result = await ImagePicker.launchCameraAsync({ base64: true, quality: 0.8 })
+    const result = await ImagePicker.launchCameraAsync({ base64: true, quality: 0.6, maxWidth: 1920, maxHeight: 1920 })
     if (result.canceled) return
 
     setScanning(true)
@@ -362,3 +362,4 @@ const styles = StyleSheet.create({
   cancelBtn: { backgroundColor: "#F3F4F6", borderRadius: 12, padding: 14, alignItems: "center", marginTop: 8 },
   cancelBtnText: { fontSize: 15, fontWeight: "600", color: "#6B7280" },
 })
+
