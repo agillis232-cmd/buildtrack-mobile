@@ -90,6 +90,7 @@ async function deleteProject() {
     { label: "Photos", sub: "Upload job site photos", route: `/project/${id}/photos`, icon: "camera-outline" },
     { label: "Daily Logs", sub: "View & add daily reports", route: `/project/${id}/logs`, icon: "document-text-outline" },
     { label: "Documents", sub: "Contracts, plans & permits", route: `/project/${id}/documents`, icon: "folder-outline" },
+    { label: "Spec Book", sub: "Materials, finishes & fixtures", route: `/project/${id}/spec-book`, icon: "book-outline" },
     ...(isAdmin ? [{ label: "Job Financials", sub: "Revenue, expenses & profit", route: `/project-financials/${id}`, icon: "stats-chart-outline" }] : []),
     { label: "Messages", sub: "Notes & communication", route: `/project/${id}/messages`, icon: "chatbubble-outline" },
   ]
