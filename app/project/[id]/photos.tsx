@@ -1,4 +1,3 @@
-@'
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Image, Dimensions } from "react-native"
 import { useEffect, useState, useCallback } from "react"
@@ -332,4 +331,3 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 })
-'@ | Set-Content -LiteralPath "C:\Users\agill\buildtrack-mobile\app\project\[id]\photos.tsx"
