@@ -29,7 +29,7 @@ export default function SpecBookScreen() {
 
   async function loadSpecBook() {
     try {
-      const res = await fetch(`${API_URL}/api/projects/${id}/spec-book`, {
+      const res = await fetch(`${API_URL}/api/mobile/projects/${id}/spec-book`, {
         headers: { "Authorization": `Bearer ${token}` }
       })
       const data = await res.json()
@@ -233,3 +233,4 @@ const styles = StyleSheet.create({
   notesBox: { width: "100%", backgroundColor: "#FAFAF9", borderRadius: 6, padding: 8, marginTop: 4 },
   notesText: { fontSize: 12, color: "#374151", lineHeight: 18, marginTop: 2 },
 })
+
