@@ -135,15 +135,35 @@ export default function QuickActionsScreen() {
       Alert.alert("Permission needed", "Please allow camera access")
       return
     }
-    const result = await ImagePicker.launchCameraAsync({ base64: true, quality: 0.6, maxWidth: 1920, maxHeight: 1920 })
-    if (result.canceled) return
+    const result = await ImagePicker.launchCameraAsync({ quality: 0.6, maxWidth: 1920, maxHeight: 1920 })
+    if (result.canceled || !result.assets?.length) return
 
     setUploading(true)
     try {
+      const signRes = await fetch(`${API_URL}/api/mobile/cloudinary-sign`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ folder: `buildtrack/projects/${project.id}` }),
+      })
+      const { signature, timestamp, apiKey, cloudName, folder } = await signRes.json()
+
+      const formData = new FormData()
+      formData.append("file", { uri: result.assets[0].uri, type: "image/jpeg", name: "photo.jpg" } as any)
+      formData.append("signature", signature)
+      formData.append("timestamp", String(timestamp))
+      formData.append("api_key", apiKey)
+      formData.append("folder", folder)
+
+      const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: "POST",
+        body: formData,
+      })
+      const cloudData = await uploadRes.json()
+
       const res = await fetch(`${API_URL}/api/mobile/projects/${project.id}/photos`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ image: result.assets[0].base64 })
+        body: JSON.stringify({ cloudinaryUrl: cloudData.secure_url, publicId: cloudData.public_id }),
       })
       const data = await res.json()
       if (data.photo) {
@@ -159,7 +179,6 @@ export default function QuickActionsScreen() {
     }
     setUploading(false)
   }
-
   async function scanReceipt() {
     const permission = await ImagePicker.requestCameraPermissionsAsync()
     if (!permission.granted) {
@@ -362,4 +381,5 @@ const styles = StyleSheet.create({
   cancelBtn: { backgroundColor: "#F3F4F6", borderRadius: 12, padding: 14, alignItems: "center", marginTop: 8 },
   cancelBtnText: { fontSize: 15, fontWeight: "600", color: "#6B7280" },
 })
+
 
