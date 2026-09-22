@@ -326,69 +326,65 @@ export default function DashboardScreen() {
         ))
       )}
 
-      {/* Estimates */}
+
+      {/* Business Tiles */}
       {(user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER") && (
-        <View style={styles.estimatesSection}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Estimates</Text>
-            <TouchableOpacity onPress={() => router.push("/new-estimate" as any)} style={styles.newProjectBtn}>
-              <Text style={styles.newProjectBtnText}>+ New</Text>
+        <View style={{ marginBottom: 24 }}>
+          <Text style={{ fontSize: 13, fontWeight: "700", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>Business</Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+
+            <TouchableOpacity onPress={() => router.push("/vendor-invoices" as any)} style={{ width: "48.5%", backgroundColor: "white", borderRadius: 14, padding: 16, borderWidth: 1, borderColor: "#E8E6E1" }}>
+              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "rgba(220,38,38,0.1)", justifyContent: "center", alignItems: "center", marginBottom: 10 }}>
+                <Ionicons name="receipt-outline" size={18} color="#DC2626" />
+              </View>
+              <Text style={{ fontSize: 14, fontWeight: "700", color: "#1C1F26", marginBottom: 2 }}>Vendor Invoices</Text>
+              <Text style={{ fontSize: 11, color: "#9CA3AF" }}>Bills & payments</Text>
             </TouchableOpacity>
-          </View>
-          <TouchableOpacity style={styles.estimatesCard} onPress={() => router.push("/estimates" as any)}>
-            <Text style={styles.estimatesCardText}>View & manage all estimates →</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-      {(user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER") && (
-        <View style={styles.estimatesSection}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Invoices</Text>
-            <TouchableOpacity onPress={() => router.push("/invoices" as any)} style={styles.newProjectBtn}>
-              <Text style={styles.newProjectBtnText}>View All</Text>
+
+            <TouchableOpacity onPress={() => router.push("/financials" as any)} style={{ width: "48.5%", backgroundColor: "white", borderRadius: 14, padding: 16, borderWidth: 1, borderColor: "#E8E6E1" }}>
+              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "rgba(22,163,74,0.1)", justifyContent: "center", alignItems: "center", marginBottom: 10 }}>
+                <Ionicons name="trending-up-outline" size={18} color="#16A34A" />
+              </View>
+              <Text style={{ fontSize: 14, fontWeight: "700", color: "#1C1F26", marginBottom: 2 }}>Financials</Text>
+              <Text style={{ fontSize: 11, color: "#9CA3AF" }}>P&L & cash flow</Text>
             </TouchableOpacity>
-          </View>
-          <TouchableOpacity style={styles.estimatesCard} onPress={() => router.push("/invoices" as any)}>
-            <Text style={styles.estimatesCardText}>Track client payments & invoices →</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-      {(user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER") && (
-        <View style={styles.estimatesSection}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Vendor Invoices</Text>
-            <TouchableOpacity onPress={() => router.push("/vendor-invoices" as any)} style={styles.newProjectBtn}>
-              <Text style={styles.newProjectBtnText}>View All</Text>
+
+            <TouchableOpacity onPress={() => router.push("/rfis" as any)} style={{ width: "48.5%", backgroundColor: "white", borderRadius: 14, padding: 16, borderWidth: 1, borderColor: "#E8E6E1" }}>
+              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "rgba(59,130,246,0.1)", justifyContent: "center", alignItems: "center", marginBottom: 10 }}>
+                <Ionicons name="help-circle-outline" size={18} color="#3B82F6" />
+              </View>
+              <Text style={{ fontSize: 14, fontWeight: "700", color: "#1C1F26", marginBottom: 2 }}>RFIs</Text>
+              <Text style={{ fontSize: 11, color: "#9CA3AF" }}>Questions & answers</Text>
             </TouchableOpacity>
-          </View>
-          <TouchableOpacity style={styles.estimatesCard} onPress={() => router.push("/vendor-invoices" as any)}>
-            <Text style={styles.estimatesCardText}>Track incoming invoices & lien waivers →</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-      {(user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER") && (
-        <View style={styles.estimatesSection}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Company Financials</Text>
-          </View>
-          <TouchableOpacity style={styles.estimatesCard} onPress={() => router.push("/financials" as any)}>
-            <Text style={styles.estimatesCardText}>View company financial health →</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-      {(user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER" || user?.role === "ARCHITECT") && (
-        <View style={styles.estimatesSection}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>RFIs</Text>
-            <TouchableOpacity onPress={() => router.push("/rfis" as any)} style={styles.newProjectBtn}>
-              <Text style={styles.newProjectBtnText}>View All</Text>
+
+            <TouchableOpacity onPress={() => router.push("/estimates" as any)} style={{ width: "48.5%", backgroundColor: "white", borderRadius: 14, padding: 16, borderWidth: 1, borderColor: "#E8E6E1" }}>
+              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "rgba(249,115,22,0.1)", justifyContent: "center", alignItems: "center", marginBottom: 10 }}>
+                <Ionicons name="calculator-outline" size={18} color="#F97316" />
+              </View>
+              <Text style={{ fontSize: 14, fontWeight: "700", color: "#1C1F26", marginBottom: 2 }}>Estimates</Text>
+              <Text style={{ fontSize: 11, color: "#9CA3AF" }}>Bids & proposals</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => router.push("/invoices" as any)} style={{ width: "48.5%", backgroundColor: "white", borderRadius: 14, padding: 16, borderWidth: 1, borderColor: "#E8E6E1" }}>
+              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "rgba(124,58,237,0.1)", justifyContent: "center", alignItems: "center", marginBottom: 10 }}>
+                <Ionicons name="document-text-outline" size={18} color="#7C3AED" />
+              </View>
+              <Text style={{ fontSize: 14, fontWeight: "700", color: "#1C1F26", marginBottom: 2 }}>Invoices</Text>
+              <Text style={{ fontSize: 11, color: "#9CA3AF" }}>Billing & payments</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => router.push("/team" as any)} style={{ width: "48.5%", backgroundColor: "white", borderRadius: 14, padding: 16, borderWidth: 1, borderColor: "#E8E6E1" }}>
+              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "rgba(28,31,38,0.08)", justifyContent: "center", alignItems: "center", marginBottom: 10 }}>
+                <Ionicons name="people-outline" size={18} color="#1C1F26" />
+              </View>
+              <Text style={{ fontSize: 14, fontWeight: "700", color: "#1C1F26", marginBottom: 2 }}>Team</Text>
+              <Text style={{ fontSize: 11, color: "#9CA3AF" }}>Users & subs</Text>
+            </TouchableOpacity>
+
           </View>
-          <TouchableOpacity style={styles.estimatesCard} onPress={() => router.push("/rfis" as any)}>
-            <Text style={styles.estimatesCardText}>Requests for information →</Text>
-          </TouchableOpacity>
         </View>
       )}
+
     </ScrollView>
   )
 }
