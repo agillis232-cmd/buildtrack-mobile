@@ -208,6 +208,95 @@ export default function QuickActionsScreen() {
     setScanning(false)
   }
 
+  const [scanningOverhead, setScanningOverhead] = useState(false)
+  const [overheadScanned, setOverheadScanned] = useState<any>(null)
+  const [showOverheadModal, setShowOverheadModal] = useState(false)
+  const [overheadCategories, setOverheadCategories] = useState<any[]>([])
+  const [selectedOverheadCat, setSelectedOverheadCat] = useState("")
+  const [savingOverhead, setSavingOverhead] = useState(false)
+
+  async function scanOverheadReceipt() {
+    const permission = await ImagePicker.requestCameraPermissionsAsync()
+    if (!permission.granted) { Alert.alert("Permission needed", "Please allow camera access"); return }
+    const result = await ImagePicker.launchCameraAsync({ quality: 0.6, maxWidth: 1920, maxHeight: 1920 })
+    if (result.canceled || !result.assets?.length) return
+
+    setScanningOverhead(true)
+    try {
+      // Upload to Cloudinary first
+      const signRes = await fetch(`${API_URL}/api/mobile/cloudinary-sign`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ folder: "buildtrack/overhead-receipts" }),
+      })
+      const { signature, timestamp, apiKey, cloudName, folder } = await signRes.json()
+
+      const formData = new FormData()
+      formData.append("file", { uri: result.assets[0].uri, type: "image/jpeg", name: "receipt.jpg" } as any)
+      formData.append("signature", signature)
+      formData.append("timestamp", String(timestamp))
+      formData.append("api_key", apiKey)
+      formData.append("folder", folder)
+
+      const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: "POST", body: formData })
+      const cloudData = await uploadRes.json()
+
+      // Scan with AI
+      const scanRes = await fetch(`${API_URL}/api/mobile/overhead`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ scanReceipt: true, receiptUrl: cloudData.secure_url }),
+      })
+      const scanData = await scanRes.json()
+
+      if (scanData.scanned) {
+        setOverheadScanned({ ...scanData.scanned, receiptUrl: cloudData.secure_url })
+        // Load categories
+        const catRes = await fetch(`${API_URL}/api/mobile/overhead`, {
+          headers: { "Authorization": `Bearer ${token}` },
+        })
+        const catData = await catRes.json()
+        setOverheadCategories(catData.categories || [])
+        if (catData.categories?.length > 0) setSelectedOverheadCat(catData.categories[0].id)
+        setShowOverheadModal(true)
+      } else {
+        Alert.alert("Error", "Could not read receipt")
+      }
+    } catch (e) {
+      Alert.alert("Error", "Could not scan receipt")
+    }
+    setScanningOverhead(false)
+  }
+
+  async function saveOverheadExpense() {
+    if (!overheadScanned || !selectedOverheadCat) return
+    setSavingOverhead(true)
+    try {
+      const res = await fetch(`${API_URL}/api/mobile/overhead`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          categoryId: selectedOverheadCat,
+          vendor: overheadScanned.vendor || "Unknown",
+          description: overheadScanned.description || "",
+          amount: overheadScanned.amount || 0,
+          date: overheadScanned.date || new Date().toISOString().split("T")[0],
+          receiptUrl: overheadScanned.receiptUrl,
+          receiptName: "receipt.jpg",
+        }),
+      })
+      const data = await res.json()
+      if (data.expense) {
+        Alert.alert("Saved!", `$${data.expense.amount.toLocaleString()} added to overhead`)
+        setShowOverheadModal(false)
+        setOverheadScanned(null)
+      } else {
+        Alert.alert("Error", data.error || "Could not save")
+      }
+    } catch (e) { Alert.alert("Error", "Connection error") }
+    setSavingOverhead(false)
+  }
+
   const actions = [
     {
       label: "Take Photo",
@@ -381,5 +470,8 @@ const styles = StyleSheet.create({
   cancelBtn: { backgroundColor: "#F3F4F6", borderRadius: 12, padding: 14, alignItems: "center", marginTop: 8 },
   cancelBtnText: { fontSize: 15, fontWeight: "600", color: "#6B7280" },
 })
+
+
+
 
 
