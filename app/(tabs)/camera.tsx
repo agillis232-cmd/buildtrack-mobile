@@ -259,15 +259,15 @@ export default function QuickActionsScreen() {
         setOverheadCategories(catData.categories || [])
         if (catData.categories?.length > 0) setSelectedOverheadCat(catData.categories[0].id)
         setShowOverheadModal(true)
+        setShowOverheadModal(true)
       } else {
-        Alert.alert("Error", "Could not read receipt")
+        Alert.alert("Scan Failed", "Server response: " + JSON.stringify(scanData).substring(0, 200))
       }
-    } catch (e) {
-      Alert.alert("Error", "Could not scan receipt")
+    } catch (e: any) {
+      Alert.alert("Error Details", e?.message || String(e))
     }
     setScanningOverhead(false)
   }
-
   async function saveOverheadExpense() {
     if (!overheadScanned || !selectedOverheadCat) return
     setSavingOverhead(true)
