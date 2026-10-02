@@ -353,6 +353,15 @@ export default function QuickActionsScreen() {
       roles: ["ADMIN", "PROJECT_MANAGER", "FIELD_WORKER"],
     },
     {
+      label: "Overhead Receipt",
+      sub: "Scan receipt for overhead expense",
+      color: "#DC2626",
+      iconType: "receipt",
+      onPress: scanOverheadReceipt,
+      loading: scanningOverhead,
+      roles: ["ADMIN", "PROJECT_MANAGER"],
+    },
+    {
       label: "New Project",
       sub: "Create a new project",
       color: "#1C1F26",
@@ -470,6 +479,7 @@ const styles = StyleSheet.create({
   cancelBtn: { backgroundColor: "#F3F4F6", borderRadius: 12, padding: 14, alignItems: "center", marginTop: 8 },
   cancelBtnText: { fontSize: 15, fontWeight: "600", color: "#6B7280" },
 })
+
 
 
 
