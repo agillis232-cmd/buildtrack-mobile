@@ -446,6 +446,81 @@ export default function QuickActionsScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Overhead Receipt Modal */}
+      <Modal visible={showOverheadModal} animationType="slide" transparent>
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "flex-end" }}>
+          <View style={{ backgroundColor: "white", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, maxHeight: "80%" }}>
+            <Text style={{ fontSize: 18, fontWeight: "700", color: "#1C1F26", marginBottom: 4 }}>Overhead Expense</Text>
+            <Text style={{ fontSize: 13, color: "#6B7280", marginBottom: 16 }}>AI scanned your receipt</Text>
+
+            {overheadScanned && (
+              <ScrollView style={{ maxHeight: 400 }}>
+                <View style={{ gap: 12 }}>
+                  <View>
+                    <Text style={{ fontSize: 11, fontWeight: "700", color: "#9CA3AF", marginBottom: 4 }}>VENDOR</Text>
+                    <Text style={{ fontSize: 16, fontWeight: "600", color: "#1C1F26" }}>{overheadScanned.vendor || "Unknown"}</Text>
+                  </View>
+                  <View>
+                    <Text style={{ fontSize: 11, fontWeight: "700", color: "#9CA3AF", marginBottom: 4 }}>AMOUNT</Text>
+                    <Text style={{ fontSize: 24, fontWeight: "800", color: "#F97316" }}>${(overheadScanned.amount || 0).toLocaleString()}</Text>
+                  </View>
+                  <View>
+                    <Text style={{ fontSize: 11, fontWeight: "700", color: "#9CA3AF", marginBottom: 4 }}>DATE</Text>
+                    <Text style={{ fontSize: 14, color: "#1C1F26" }}>{overheadScanned.date || "Today"}</Text>
+                  </View>
+                  <View>
+                    <Text style={{ fontSize: 11, fontWeight: "700", color: "#9CA3AF", marginBottom: 4 }}>DESCRIPTION</Text>
+                    <Text style={{ fontSize: 14, color: "#1C1F26" }}>{overheadScanned.description || "—"}</Text>
+                  </View>
+
+                  {overheadScanned.lineItems?.length > 0 && (
+                    <View>
+                      <Text style={{ fontSize: 11, fontWeight: "700", color: "#9CA3AF", marginBottom: 6 }}>ITEMS ({overheadScanned.lineItems.length})</Text>
+                      {overheadScanned.lineItems.map((item: any, i: number) => (
+                        <View key={i} style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: "#F3F4F6" }}>
+                          <View style={{ flex: 1 }}>
+                            <Text style={{ fontSize: 13, color: "#1C1F26" }}>{item.description}</Text>
+                            <Text style={{ fontSize: 10, color: "#F97316", fontWeight: "600" }}>{item.materialTag || "Other"}</Text>
+                          </View>
+                          <Text style={{ fontSize: 13, fontWeight: "600", color: "#1C1F26" }}>${(item.amount || 0).toFixed(2)}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+
+                  <View>
+                    <Text style={{ fontSize: 11, fontWeight: "700", color: "#9CA3AF", marginBottom: 4 }}>CATEGORY</Text>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                      <View style={{ flexDirection: "row", gap: 6 }}>
+                        {overheadCategories.map((cat: any) => (
+                          <TouchableOpacity key={cat.id} onPress={() => setSelectedOverheadCat(cat.id)}
+                            style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8,
+                              backgroundColor: selectedOverheadCat === cat.id ? "#F97316" : "#F3F4F6" }}>
+                            <Text style={{ fontSize: 12, fontWeight: "600",
+                              color: selectedOverheadCat === cat.id ? "white" : "#6B7280" }}>{cat.name}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    </ScrollView>
+                  </View>
+                </View>
+              </ScrollView>
+            )}
+
+            <View style={{ flexDirection: "row", gap: 10, marginTop: 16 }}>
+              <TouchableOpacity onPress={() => { setShowOverheadModal(false); setOverheadScanned(null) }}
+                style={{ flex: 1, padding: 14, borderRadius: 10, backgroundColor: "#F3F4F6", alignItems: "center" }}>
+                <Text style={{ fontSize: 14, fontWeight: "600", color: "#6B7280" }}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={saveOverheadExpense} disabled={savingOverhead || !selectedOverheadCat}
+                style={{ flex: 1, padding: 14, borderRadius: 10, backgroundColor: "#F97316", alignItems: "center", opacity: savingOverhead ? 0.5 : 1 }}>
+                <Text style={{ fontSize: 14, fontWeight: "700", color: "white" }}>{savingOverhead ? "Saving..." : "Save Expense"}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   )
 }
