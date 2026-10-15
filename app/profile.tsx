@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Image } from "react-native"
+import { View, Text, Linking, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Image } from "react-native"
 import { useAuth } from "@/lib/auth"
 import { useRouter } from "expo-router"
 import { useState } from "react"
@@ -59,7 +59,7 @@ console.log("User role:", user?.role)
       <View style={styles.headerBanner}>
         <View style={styles.headerCircle} />
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={styles.backText}>← Back</Text>
+          <Text style={styles.backText}>â† Back</Text>
         </TouchableOpacity>
         <Text style={styles.pageTitle}>Profile</Text>
 
@@ -109,15 +109,15 @@ console.log("User role:", user?.role)
           <View style={styles.card}>
             <TouchableOpacity style={styles.adminRow} onPress={() => router.push("/team" as any)}>
               <Text style={styles.adminRowLabel}>Team Management</Text>
-              <Text style={styles.adminRowArrow}>›</Text>
+              <Text style={styles.adminRowArrow}>â€º</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.adminRow} onPress={() => router.push("/financials" as any)}>
               <Text style={styles.adminRowLabel}>Company Financials</Text>
-              <Text style={styles.adminRowArrow}>›</Text>
+              <Text style={styles.adminRowArrow}>â€º</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.adminRow} onPress={() => router.push("/organization" as any)}>
               <Text style={styles.adminRowLabel}>Company Profile</Text>
-              <Text style={styles.adminRowArrow}>›</Text>
+              <Text style={styles.adminRowArrow}>â€º</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -128,6 +128,35 @@ console.log("User role:", user?.role)
           : <Text style={styles.signOutText}>Sign Out</Text>
         }
       </TouchableOpacity>
+
+      {/* Delete Account */}
+      <TouchableOpacity onPress={() => {
+        Alert.alert("Delete Account", "This will permanently delete your account and all data. This cannot be undone.", [
+          { text: "Cancel", style: "cancel" },
+          { text: "Delete", style: "destructive", onPress: async () => {
+            try {
+              const res = await fetch(`${API_URL}/api/account/delete`, { method: "DELETE", headers: { "Authorization": `Bearer ${token}` } })
+              if (res.ok) { await signOut(); Alert.alert("Account Deleted", "Your account has been deleted.") }
+              else Alert.alert("Error", "Could not delete account")
+            } catch (e) { Alert.alert("Error", "Connection error") }
+          }}
+        ])
+      }} style={{ marginHorizontal: 16, marginTop: 12, padding: 14, borderRadius: 12, borderWidth: 1, borderColor: "#FEE2E2", alignItems: "center" }}>
+        <Text style={{ color: "#DC2626", fontSize: 14, fontWeight: "600" }}>Delete Account</Text>
+      </TouchableOpacity>
+
+      {/* Legal */}
+      <View style={{ flexDirection: "row", justifyContent: "center", gap: 16, marginTop: 16, marginBottom: 32 }}>
+        <TouchableOpacity onPress={() => Linking.openURL("https://buildtrackpro.app/legal/privacy")}>
+          <Text style={{ color: "#9CA3AF", fontSize: 12 }}>Privacy</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => Linking.openURL("https://buildtrackpro.app/legal/terms")}>
+          <Text style={{ color: "#9CA3AF", fontSize: 12 }}>Terms</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => Linking.openURL("https://buildtrackpro.app/legal/eula")}>
+          <Text style={{ color: "#9CA3AF", fontSize: 12 }}>EULA</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   )
 }

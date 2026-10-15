@@ -2,7 +2,7 @@ import { useState } from "react"
 import {
   View, Text, TextInput, TouchableOpacity,
   StyleSheet, KeyboardAvoidingView, Platform,
-  ActivityIndicator, Alert, Image, ScrollView
+  ActivityIndicator, Alert, Image, ScrollView, Linking
 } from "react-native"
 import { useRouter } from "expo-router"
 import { useAuth } from "@/lib/auth"
@@ -51,7 +51,7 @@ export default function LoginScreen() {
         {/* Hero text */}
         <View style={styles.hero}>
           <Text style={styles.heroTitle}>Manage your projects from the field</Text>
-          <Text style={styles.heroSub}>Daily logs, change orders, expenses and more — right from your phone.</Text>
+          <Text style={styles.heroSub}>Daily logs, change orders, expenses and more â€” right from your phone.</Text>
         </View>
 
         {/* Form card */}
@@ -76,7 +76,7 @@ export default function LoginScreen() {
             <Text style={styles.label}>Password</Text>
             <TextInput
               style={styles.input}
-              placeholder="••••••••"
+              placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
               placeholderTextColor="#9CA3AF"
               value={password}
               onChangeText={setPassword}
@@ -99,10 +99,22 @@ export default function LoginScreen() {
         </View>
         
 
-        <Text style={styles.footer}>Watt House Builders · BuildTrack Pro</Text>
+        <Text style={styles.footer}>Watt House Builders - BuildTrack Pro</Text>
          <TouchableOpacity onPress={() => router.push("/signup" as any)} style={styles.signupLink}>
-          <Text style={styles.signupLinkText}>New team member? Request access →</Text>
+          <Text style={styles.signupLinkText}>New team member? Request access</Text>
         </TouchableOpacity>
+
+        <View style={{ flexDirection: "row", justifyContent: "center", gap: 16, marginTop: 12 }}>
+          <TouchableOpacity onPress={() => Linking.openURL("https://buildtrackpro.app/legal/privacy")}>
+            <Text style={{ color: "rgba(255,255,255,0.3)", fontSize: 12 }}>Privacy Policy</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => Linking.openURL("https://buildtrackpro.app/legal/terms")}>
+            <Text style={{ color: "rgba(255,255,255,0.3)", fontSize: 12 }}>Terms of Service</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => Linking.openURL("https://buildtrackpro.app/legal/eula")}>
+            <Text style={{ color: "rgba(255,255,255,0.3)", fontSize: 12 }}>EULA</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   )

@@ -1,63 +1,70 @@
-{
-  "expo": {
-    "name": "BuildTrack",
-    "slug": "buildtrack-mobile",
-    "version": "1.4.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#1C1F26"
-    },
-    "ios": {
-      "bundleIdentifier": "com.watthouse.buildtrack",
-      "buildNumber": "2",
-      "supportsTablet": true,
-      "infoPlist": {
-        "LSApplicationQueriesSchemes": ["bluebeam", "bluebeamcloud"],
-        "ITSAppUsesNonExemptEncryption": false
-      }
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#1C1F26"
-      },
-      "package": "com.watthouse.buildtrack",
-      "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
-      ]
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
-    "plugins": [
-      "expo-router",
-      "expo-camera",
-      "expo-document-picker",
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "BuildTrack needs access to your photos to upload site photos and receipts.",
-          "cameraPermission": "BuildTrack needs access to your camera to capture site photos and receipts."
-        }
-      ],
-      "@react-native-community/datetimepicker"
-    ],
-    "scheme": "buildtrack",
-    "experiments": {
-      "typedRoutes": true
-    },
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "65041af5-d938-4922-96e8-734b54a9ed8e"
-      }
-    },
-    "owner": "dru232"
-  }
-}
+﻿{
+    "expo":  {
+                 "name":  "BuildTrack Pro",
+                 "slug":  "buildtrack-mobile",
+                 "version":  "1.5.0",
+                 "orientation":  "portrait",
+                 "icon":  "./assets/icon.png",
+                 "userInterfaceStyle":  "light",
+                 "splash":  {
+                                "image":  "./assets/splash-icon.png",
+                                "resizeMode":  "contain",
+                                "backgroundColor":  "#1C1F26"
+                            },
+                 "ios":  {
+                             "bundleIdentifier":  "com.watthouse.buildtrack",
+                             "buildNumber":  "3",
+                             "supportsTablet":  true,
+                             "infoPlist":  {
+                                               "LSApplicationQueriesSchemes":  [
+                                                                                   "bluebeam",
+                                                                                   "bluebeamcloud"
+                                                                               ],
+                                               "ITSAppUsesNonExemptEncryption":  false,
+                                               "NSCameraUsageDescription":  "BuildTrack Pro needs camera access to take site photos, scan receipts, and document project progress.",
+                                               "NSPhotoLibraryUsageDescription":  "BuildTrack Pro needs photo library access to upload site photos and receipt images.",
+                                               "NSPhotoLibraryAddUsageDescription":  "BuildTrack Pro saves photos to your library for offline access."
+                                           }
+                         },
+                 "android":  {
+                                 "adaptiveIcon":  {
+                                                      "foregroundImage":  "./assets/adaptive-icon.png",
+                                                      "backgroundColor":  "#1C1F26"
+                                                  },
+                                 "package":  "com.watthouse.buildtrack",
+                                 "permissions":  [
+                                                     "android.permission.CAMERA",
+                                                     "android.permission.RECORD_AUDIO"
+                                                 ]
+                             },
+                 "web":  {
+                             "favicon":  "./assets/favicon.png"
+                         },
+                 "plugins":  [
+                                 "expo-router",
+                                 "expo-camera",
+                                 "expo-document-picker",
+                                 [
+                                     "expo-image-picker",
+                                     {
+                                         "photosPermission":  "BuildTrack needs access to your photos to upload site photos and receipts.",
+                                         "cameraPermission":  "BuildTrack needs access to your camera to capture site photos and receipts."
+                                     }
+                                 ],
+                                 "@react-native-community/datetimepicker"
+                             ],
+                 "scheme":  "buildtrack",
+                 "experiments":  {
+                                     "typedRoutes":  true
+                                 },
+                 "extra":  {
+                               "router":  {
 
+                                          },
+                               "eas":  {
+                                           "projectId":  "65041af5-d938-4922-96e8-734b54a9ed8e"
+                                       }
+                           },
+                 "owner":  "dru232"
+             }
+}
