@@ -51,7 +51,7 @@ export default function LoginScreen() {
         {/* Hero text */}
         <View style={styles.hero}>
           <Text style={styles.heroTitle}>Manage your projects from the field</Text>
-          <Text style={styles.heroSub}>Daily logs, change orders, expenses and more â€” right from your phone.</Text>
+          <Text style={styles.heroSub}>Daily logs, change orders, expenses and more - all in one place.</Text></Text>
         </View>
 
         {/* Form card */}
@@ -76,7 +76,7 @@ export default function LoginScreen() {
             <Text style={styles.label}>Password</Text>
             <TextInput
               style={styles.input}
-              placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+              placeholder="Enter password"
               placeholderTextColor="#9CA3AF"
               value={password}
               onChangeText={setPassword}
