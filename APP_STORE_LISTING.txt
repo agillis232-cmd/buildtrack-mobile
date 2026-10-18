@@ -1,0 +1,48 @@
+﻿BuildTrack Pro — Construction Management
+
+Short Description (30 chars):
+Construction project management
+
+Full Description:
+BuildTrack Pro is the all-in-one construction management platform built for residential remodelers and general contractors.
+
+Manage every project from first estimate to final punch list — specs, schedules, change orders, invoicing, daily logs, and client communication — all in one app.
+
+BUILT FOR THE FIELD
+- Take and organize site photos directly from your phone
+- Create daily logs with crew size, hours, and materials
+- Scan receipts with AI to auto-categorize expenses
+- View project schedules and track progress on the go
+
+PROJECT MANAGEMENT
+- Full spec book system — track every material, finish, and fixture by room
+- Change orders with digital signatures and cost breakdowns
+- RFIs with automatic PM notifications
+- Punch lists to close out projects cleanly
+
+FINANCIAL TOOLS
+- Estimates with payment schedules and draw requests
+- Invoice creation and payment tracking
+- Vendor bill management with lien waiver tracking
+- P&L reports and financial dashboards
+
+CLIENT & SUB PORTALS
+- Clients view progress, approve change orders, and see their schedule
+- Subcontractors manage compliance docs, submit RFIs, and log daily work
+- Subs can work with multiple general contractors from one account
+
+TEAM COLLABORATION
+- Invite team members with role-based access
+- Share documents and photos across your organization
+- Real-time project updates for everyone involved
+
+BuildTrack Pro requires a subscription purchased at buildtrackpro.app. Download the app for free and sign in with your account.
+
+Keywords:
+construction,project management,contractor,remodel,building,punch list,daily log,change order,invoice,estimate,spec book,subcontractor,RFI
+
+Support URL: https://buildtrackpro.app
+Privacy URL: https://buildtrackpro.app/legal/privacy
+
+Category: Business
+Secondary Category: Productivity
