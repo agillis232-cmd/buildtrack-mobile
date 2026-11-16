@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { View, Text, TouchableOpacity, StyleSheet, Modal, Platform } from "react-native"
 import DateTimePicker from "@react-native-community/datetimepicker"
+import { toDateKey, parseDateOnly } from "@/lib/dates"
 
 interface DatePickerProps {
   label: string
@@ -11,17 +12,18 @@ interface DatePickerProps {
 
 export default function DatePicker({ label, value, onChange, placeholder }: DatePickerProps) {
   const [show, setShow] = useState(false)
-  const date = value ? new Date(value) : new Date()
+  // `value` is a calendar day ("YYYY-MM-DD"), not a moment in time.
+  const date = value ? parseDateOnly(value) : new Date()
 
   function handleChange(_: any, selected?: Date) {
     if (Platform.OS === "android") setShow(false)
     if (selected) {
-      onChange(selected.toISOString().split("T")[0])
+      onChange(toDateKey(selected))
     }
   }
 
   const displayValue = value
-    ? new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    ? parseDateOnly(value).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
     : placeholder || "Select date..."
 
   return (

@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator
 import { useEffect, useState, useRef } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
+import { toDateKey, dateKeyOf, parseDateOnly, parseTimeLabel } from "@/lib/dates"
 import DateTimePicker from "@react-native-community/datetimepicker"
 import { Linking } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
@@ -41,8 +42,9 @@ function getWeekDays(baseDate: Date) {
   return days
 }
 
+// Same calendar day on this phone (not in UTC, which rolls over mid-afternoon in California).
 function isSameDay(a: Date, b: Date) {
-  return a.toISOString().split("T")[0] === b.toISOString().split("T")[0]
+  return toDateKey(a) === toDateKey(b)
 }
 
 export default function ScheduleScreen() {
@@ -77,6 +79,7 @@ export default function ScheduleScreen() {
     if (token) {
       loadEvents()
       loadProjects()
+      loadCalendarStatus()
     } else {
       setLoading(false)
     }
@@ -90,6 +93,17 @@ export default function ScheduleScreen() {
       const data = await res.json()
       setProjects(data.projects || [])
     } catch (e) { console.log("Error loading projects:", e) }
+  }
+
+  // Shows "Sync" instead of "Connect" once Google Calendar is linked.
+  async function loadCalendarStatus() {
+    try {
+      const res = await fetch(`${API_URL}/api/google-calendar/status`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      })
+      const data = await res.json()
+      setCalendarConnected(!!data.connected)
+    } catch (e) { console.log("Error loading calendar status:", e) }
   }
 
   async function loadEvents() {
@@ -127,7 +141,9 @@ export default function ScheduleScreen() {
   }
 
   function eventsForDay(day: Date) {
-    return events.filter(e => isSameDay(new Date(e.date), day))
+    // Event dates are calendar days from the server; compare day to day.
+    const key = toDateKey(day)
+    return events.filter(e => dateKeyOf(e.date) === key)
   }
 
   function startEdit(event: any) {
@@ -137,9 +153,9 @@ export default function ScheduleScreen() {
     setNotes(event.notes || "")
     setProjectId(event.projectId || "")
     setLocationText(event.location || "")
-    setSelectedDate(new Date(event.date))
-    setStartTime(event.startTime ? new Date(`2000-01-01T${event.startTime}`) : null)
-    setEndTime(event.endTime ? new Date(`2000-01-01T${event.endTime}`) : null)
+    setSelectedDate(parseDateOnly(event.date))
+    setStartTime(parseTimeLabel(event.startTime))
+    setEndTime(parseTimeLabel(event.endTime))
     setAdding(true)
   }
 
@@ -157,7 +173,7 @@ export default function ScheduleScreen() {
           title, type, notes: notes || null,
           projectId: projectId || null,
           location: locationText || null,
-          date: selectedDate.toISOString().split("T")[0],
+          date: toDateKey(selectedDate),
           startTime: startTime ? startTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }) : null,
           endTime: endTime ? endTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }) : null,
         })
@@ -202,17 +218,20 @@ export default function ScheduleScreen() {
       })
       const data = await res.json()
       if (data.event) setEvents(prev => prev.map(e => e.id === eventId ? data.event : e))
-    } catch (e) { console.log(e) }
+      else Alert.alert("Error", data.error || "Could not update event")
+    } catch (e) { Alert.alert("Error", "Connection error") }
   }
 
   async function connectCalendar() {
     try {
-      const res = await fetch(`${API_URL}/api/google-calendar/auth-url`, {
+      const res = await fetch(`${API_URL}/api/google-calendar/connect`, {
         headers: { "Authorization": `Bearer ${token}` }
       })
       const data = await res.json()
-      if (data.url) Linking.openURL(data.url)
-    } catch (e) { console.log(e) }
+      const url = data.authUrl || data.url
+      if (url) Linking.openURL(url)
+      else Alert.alert("Google Calendar", "Could not start the Google sign-in. Please try again.")
+    } catch (e) { Alert.alert("Google Calendar", "Connection error") }
   }
 
   async function syncFromGoogle() {
@@ -220,14 +239,18 @@ export default function ScheduleScreen() {
     try {
       const res = await fetch(`${API_URL}/api/google-calendar/sync`, {
         method: "POST",
-        headers: { "Authorization": `Bearer ${token}` }
+        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "pull" })
       })
       const data = await res.json()
-      if (data.synced) {
-        Alert.alert("Synced", `${data.synced} events imported`)
+      if (data.success) {
+        const count = data.imported || 0
+        Alert.alert("Synced", `${count} event${count === 1 ? "" : "s"} imported`)
         loadEvents()
+      } else {
+        Alert.alert("Google Calendar", data.error || "Could not sync")
       }
-    } catch (e) { console.log(e) }
+    } catch (e) { Alert.alert("Google Calendar", "Connection error") }
     setSyncing(false)
   }
 
@@ -371,7 +394,9 @@ export default function ScheduleScreen() {
                         <Text style={s.actionBtnText}>Edit</Text>
                       </TouchableOpacity>
                       <TouchableOpacity style={s.actionBtn} onPress={() => {
-                        setSelectedDate(new Date(new Date(event.date).getTime() + 86400000))
+                        const nextDay = parseDateOnly(event.date)
+                        nextDay.setDate(nextDay.getDate() + 1)
+                        setSelectedDate(nextDay)
                         setTitle(event.title)
                         setType(event.type)
                         setNotes(event.notes || "")
@@ -399,8 +424,8 @@ export default function ScheduleScreen() {
             {(() => {
               const sortedEvents = [...events].filter(e => e.date).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
               if (sortedEvents.length === 0) return <Text style={{ color: "rgba(255,255,255,0.4)", textAlign: "center", padding: 40 }}>No events to display</Text>
-              const minDate = new Date(sortedEvents[0].date)
-              const maxDate = new Date(sortedEvents[sortedEvents.length - 1].date)
+              const minDate = parseDateOnly(sortedEvents[0].date)
+              const maxDate = parseDateOnly(sortedEvents[sortedEvents.length - 1].date)
               const totalDays = Math.max(Math.ceil((maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24)) + 1, 7)
               const barWidth = SCREEN_WIDTH - 140
               const byProject: Record<string, any[]> = {}
@@ -428,19 +453,19 @@ export default function ScheduleScreen() {
                     <View key={projectName} style={{ marginBottom: 16 }}>
                       <Text style={{ fontSize: 11, fontWeight: "700", color: "rgba(255,255,255,0.6)", marginBottom: 6 }}>{projectName}</Text>
                       {projectEvents.map((event) => {
-                        const startDay = Math.ceil((new Date(event.date).getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24))
-                        const endDay = event.endDate ? Math.ceil((new Date(event.endDate).getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24)) : startDay + 1
+                        const startDay = Math.ceil((parseDateOnly(event.date).getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24))
+                        const endDay = event.endDate ? Math.ceil((parseDateOnly(event.endDate).getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24)) : startDay + 1
                         const duration = Math.max(endDay - startDay, 1)
                         const left = (startDay / totalDays) * barWidth
                         const width = Math.max((duration / totalDays) * barWidth, 20)
                         const color = EVENT_COLORS[event.type] || "#6B7280"
-                        const isPast = new Date(event.date) < new Date()
+                        const isPast = dateKeyOf(event.date) < toDateKey(new Date())
                         return (
-                          <TouchableOpacity key={event.id} onPress={() => Alert.alert(event.title, `${event.type}\n${new Date(event.date).toLocaleDateString()}${event.notes ? `\n\n${event.notes}` : ""}`)} style={{ flexDirection: "row", alignItems: "center", marginBottom: 4, height: 28 }}>
+                          <TouchableOpacity key={event.id} onPress={() => Alert.alert(event.title, `${event.type}\n${parseDateOnly(event.date).toLocaleDateString()}${event.notes ? `\n\n${event.notes}` : ""}`)} style={{ flexDirection: "row", alignItems: "center", marginBottom: 4, height: 28 }}>
                             <Text style={{ width: 96, fontSize: 10, color: "rgba(255,255,255,0.4)", paddingRight: 4 }} numberOfLines={1}>{event.title}</Text>
                             <View style={{ flex: 1, position: "relative", height: 22 }}>
                               <View style={{ position: "absolute", left, width, height: 20, borderRadius: 4, backgroundColor: color + (isPast ? "40" : "CC"), borderLeftWidth: 3, borderLeftColor: color, justifyContent: "center", paddingHorizontal: 6 }}>
-                                {width > 50 && <Text style={{ fontSize: 8, color: "white", fontWeight: "600" }} numberOfLines={1}>{new Date(event.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</Text>}
+                                {width > 50 && <Text style={{ fontSize: 8, color: "white", fontWeight: "600" }} numberOfLines={1}>{parseDateOnly(event.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</Text>}
                               </View>
                             </View>
                           </TouchableOpacity>

@@ -17,15 +17,21 @@ export default function SubRFIsScreen() {
 
   useEffect(() => { loadData() }, [])
 
+  // The latest reply on an RFI is its answer.
+  function withAnswer(rfi: any) {
+    const replies = rfi.responses || []
+    return { ...rfi, answer: rfi.answer ?? replies[replies.length - 1]?.message }
+  }
+
   async function loadData() {
     try {
       const [rfiRes, projRes] = await Promise.all([
-        fetch(`${API_URL}/api/sub/rfis`, { headers: { "Authorization": `Bearer ${token}` } }),
+        fetch(`${API_URL}/api/mobile/rfis`, { headers: { "Authorization": `Bearer ${token}` } }),
         fetch(`${API_URL}/api/mobile/sub/projects`, { headers: { "Authorization": `Bearer ${token}` } }),
       ])
       const rfiData = await rfiRes.json()
       const projData = await projRes.json()
-      setRfis(rfiData.rfis || [])
+      setRfis((rfiData.rfis || []).map(withAnswer))
       setProjects(projData.projects || [])
       if (projData.projects?.length > 0) setSelectedProject(projData.projects[0].projectId)
     } catch (e) { console.error(e) }
@@ -36,16 +42,18 @@ export default function SubRFIsScreen() {
     if (!subject.trim() || !question.trim() || !selectedProject) return
     setSending(true)
     try {
-      const res = await fetch(`${API_URL}/api/sub/rfis`, {
+      const res = await fetch(`${API_URL}/api/mobile/rfis`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ projectId: selectedProject, subject, question }),
+        body: JSON.stringify({ projectId: selectedProject, subject, description: question }),
       })
       const data = await res.json()
       if (data.rfi) {
-        setRfis(prev => [data.rfi, ...prev])
+        setRfis(prev => [withAnswer(data.rfi), ...prev])
         setShowForm(false); setSubject(""); setQuestion("")
         Alert.alert("Sent!", "Your RFI has been submitted to the PM")
+      } else {
+        Alert.alert("Error", data.error || "Could not submit RFI")
       }
     } catch (e) { Alert.alert("Error", "Could not submit RFI") }
     setSending(false)

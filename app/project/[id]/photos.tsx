@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator
 import { useEffect, useState, useCallback } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
+import { cloudinaryThumb } from "@/lib/images"
 import * as ImagePicker from "expo-image-picker"
 import { Ionicons } from "@expo/vector-icons"
 
@@ -49,7 +50,7 @@ async function uploadToCloudinary(
       if (!uploadRes.ok) throw new Error("Cloudinary upload failed")
       const cloudData = await uploadRes.json()
 
-      // Step 3: Save the record in our DB (tiny request — just the URL)
+      // Step 3: Save the record in our DB (tiny request â€” just the URL)
       const saveRes = await fetch(`${apiUrl}/api/mobile/projects/${projectId}/photos`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
@@ -95,6 +96,7 @@ export default function PhotosScreen() {
     setIsUploading(true)
     let successCount = 0
     let failCount = 0
+    const failedJobs: UploadJob[] = []
 
     for (let i = 0; i < jobs.length; i++) {
       setUploadQueue(prev => prev.map((j, idx) => idx === i ? { ...j, status: "uploading" as const } : j))
@@ -104,11 +106,12 @@ export default function PhotosScreen() {
         if (data.photo) {
           setPhotos(prev => [data.photo, ...prev])
           successCount++
-        } else { failCount++ }
+        } else { failCount++; failedJobs.push(jobs[i]) }
         setUploadQueue(prev => prev.map((j, idx) => idx === i ? { ...j, status: data.photo ? "done" as const : "error" as const } : j))
       } catch (e) {
         console.log("Upload failed:", e)
         failCount++
+        failedJobs.push(jobs[i])
         setUploadQueue(prev => prev.map((j, idx) => idx === i ? { ...j, status: "error" as const } : j))
       }
     }
@@ -116,20 +119,23 @@ export default function PhotosScreen() {
     setIsUploading(false)
     if (failCount === 0) {
       Alert.alert("Done", `${successCount} photo${successCount > 1 ? "s" : ""} uploaded`)
+      setTimeout(() => setUploadQueue([]), 1500)
     } else {
+      // Keep only the ones that failed on screen, and retry exactly those.
+      setUploadQueue(failedJobs.map(j => ({ ...j, status: "error" as const })))
       Alert.alert("Upload Complete", `${successCount} uploaded, ${failCount} failed.`, [
-        { text: "Retry Failed", onPress: retryFailed },
+        {
+          text: "Retry Failed",
+          onPress: () => {
+            const retry = failedJobs.map(j => ({ ...j, status: "pending" as const, retries: j.retries + 1 }))
+            setUploadQueue(retry)
+            processQueue(retry)
+          }
+        },
         { text: "Dismiss", onPress: () => setUploadQueue([]) },
       ])
     }
-    setTimeout(() => setUploadQueue(prev => prev.filter(j => j.status === "error")), 1500)
   }, [id, token])
-
-  function retryFailed() {
-    const failed = uploadQueue.filter(j => j.status === "error").map(j => ({ ...j, status: "pending" as const, retries: j.retries + 1 }))
-    setUploadQueue(failed)
-    processQueue(failed)
-  }
 
   async function pickPhotos(fromCamera: boolean) {
     if (isUploading) return
@@ -137,7 +143,7 @@ export default function PhotosScreen() {
     if (fromCamera) {
       const perm = await ImagePicker.requestCameraPermissionsAsync()
       if (!perm.granted) { Alert.alert("Permission needed", "Please allow camera access"); return }
-      const result = await ImagePicker.launchCameraAsync({ quality: 0.6, maxWidth: 1920, maxHeight: 1920 })
+      const result = await ImagePicker.launchCameraAsync({ quality: 0.6 })
       if (result.canceled || !result.assets?.length) return
       const jobs: UploadJob[] = result.assets.map(a => ({ uri: a.uri, status: "pending" as const, retries: 0 }))
       setUploadQueue(jobs)
@@ -145,7 +151,7 @@ export default function PhotosScreen() {
     } else {
       const perm = await ImagePicker.requestMediaLibraryPermissionsAsync()
       if (!perm.granted) { Alert.alert("Permission needed", "Please allow photo library access"); return }
-      const result = await ImagePicker.launchImageLibraryAsync({ quality: 0.6, maxWidth: 1920, maxHeight: 1920, allowsMultipleSelection: true, selectionLimit: 10 })
+      const result = await ImagePicker.launchImageLibraryAsync({ quality: 0.6, allowsMultipleSelection: true, selectionLimit: 10 })
       if (result.canceled || !result.assets?.length) return
       const jobs: UploadJob[] = result.assets.map(a => ({ uri: a.uri, status: "pending" as const, retries: 0 }))
       setUploadQueue(jobs)
@@ -201,7 +207,7 @@ export default function PhotosScreen() {
         ) : (
           <View style={styles.grid}>
             {photos.map((photo: any) => (
-              <Image key={photo.id} source={{ uri: photo.url }} style={styles.photo} />
+              <Image key={photo.id} source={{ uri: cloudinaryThumb(photo.url) }} style={styles.photo} />
             ))}
           </View>
         )}

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { useRouter } from "expo-router"
 import { API_URL } from "@/lib/api"
+import { parseDateOnly } from "@/lib/dates"
 
 export default function ExpensesScreen() {
   const { token } = useAuth()
@@ -63,7 +64,7 @@ export default function ExpensesScreen() {
                   <View style={{ flex: 1 }}>
                     <Text style={styles.expenseVendor}>{expense.vendor}</Text>
                     <Text style={styles.expenseDesc} numberOfLines={1}>{expense.description || expense.project?.name || ""}</Text>
-                    <Text style={styles.expenseDate}>{new Date(expense.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</Text>
+                    <Text style={styles.expenseDate}>{parseDateOnly(expense.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</Text>
                   </View>
                 </View>
                 <Text style={styles.expenseAmount}>${expense.amount.toLocaleString()}</Text>

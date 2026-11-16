@@ -5,7 +5,7 @@ import {
   ActivityIndicator, Alert, Image, ScrollView, Linking
 } from "react-native"
 import { useRouter } from "expo-router"
-import { useAuth } from "@/lib/auth"
+import { useAuth, homeRouteFor } from "@/lib/auth"
 
 export default function LoginScreen() {
   const router = useRouter()
@@ -20,12 +20,8 @@ export default function LoginScreen() {
       return
     }
     setLoading(true)
-    const error = await signIn(email, password, (role) => {
-      if (role === "CLIENT") {
-        router.replace("/(client-tabs)" as any)
-      } else {
-        router.replace("/(tabs)")
-      }
+    const error = await signIn(email.trim(), password, (role) => {
+      router.replace(homeRouteFor(role))
     })
     setLoading(false)
     if (error) {
@@ -69,6 +65,8 @@ export default function LoginScreen() {
               autoCapitalize="none"
               keyboardType="email-address"
               autoCorrect={false}
+              textContentType="username"
+              autoComplete="email"
             />
           </View>
 
@@ -81,6 +79,8 @@ export default function LoginScreen() {
               value={password}
               onChangeText={setPassword}
               secureTextEntry
+              textContentType="password"
+              autoComplete="current-password"
             />
           </View>
 

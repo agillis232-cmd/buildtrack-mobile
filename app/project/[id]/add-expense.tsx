@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
 import { Ionicons } from "@expo/vector-icons"
+import { toDateKey } from "@/lib/dates"
 
 export default function AddExpenseScreen() {
   const { id, prefill } = useLocalSearchParams()
@@ -14,7 +15,7 @@ export default function AddExpenseScreen() {
   const [vendor, setVendor] = useState(prefillData.vendor || "")
   const [description, setDescription] = useState(prefillData.description || "")
   const [amount, setAmount] = useState(prefillData.amount?.toString() || "")
-  const [date, setDate] = useState(prefillData.date || new Date().toISOString().split("T")[0])
+  const [date, setDate] = useState(prefillData.date || toDateKey(new Date()))
   const [categories, setCategories] = useState<any[]>([])
   const [categoryId, setCategoryId] = useState("")
   const [showCategories, setShowCategories] = useState(false)

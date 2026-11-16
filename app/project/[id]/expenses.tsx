@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
 import * as ImagePicker from "expo-image-picker"
+import { parseDateOnly, dateKeyOf } from "@/lib/dates"
 
 export default function ExpensesScreen() {
   const { id } = useLocalSearchParams()
@@ -70,7 +71,7 @@ export default function ExpensesScreen() {
     setVendor(expense.vendor)
     setDescription(expense.description || "")
     setAmount(expense.amount.toString())
-    setDate(new Date(expense.date).toISOString().split("T")[0])
+    setDate(dateKeyOf(expense.date))
   }
 
   function closeEdit() {
@@ -167,7 +168,7 @@ export default function ExpensesScreen() {
                 <View style={{ flex: 1 }}>
                   <Text style={styles.expenseVendor}>{expense.vendor}</Text>
                   {expense.description ? <Text style={styles.expenseDesc} numberOfLines={1}>{expense.description}</Text> : null}
-                  <Text style={styles.expenseDate}>{new Date(expense.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</Text>
+                  <Text style={styles.expenseDate}>{parseDateOnly(expense.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</Text>
                 </View>
               </View>
               <View style={styles.expenseRight}>

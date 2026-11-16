@@ -25,7 +25,7 @@ export default function SubCameraScreen() {
   async function takePhoto(projectId: string) {
     const perm = await ImagePicker.requestCameraPermissionsAsync()
     if (!perm.granted) { Alert.alert("Permission needed"); return }
-    const result = await ImagePicker.launchCameraAsync({ quality: 0.6, maxWidth: 1920, maxHeight: 1920 })
+    const result = await ImagePicker.launchCameraAsync({ quality: 0.6 })
     if (result.canceled || !result.assets?.length) return
 
     setUploading(true)
@@ -47,11 +47,14 @@ export default function SubCameraScreen() {
       const upRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: "POST", body: fd })
       const cloudData = await upRes.json()
 
-      await fetch(`${API_URL}/api/sub/photos`, {
+      if (!cloudData.secure_url) throw new Error("Upload failed")
+
+      const saveRes = await fetch(`${API_URL}/api/mobile/projects/${projectId}/photos`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ projectId, url: cloudData.secure_url, publicId: cloudData.public_id }),
+        body: JSON.stringify({ cloudinaryUrl: cloudData.secure_url, publicId: cloudData.public_id }),
       })
+      if (!saveRes.ok) throw new Error("Could not save photo")
 
       Alert.alert("Uploaded!", "Photo added to project")
     } catch (e) { Alert.alert("Error", "Could not upload photo") }

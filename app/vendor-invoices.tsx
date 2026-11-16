@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth"
 import { useRouter } from "expo-router"
 import { API_URL } from "@/lib/api"
 import DatePicker from "@/components/DatePicker"
+import { parseDateOnly } from "@/lib/dates"
 
 const STATUS_COLORS: Record<string, string> = {
   UNPAID: "#DC2626",
@@ -232,7 +233,7 @@ export default function VendorInvoicesScreen() {
 
               {invoice.dueDate && (
                 <Text style={[styles.dueDate, new Date(invoice.dueDate) < new Date() && invoice.status !== "PAID" && styles.overdue]}>
-                  Due: {new Date(invoice.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                  Due: {parseDateOnly(invoice.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                   {new Date(invoice.dueDate) < new Date() && invoice.status !== "PAID" ? " — OVERDUE" : ""}
                 </Text>
               )}

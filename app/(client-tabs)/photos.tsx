@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth"
 import { useRouter } from "expo-router"
 import { API_URL } from "@/lib/api"
 import * as ImagePicker from "expo-image-picker"
+import { cloudinaryThumb } from "@/lib/images"
 
 export default function ClientPhotosScreen() {
   const { token } = useAuth()
@@ -104,7 +105,7 @@ export default function ClientPhotosScreen() {
                 onPress={() => router.push(`/project/${projectId}/photo-viewer?photoId=${photo.id}&url=${encodeURIComponent(photo.url)}&caption=${encodeURIComponent(photo.caption || "")}` as any)}
                 activeOpacity={0.9}
               >
-                <Image source={{ uri: photo.url.replace('/upload/', '/upload/f_jpg/') }} style={styles.photo} />
+                <Image source={{ uri: cloudinaryThumb(photo.url) }} style={styles.photo} />
                 {photo.caption ? (
                   <View style={styles.captionOverlay}>
                     <Text style={styles.captionText} numberOfLines={1}>{photo.caption}</Text>

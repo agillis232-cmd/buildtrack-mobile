@@ -7,6 +7,7 @@ import { router } from "expo-router"
 import * as SecureStore from "expo-secure-store"
 import { API_URL } from "@/lib/api"
 import { Ionicons } from "@expo/vector-icons"
+import { parseDateOnly } from "@/lib/dates"
 
 const STATUS_COLORS: Record<string, string> = { TODO: "#D97706", IN_PROGRESS: "#3B82F6", REVIEW: "#8B5CF6", DONE: "#16A34A" }
 const STATUS_LABELS: Record<string, string> = { TODO: "To Do", IN_PROGRESS: "In Progress", REVIEW: "Review", DONE: "Done" }
@@ -139,7 +140,7 @@ export default function TasksScreen() {
                     fontSize: 11, fontWeight: "600",
                     color: new Date(task.dueDate) < new Date() && task.status !== "DONE" ? "#DC2626" : "#999"
                   }}>
-                    Due {new Date(task.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                    Due {parseDateOnly(task.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                   </Text>
                 )}
               </View>

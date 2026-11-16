@@ -8,6 +8,7 @@ import * as SecureStore from "expo-secure-store"
 import { API_URL } from "@/lib/api"
 import { useAuth } from "@/lib/auth"
 import { Ionicons } from "@expo/vector-icons"
+import { parseDateOnly, toDateKey } from "@/lib/dates"
 
 const STATUS_COLORS: Record<string, string> = { PENDING: "#D97706", APPROVED: "#16A34A", REJECTED: "#DC2626" }
 
@@ -22,7 +23,7 @@ export default function TimeScreen() {
   const [tab, setTab] = useState<"mine" | "pending">("mine")
 
   const [projectId, setProjectId] = useState("")
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0])
+  const [date, setDate] = useState(toDateKey(new Date()))
   const [hours, setHours] = useState("")
   const [notes, setNotes] = useState("")
 
@@ -230,7 +231,7 @@ export default function TimeScreen() {
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                     <Ionicons name="calendar-outline" size={12} color="#9CA3AF" />
                     <Text style={{ fontSize: 11, color: "#9CA3AF" }}>
-                      {new Date(entry.date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                      {parseDateOnly(entry.date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
                     </Text>
                   </View>
                   <View style={{ paddingHorizontal: 6, paddingVertical: 1, borderRadius: 99, backgroundColor: statusColor + "15" }}>

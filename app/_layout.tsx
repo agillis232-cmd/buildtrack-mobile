@@ -1,6 +1,6 @@
-import { Stack } from "expo-router"
+import { Stack, useRouter, useSegments, useRootNavigationState } from "expo-router"
 import { StatusBar } from "expo-status-bar"
-import { AuthProvider } from "@/lib/auth"
+import { AuthProvider, useAuth } from "@/lib/auth"
 import { useEffect } from "react"
 import * as Notifications from "expo-notifications"
 import * as Device from "expo-device"
@@ -9,6 +9,8 @@ import { Platform } from "react-native"
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
   }),
@@ -36,16 +38,36 @@ async function registerForPushNotifications() {
   return token.data
 }
 
+// Screens anyone can see without being signed in.
+const PUBLIC_SCREENS = ["login", "signup"]
+
+// Whenever the sign-in goes away (sign out, account deleted, expired session),
+// send the person back to the login screen from wherever they are.
+function SessionGate() {
+  const { user, loading } = useAuth()
+  const segments = useSegments()
+  const router = useRouter()
+  const navigationReady = !!useRootNavigationState()?.key
+
+  useEffect(() => {
+    if (loading || !navigationReady) return
+    const first = segments[0] as string | undefined
+    const onPublicScreen = !first || PUBLIC_SCREENS.includes(first)
+    if (!user && !onPublicScreen) router.replace("/login")
+  }, [user, loading, segments, navigationReady])
+
+  return null
+}
+
 export default function RootLayout() {
   useEffect(() => {
-    registerForPushNotifications().then(token => {
-      if (token) console.log("Push token:", token)
-    })
+    registerForPushNotifications()
   }, [])
 
   return (
     <AuthProvider>
       <StatusBar style="light" />
+      <SessionGate />
       <Stack screenOptions={{ headerShown: false }} />
     </AuthProvider>
   )

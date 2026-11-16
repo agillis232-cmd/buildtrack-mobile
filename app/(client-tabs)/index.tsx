@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth"
 import { useRouter } from "expo-router"
 import { API_URL } from "@/lib/api"
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import { parseDateOnly } from "@/lib/dates"
 
 const CLIENT_KPI_OPTIONS = [
   { key: "contract", label: "Contract Total", description: "Total contract value including approved COs", color: "white" },
@@ -161,7 +162,7 @@ export default function ClientDashboard() {
               <Text style={styles.sectionTitle}>Recent Site Updates</Text>
               {project.dailyLogs.slice(0, 3).map((log: any) => (
                 <View key={log.id} style={styles.logCard}>
-                  <Text style={styles.logDate}>{new Date(log.date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}</Text>
+                  <Text style={styles.logDate}>{parseDateOnly(log.date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}</Text>
                   <Text style={styles.logSummary}>{log.summary}</Text>
                   <Text style={styles.logMeta}>{log.weather} · {log.hoursWorked} hrs</Text>
                 </View>
@@ -194,8 +195,8 @@ export default function ClientDashboard() {
               {project.scheduleEvents.slice(0, 3).map((event: any) => (
                 <View key={event.id} style={styles.eventCard}>
                   <View style={styles.eventDateBox}>
-                    <Text style={styles.eventMonth}>{new Date(event.date).toLocaleDateString("en-US", { month: "short" })}</Text>
-                    <Text style={styles.eventDay}>{new Date(event.date).getDate()}</Text>
+                    <Text style={styles.eventMonth}>{parseDateOnly(event.date).toLocaleDateString("en-US", { month: "short" })}</Text>
+                    <Text style={styles.eventDay}>{parseDateOnly(event.date).getDate()}</Text>
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.eventTitle}>{event.title}</Text>

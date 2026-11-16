@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth"
 import { useRouter } from "expo-router"
 import { API_URL } from "@/lib/api"
 import * as ImagePicker from "expo-image-picker"
+import { toDateKey } from "@/lib/dates"
 
 const ACTION_ICONS: Record<string, { lines: number[], circle?: boolean }> = {
   photo: { circle: true, lines: [14, 10] },
@@ -80,6 +81,7 @@ export default function QuickActionsScreen() {
   const [uploading, setUploading] = useState(false)
   const [showProjectPicker, setShowProjectPicker] = useState(false)
   const [pendingAction, setPendingAction] = useState<string | null>(null)
+  const [scannedExpense, setScannedExpense] = useState<any>(null)
 
   const isAdminOrPM = user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER"
 
@@ -119,6 +121,13 @@ export default function QuickActionsScreen() {
       case "expense":
         router.push(`/project/${project.id}/expenses` as any)
         break
+      case "expense-scan":
+        // Open the new-expense form already filled in from the scanned receipt.
+        router.push((scannedExpense
+          ? `/project/${project.id}/add-expense?prefill=${encodeURIComponent(JSON.stringify(scannedExpense))}`
+          : `/project/${project.id}/add-expense`) as any)
+        setScannedExpense(null)
+        break
       case "change-order":
         router.push(`/project/${project.id}/change-orders` as any)
         break
@@ -135,7 +144,7 @@ export default function QuickActionsScreen() {
       Alert.alert("Permission needed", "Please allow camera access")
       return
     }
-    const result = await ImagePicker.launchCameraAsync({ quality: 0.6, maxWidth: 1920, maxHeight: 1920 })
+    const result = await ImagePicker.launchCameraAsync({ quality: 0.6 })
     if (result.canceled || !result.assets?.length) return
 
     setUploading(true)
@@ -185,7 +194,7 @@ export default function QuickActionsScreen() {
       Alert.alert("Permission needed", "Please allow camera access")
       return
     }
-    const result = await ImagePicker.launchCameraAsync({ base64: true, quality: 0.6, maxWidth: 1920, maxHeight: 1920 })
+    const result = await ImagePicker.launchCameraAsync({ base64: true, quality: 0.6 })
     if (result.canceled) return
 
     setScanning(true)
@@ -196,11 +205,13 @@ export default function QuickActionsScreen() {
         body: JSON.stringify({ image: result.assets[0].base64 })
       })
       const data = await res.json()
-      if (data.vendor) {
+      if (data.expense) {
+        // Keep what was read off the receipt, then ask which project it belongs to.
+        setScannedExpense(data.expense)
         setPendingAction("expense-scan")
         setShowProjectPicker(true)
       } else {
-        Alert.alert("Error", "Could not scan receipt")
+        Alert.alert("Could not read receipt", "Try again with the whole receipt in frame, or log the expense by hand.")
       }
     } catch (e) {
       Alert.alert("Error", "Could not scan receipt")
@@ -218,7 +229,7 @@ export default function QuickActionsScreen() {
   async function scanOverheadReceipt() {
     const permission = await ImagePicker.requestCameraPermissionsAsync()
     if (!permission.granted) { Alert.alert("Permission needed", "Please allow camera access"); return }
-    const result = await ImagePicker.launchCameraAsync({ quality: 0.6, maxWidth: 1920, maxHeight: 1920 })
+    const result = await ImagePicker.launchCameraAsync({ quality: 0.6 })
     if (result.canceled || !result.assets?.length) return
 
     setScanningOverhead(true)
@@ -259,12 +270,12 @@ export default function QuickActionsScreen() {
         setOverheadCategories(catData.categories || [])
         if (catData.categories?.length > 0) setSelectedOverheadCat(catData.categories[0].id)
         setShowOverheadModal(true)
-        setShowOverheadModal(true)
       } else {
-        Alert.alert("Scan Failed", "Server response: " + JSON.stringify(scanData).substring(0, 200))
+        Alert.alert("Could not read receipt", scanData.error || "Try again with the whole receipt in frame.")
       }
     } catch (e: any) {
-      Alert.alert("Error Details", e?.message || String(e))
+      console.log("Overhead receipt scan failed:", e)
+      Alert.alert("Could not scan receipt", "Check your connection and try again.")
     }
     setScanningOverhead(false)
   }
@@ -280,7 +291,7 @@ export default function QuickActionsScreen() {
           vendor: overheadScanned.vendor || "Unknown",
           description: overheadScanned.description || "",
           amount: overheadScanned.amount || 0,
-          date: overheadScanned.date || new Date().toISOString().split("T")[0],
+          date: overheadScanned.date || toDateKey(new Date()),
           receiptUrl: overheadScanned.receiptUrl,
           receiptName: "receipt.jpg",
         }),
@@ -471,7 +482,7 @@ export default function QuickActionsScreen() {
                   </View>
                   <View>
                     <Text style={{ fontSize: 11, fontWeight: "700", color: "#9CA3AF", marginBottom: 4 }}>DESCRIPTION</Text>
-                    <Text style={{ fontSize: 14, color: "#1C1F26" }}>{overheadScanned.description || "—"}</Text>
+                    <Text style={{ fontSize: 14, color: "#1C1F26" }}>{overheadScanned.description || "â€”"}</Text>
                   </View>
 
                   {overheadScanned.lineItems?.length > 0 && (

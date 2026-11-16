@@ -175,7 +175,7 @@ export default function PhotoViewerScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000" },
-  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingTop: 60, paddingHorizontal: 20, paddingBottom: 12, position: "absolute", top: 0, left: 0, right: 0, zIndex: 10, background: "linear-gradient(to bottom, rgba(0,0,0,0.6), transparent)" },
+  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingTop: 60, paddingHorizontal: 20, paddingBottom: 12, position: "absolute", top: 0, left: 0, right: 0, zIndex: 10 },
   backBtn: { backgroundColor: "rgba(0,0,0,0.5)", paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99 },
   backText: { color: "white", fontSize: 14, fontWeight: "600" },
   deleteBtn: { backgroundColor: "rgba(220,38,38,0.15)", paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99, borderWidth: 1, borderColor: "rgba(220,38,38,0.3)" },

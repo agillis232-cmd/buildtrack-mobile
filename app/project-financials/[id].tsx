@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator
 import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
+import { parseDateOnly } from "@/lib/dates"
 
 export default function ProjectFinancialsScreen() {
   const { id } = useLocalSearchParams()
@@ -160,7 +161,7 @@ export default function ProjectFinancialsScreen() {
                 <Text style={styles.paymentDesc}>{payment.description}</Text>
                 {payment.dueDate && (
                   <Text style={styles.paymentDate}>
-                    Due: {new Date(payment.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                    Due: {parseDateOnly(payment.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                   </Text>
                 )}
               </View>

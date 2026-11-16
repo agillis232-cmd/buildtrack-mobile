@@ -86,7 +86,7 @@ export default function SpecBookScreen() {
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
           <Text style={styles.headerTitle}>Spec Book</Text>
-          <Text style={styles.headerSub}>{meta.projectName} · {filledItems}/{totalItems} specified</Text>
+          <Text style={styles.headerSub}>{meta.projectName} Â· {filledItems}/{totalItems} specified</Text>
         </View>
       </View>
 
@@ -139,9 +139,9 @@ export default function SpecBookScreen() {
                       <View style={styles.itemRow}>
                         <Text style={styles.itemCode}>{code}</Text>
                         <View style={{ flex: 1 }}>
-                          <Text style={styles.itemName}>{item.name || "—"}</Text>
+                          <Text style={styles.itemName}>{item.name || "â€”"}</Text>
                           {!isExpanded && hasSpecs && (
-                            <Text style={styles.itemPreview}>{[item.brand, item.model, item.color].filter(Boolean).join(" · ")}</Text>
+                            <Text style={styles.itemPreview}>{[item.brand, item.model, item.color].filter(Boolean).join(" Â· ")}</Text>
                           )}
                         </View>
                         {item.swatch && item.swatch !== "#eae9e9" && (

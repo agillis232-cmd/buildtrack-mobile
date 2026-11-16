@@ -4,6 +4,7 @@ import { useRouter } from "expo-router"
 import { useState } from "react"
 import * as ImagePicker from "expo-image-picker"
 import { API_URL } from "@/lib/api"
+import Constants from "expo-constants"
 
 export default function ProfileScreen() {
   const { user, signOut, token } = useAuth()
@@ -53,13 +54,12 @@ export default function ProfileScreen() {
   }
 
   const initials = user?.name?.split(" ").map(n => n[0]).join("").toUpperCase() || "?"
-console.log("User role:", user?.role)
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.headerBanner}>
         <View style={styles.headerCircle} />
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={styles.backText}>â† Back</Text>
+          <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.pageTitle}>Profile</Text>
 
@@ -99,7 +99,7 @@ console.log("User role:", user?.role)
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>App</Text>
         <View style={styles.card}>
-          <Row label="Version" value="1.0.0" />
+          <Row label="Version" value={Constants.expoConfig?.version || "-"} />
           <Row label="Platform" value="BuildTrack Pro" last />
         </View>
       </View>
@@ -109,15 +109,15 @@ console.log("User role:", user?.role)
           <View style={styles.card}>
             <TouchableOpacity style={styles.adminRow} onPress={() => router.push("/team" as any)}>
               <Text style={styles.adminRowLabel}>Team Management</Text>
-              <Text style={styles.adminRowArrow}>â€º</Text>
+              <Text style={styles.adminRowArrow}>›</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.adminRow} onPress={() => router.push("/financials" as any)}>
               <Text style={styles.adminRowLabel}>Company Financials</Text>
-              <Text style={styles.adminRowArrow}>â€º</Text>
+              <Text style={styles.adminRowArrow}>›</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.adminRow} onPress={() => router.push("/organization" as any)}>
               <Text style={styles.adminRowLabel}>Company Profile</Text>
-              <Text style={styles.adminRowArrow}>â€º</Text>
+              <Text style={styles.adminRowArrow}>›</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -196,6 +196,7 @@ const styles = StyleSheet.create({
   rowLabel: { fontSize: 14, color: "#6B7280" },
   rowValue: { fontSize: 14, fontWeight: "600", color: "#1A1A1A", maxWidth: "60%", textAlign: "right" },
  signOutBtn: { backgroundColor: "#DC2626", borderRadius: 14, padding: 16, alignItems: "center", marginHorizontal: 16 },
+ signOutText: { color: "white", fontSize: 16, fontWeight: "700" },
   adminRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 14 },
   adminRowLabel: { fontSize: 14, fontWeight: "600", color: "#1A1A1A" },
   adminRowArrow: { fontSize: 20, color: "#D1D5DB" },

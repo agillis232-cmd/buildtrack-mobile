@@ -5,6 +5,7 @@ import { useRouter } from "expo-router"
 import { API_URL } from "@/lib/api"
 import DatePicker from "@/components/DatePicker"
 import * as DocumentPicker from "expo-document-picker"
+import { parseDateOnly } from "@/lib/dates"
 
 const STATUS_COLORS: Record<string, string> = {
   OPEN: "#3B82F6",
@@ -270,7 +271,7 @@ export default function RFIsScreen() {
               <View style={styles.rfiMeta}>
                 <Text style={styles.rfiMetaText}>By {rfi.submittedBy?.name}</Text>
                 {rfi.assignedToUser && <Text style={styles.rfiMetaText}>→ {rfi.assignedToUser?.name}</Text>}
-                {rfi.dueDate && <Text style={[styles.rfiMetaText, new Date(rfi.dueDate) < new Date() && rfi.status === "OPEN" && { color: "#DC2626" }]}>Due {new Date(rfi.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</Text>}
+                {rfi.dueDate && <Text style={[styles.rfiMetaText, new Date(rfi.dueDate) < new Date() && rfi.status === "OPEN" && { color: "#DC2626" }]}>Due {parseDateOnly(rfi.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</Text>}
                 <Text style={styles.rfiMetaText}>{rfi._count?.responses || 0} response{rfi._count?.responses !== 1 ? "s" : ""}</Text>
               </View>
             </TouchableOpacity>
@@ -402,7 +403,7 @@ export default function RFIsScreen() {
               {showDetailModal?.dueDate && (
                 <View style={styles.detailInfoRow}>
                   <Text style={styles.detailInfoLabel}>Due date</Text>
-                  <Text style={styles.detailInfoValue}>{new Date(showDetailModal.dueDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</Text>
+                  <Text style={styles.detailInfoValue}>{parseDateOnly(showDetailModal.dueDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</Text>
                 </View>
               )}
               {/* Documents */}

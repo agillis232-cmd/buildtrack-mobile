@@ -99,7 +99,7 @@ export default function LogsScreen() {
     setSaving(true)
     try {
       const url = editingLog
-        ? `${API_URL}/api/daily-logs/${editingLog.id}`
+        ? `${API_URL}/api/mobile/projects/${id}/logs/${editingLog.id}`
         : `${API_URL}/api/mobile/projects/${id}/logs`
       
       const res = await fetch(url, {
@@ -123,7 +123,7 @@ export default function LogsScreen() {
       const data = await res.json()
       if (data.log) {
         if (editingLog) {
-          setLogs(prev => prev.map(l => l.id === data.log.id ? data.log : l))
+          setLogs(prev => prev.map(l => l.id === data.log.id ? { ...l, ...data.log } : l))
         } else {
           setLogs(prev => [data.log, ...prev])
         }
@@ -131,7 +131,7 @@ export default function LogsScreen() {
         setAdding(false)
         setEditingLog(null)
       } else {
-        Alert.alert("Error", "Could not save log")
+        Alert.alert("Error", data.error || "Could not save log")
       }
     } catch (e) {
       Alert.alert("Error", "Connection error")

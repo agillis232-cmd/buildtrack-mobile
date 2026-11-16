@@ -4,6 +4,7 @@ import { useRouter } from "expo-router"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
 import DateTimePicker from "@react-native-community/datetimepicker"
+import { toDateKey } from "@/lib/dates"
 
 const PROJECT_TYPES = [
   "Full Renovation",
@@ -56,8 +57,8 @@ export default function NewProjectScreen() {
           state,
           projectType,
           contractValue,
-          startDate: startDate?.toISOString().split("T")[0],
-          endDate: endDate?.toISOString().split("T")[0],
+          startDate: startDate ? toDateKey(startDate) : undefined,
+          endDate: endDate ? toDateKey(endDate) : undefined,
         })
       })
       const data = await res.json()
