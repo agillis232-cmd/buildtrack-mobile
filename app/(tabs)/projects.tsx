@@ -1,11 +1,13 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, TextInput, Alert, Modal, Dimensions } from "react-native"
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, useCallback } from "react"
+import { useFocusEffect } from "expo-router"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
 import { toDateKey, dateKeyOf, parseDateOnly, parseTimeLabel } from "@/lib/dates"
 import DateTimePicker from "@react-native-community/datetimepicker"
 import { Linking } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
+import { loadCached } from "@/lib/cache"
 
 const EVENT_TYPES = ["MEETING", "INSPECTION", "DELIVERY", "ORDER", "WORK", "OTHER"]
 const SCREEN_WIDTH = Dimensions.get("window").width
@@ -75,7 +77,8 @@ export default function ScheduleScreen() {
   const today = new Date()
   const weekDays = getWeekDays(weekBase)
 
-  useEffect(() => {
+  // Refresh whenever this tab comes back into view. The saved copy shows instantly in the meantime.
+  useFocusEffect(useCallback(() => {
     if (token) {
       loadEvents()
       loadProjects()
@@ -83,15 +86,11 @@ export default function ScheduleScreen() {
     } else {
       setLoading(false)
     }
-  }, [token])
+  }, [token]))
 
   async function loadProjects() {
     try {
-      const res = await fetch(`${API_URL}/api/mobile/projects`, {
-        headers: { "Authorization": `Bearer ${token}` }
-      })
-      const data = await res.json()
-      setProjects(data.projects || [])
+      await loadCached("/api/mobile/projects", token, data => setProjects(data.projects || []))
     } catch (e) { console.log("Error loading projects:", e) }
   }
 
@@ -112,11 +111,10 @@ export default function ScheduleScreen() {
       from.setMonth(from.getMonth() - 1)
       const to = new Date()
       to.setMonth(to.getMonth() + 3)
-      const res = await fetch(`${API_URL}/api/mobile/schedule?from=${from.toISOString()}&to=${to.toISOString()}`, {
-        headers: { "Authorization": `Bearer ${token}` }
-      })
-      const data = await res.json()
-      setEvents(data.events || [])
+      await loadCached(`/api/mobile/schedule?from=${from.toISOString()}&to=${to.toISOString()}`, token, data => {
+        setEvents(data.events || [])
+        setLoading(false)
+      }, "schedule-events")
     } catch (e) { console.log("Error loading events:", e) }
     setLoading(false)
     setRefreshing(false)

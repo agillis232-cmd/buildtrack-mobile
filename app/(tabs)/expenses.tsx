@@ -1,9 +1,10 @@
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from "react-native"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useAuth } from "@/lib/auth"
-import { useRouter } from "expo-router"
+import { useRouter, useFocusEffect } from "expo-router"
 import { API_URL } from "@/lib/api"
 import { parseDateOnly } from "@/lib/dates"
+import { loadCached } from "@/lib/cache"
 
 export default function ExpensesScreen() {
   const { token } = useAuth()
@@ -11,17 +12,17 @@ export default function ExpensesScreen() {
   const [expenses, setExpenses] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+  // Refresh whenever this tab comes back into view. The saved copy shows instantly in the meantime.
+  useFocusEffect(useCallback(() => {
     if (token) loadExpenses()
-  }, [token])
+  }, [token]))
 
   async function loadExpenses() {
     try {
-      const res = await fetch(`${API_URL}/api/mobile/expenses`, {
-        headers: { "Authorization": `Bearer ${token}` }
+      await loadCached("/api/mobile/expenses", token, data => {
+        setExpenses(data.expenses || [])
+        setLoading(false)
       })
-      const data = await res.json()
-      setExpenses(data.expenses || [])
     } catch (e) {
       console.log("Error loading expenses:", e)
     }

@@ -1,10 +1,11 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, RefreshControl } from "react-native"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useAuth } from "@/lib/auth"
-import { useRouter } from "expo-router"
+import { useRouter, useFocusEffect } from "expo-router"
 import { API_URL } from "@/lib/api"
 import * as DocumentPicker from "expo-document-picker"
 import { openDocument as openInBluebeam } from "@/lib/openDocument"
+import { loadCached } from "@/lib/cache"
 
 
 export default function DocumentsScreen() {
@@ -15,17 +16,17 @@ export default function DocumentsScreen() {
   const [refreshing, setRefreshing] = useState(false)
   const [uploading, setUploading] = useState(false)
 
-  useEffect(() => {
+  // Refresh whenever this tab comes back into view. The saved copy shows instantly in the meantime.
+  useFocusEffect(useCallback(() => {
     if (token) loadDocuments()
-  }, [token])
+  }, [token]))
 
   async function loadDocuments() {
     try {
-      const res = await fetch(`${API_URL}/api/mobile/documents`, {
-        headers: { "Authorization": `Bearer ${token}` }
+      await loadCached("/api/mobile/documents", token, data => {
+        setDocuments(data.documents || [])
+        setLoading(false)
       })
-      const data = await res.json()
-      setDocuments(data.documents || [])
     } catch (e) {
       console.log("Error loading documents:", e)
     }

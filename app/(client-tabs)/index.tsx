@@ -1,10 +1,11 @@
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl, TouchableOpacity, Modal } from "react-native"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useAuth } from "@/lib/auth"
-import { useRouter } from "expo-router"
+import { useRouter, useFocusEffect } from "expo-router"
 import { API_URL } from "@/lib/api"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { parseDateOnly } from "@/lib/dates"
+import { loadCached } from "@/lib/cache"
 
 const CLIENT_KPI_OPTIONS = [
   { key: "contract", label: "Contract Total", description: "Total contract value including approved COs", color: "white" },
@@ -28,9 +29,10 @@ export default function ClientDashboard() {
     loadKPIPreferences()
   }, [])
 
-  useEffect(() => {
+  // Refresh whenever this tab comes back into view. The saved copy shows instantly in the meantime.
+  useFocusEffect(useCallback(() => {
     if (token) loadProject()
-  }, [token])
+  }, [token]))
 
   async function loadKPIPreferences() {
     try {
@@ -51,11 +53,10 @@ export default function ClientDashboard() {
 
   async function loadProject() {
     try {
-      const res = await fetch(`${API_URL}/api/mobile/client/project`, {
-        headers: { "Authorization": `Bearer ${token}` }
+      await loadCached("/api/mobile/client/project", token, data => {
+        setProject(data.project)
+        setLoading(false)
       })
-      const data = await res.json()
-      setProject(data.project)
     } catch (e) {
       console.log("Error loading client project:", e)
     }

@@ -5,6 +5,7 @@ import { useRouter } from "expo-router"
 import { API_URL } from "@/lib/api"
 import * as ImagePicker from "expo-image-picker"
 import { toDateKey } from "@/lib/dates"
+import { loadCached } from "@/lib/cache"
 
 const ACTION_ICONS: Record<string, { lines: number[], circle?: boolean }> = {
   photo: { circle: true, lines: [14, 10] },
@@ -91,11 +92,7 @@ export default function QuickActionsScreen() {
 
   async function loadProjects() {
     try {
-      const res = await fetch(`${API_URL}/api/mobile/projects`, {
-        headers: { "Authorization": `Bearer ${token}` }
-      })
-      const data = await res.json()
-      setProjects(data.projects || [])
+      await loadCached("/api/mobile/projects", token, data => setProjects(data.projects || []))
     } catch (e) {
       console.log("Error loading projects:", e)
     }

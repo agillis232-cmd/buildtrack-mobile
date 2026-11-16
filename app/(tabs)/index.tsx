@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl, ActivityIndicator, Image, Modal } from "react-native"
-import { useRouter } from "expo-router"
+import { useRouter, useFocusEffect } from "expo-router"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { Ionicons } from "@expo/vector-icons"
+import { loadCached } from "@/lib/cache"
 
 export default function DashboardScreen() {
   const { user, signOut, token } = useAuth()
@@ -64,18 +65,17 @@ export default function DashboardScreen() {
     return { key, label: option.label, value: getKPIValue(key), color: option.color }
   })
 
-  useEffect(() => {
+  // Refresh whenever this tab comes back into view. The saved copy shows instantly in the meantime.
+  useFocusEffect(useCallback(() => {
     if (token) { loadProjects() } else { setLoading(false) }
-  }, [token])
+  }, [token]))
 
   async function loadProjects() {
     try {
-      const res = await fetch(`${API_URL}/api/mobile/projects`, {
-        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" }
+      await loadCached("/api/mobile/projects", token, data => {
+        setProjects(data.projects || [])
+        setLoading(false)
       })
-      if (!res.ok) { setLoading(false); setRefreshing(false); return }
-      const data = await res.json()
-      setProjects(data.projects || [])
     } catch (e) { console.log("Error loading projects:", e) }
     setLoading(false)
     setRefreshing(false)

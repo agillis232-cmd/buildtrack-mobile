@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
 import { Ionicons } from "@expo/vector-icons"
+import { loadCached } from "@/lib/cache"
 
 const WEATHER_OPTIONS = ["Clear", "Partly Cloudy", "Cloudy", "Rain", "Snow", "Windy", "Hot", "Cold"]
 const DELAY_REASONS = ["None", "Weather", "Material delay", "Sub no-show", "Inspection delay", "Client decision", "Permit issue", "Other"]
@@ -49,11 +50,10 @@ export default function LogsScreen() {
 
   async function loadLogs() {
     try {
-      const res = await fetch(`${API_URL}/api/mobile/projects/${id}/logs`, {
-        headers: { "Authorization": `Bearer ${token}` }
+      await loadCached(`/api/mobile/projects/${id}/logs`, token, data => {
+        setLogs(data.logs || [])
+        setLoading(false)
       })
-      const data = await res.json()
-      setLogs(data.logs || [])
     } catch (e) { console.log(e) }
     setLoading(false)
   }

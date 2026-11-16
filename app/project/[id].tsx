@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
 import { Ionicons } from "@expo/vector-icons"
+import { loadCached } from "@/lib/cache"
 
 export default function ProjectDetailScreen() {
   const { id } = useLocalSearchParams()
@@ -22,11 +23,10 @@ export default function ProjectDetailScreen() {
 
   async function loadProject() {
     try {
-      const res = await fetch(`${API_URL}/api/mobile/projects/${id}`, {
-        headers: { "Authorization": `Bearer ${token}` }
+      await loadCached(`/api/mobile/projects/${id}`, token, data => {
+        setProject(data.project)
+        setLoading(false)
       })
-      const data = await res.json()
-      setProject(data.project)
     } catch (e) {
       console.log("Error loading project:", e)
     }

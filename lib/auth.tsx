@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from "react"
 import * as SecureStore from "expo-secure-store"
 import type { Href } from "expo-router"
 import { API_URL } from "./api"
+import { setCacheOwner, clearCachedData } from "./cache"
 import * as Notifications from "expo-notifications"
 
 interface User {
@@ -64,6 +65,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function clearSession() {
     await SecureStore.deleteItemAsync("auth_token")
     await SecureStore.deleteItemAsync("auth_user")
+    setCacheOwner(null)
+    await clearCachedData()
     setUser(null)
     setToken(null)
   }
@@ -75,8 +78,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       savedToken = await SecureStore.getItemAsync("auth_token")
       const savedUser = await SecureStore.getItemAsync("auth_user")
       if (savedToken && savedUser) {
+        const restored = JSON.parse(savedUser)
+        setCacheOwner(restored?.id)
         setToken(savedToken)
-        setUser(JSON.parse(savedUser))
+        setUser(restored)
       } else {
         savedToken = null
       }
@@ -111,6 +116,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!res.ok) return data.error || "Login failed"
       await SecureStore.setItemAsync("auth_token", data.token)
       await SecureStore.setItemAsync("auth_user", JSON.stringify(data.user))
+      setCacheOwner(data.user?.id)
       setToken(data.token)
       setUser(data.user)
       savePushToken(data.token)

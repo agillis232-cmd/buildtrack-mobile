@@ -1,11 +1,12 @@
 import { useLocalSearchParams, useRouter } from "expo-router"
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Image, Dimensions } from "react-native"
+import { View, Text, StyleSheet, ScrollView, FlatList, TouchableOpacity, ActivityIndicator, Alert, Image, Dimensions } from "react-native"
 import { useEffect, useState, useCallback } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
 import { cloudinaryThumb } from "@/lib/images"
 import * as ImagePicker from "expo-image-picker"
 import { Ionicons } from "@expo/vector-icons"
+import { loadCached } from "@/lib/cache"
 
 const SCREEN_WIDTH = Dimensions.get("window").width
 const PHOTO_SIZE = (SCREEN_WIDTH - 48) / 3
@@ -80,11 +81,10 @@ export default function PhotosScreen() {
 
   async function loadPhotos() {
     try {
-      const res = await fetch(`${API_URL}/api/mobile/projects/${id}/photos`, {
-        headers: { "Authorization": `Bearer ${token}` },
+      await loadCached(`/api/mobile/projects/${id}/photos`, token, data => {
+        setPhotos(data.photos || [])
+        setLoading(false)
       })
-      const data = await res.json()
-      setPhotos(data.photos || [])
     } catch (e) {
       console.log("Error loading photos:", e)
     }
@@ -197,21 +197,26 @@ export default function PhotosScreen() {
         </View>
       )}
 
-      <ScrollView contentContainerStyle={styles.content}>
-        {photos.length === 0 ? (
+      {/* Only the photos near the screen are drawn, so a project with hundreds of photos stays smooth. */}
+      <FlatList
+        data={photos}
+        keyExtractor={(photo: any) => photo.id}
+        numColumns={3}
+        contentContainerStyle={styles.content}
+        columnWrapperStyle={styles.gridRow}
+        initialNumToRender={18}
+        windowSize={7}
+        renderItem={({ item }: { item: any }) => (
+          <Image source={{ uri: cloudinaryThumb(item.url) }} style={styles.photo} />
+        )}
+        ListEmptyComponent={
           <View style={styles.emptyState}>
             <Ionicons name="camera-outline" size={48} color="#94A3B8" />
             <Text style={styles.emptyText}>No photos yet</Text>
             <Text style={styles.emptySubText}>Tap the button below to add photos</Text>
           </View>
-        ) : (
-          <View style={styles.grid}>
-            {photos.map((photo: any) => (
-              <Image key={photo.id} source={{ uri: cloudinaryThumb(photo.url) }} style={styles.photo} />
-            ))}
-          </View>
-        )}
-      </ScrollView>
+        }
+      />
 
       <TouchableOpacity style={[styles.fab, isUploading && styles.fabDisabled]} onPress={pickSource} disabled={isUploading}>
         <Ionicons name="add" size={28} color="#fff" />
@@ -224,7 +229,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F5F4F0" },
   center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#F5F4F0" },
   content: { padding: 16, paddingBottom: 80 },
-  grid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  gridRow: { gap: 8, marginBottom: 8 },
   photo: { width: PHOTO_SIZE, height: PHOTO_SIZE, borderRadius: 8, backgroundColor: "#E2E8F0" },
   fab: { position: "absolute", bottom: 24, right: 24, width: 56, height: 56, borderRadius: 28, backgroundColor: "#F97316", justifyContent: "center", alignItems: "center", shadowColor: "#000", shadowOpacity: 0.2, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 6 },
   fabDisabled: { opacity: 0.5 },

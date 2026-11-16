@@ -6,6 +6,11 @@ import * as Notifications from "expo-notifications"
 import * as Device from "expo-device"
 import { Platform } from "react-native"
 
+// Debug logging is for development. In the App Store build it only slows the app down.
+if (!__DEV__) {
+  console.log = () => {}
+}
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
