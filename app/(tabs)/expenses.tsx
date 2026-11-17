@@ -1,9 +1,12 @@
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from "react-native"
+import { View, Text, StyleSheet, Pressable, ActivityIndicator, RefreshControl } from "react-native"
+import { Ionicons } from "@expo/vector-icons"
 import { useEffect, useState, useCallback } from "react"
 import { useAuth } from "@/lib/auth"
 import { useRouter, useFocusEffect } from "expo-router"
 import { API_URL } from "@/lib/api"
 import { parseDateOnly } from "@/lib/dates"
+import { Screen, ScreenHeader, CircleButton, Card, EmptyState } from "@/components/ui"
+import { colors, type, humanize } from "@/lib/theme"
 import { loadCached } from "@/lib/cache"
 
 export default function ExpensesScreen() {
@@ -11,6 +14,7 @@ export default function ExpensesScreen() {
   const router = useRouter()
   const [expenses, setExpenses] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
 
   // Refresh whenever this tab comes back into view. The saved copy shows instantly in the meantime.
   useFocusEffect(useCallback(() => {
@@ -27,76 +31,63 @@ export default function ExpensesScreen() {
       console.log("Error loading expenses:", e)
     }
     setLoading(false)
+    setRefreshing(false)
   }
 
-  const total = expenses.reduce((sum, e) => sum + e.amount, 0)
+  const total = expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0)
 
-  if (loading) return <View style={styles.center}><ActivityIndicator color="#F97316" /></View>
+  if (loading) return <View style={styles.center}><ActivityIndicator color={colors.accent} /></View>
 
   return (
-    <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        {/* Header */}
-        <View style={styles.headerBanner}>
-          <View style={styles.headerCircle} />
-          <Text style={styles.pageTitle}>Expenses</Text>
-          <Text style={styles.totalAmount}>${total.toLocaleString("en-US", { minimumFractionDigits: 2 })}</Text>
-          <Text style={styles.totalSub}>{expenses.length} expenses across all projects</Text>
-        </View>
+    <Screen
+      tabBar
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadExpenses() }} tintColor={colors.accent} />}
+    >
+      <ScreenHeader title="Expenses" subtitle={`${expenses.length} expense${expenses.length === 1 ? "" : "s"} across all projects`} />
 
-        {expenses.length === 0 ? (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyTitle}>No expenses yet</Text>
-            <Text style={styles.emptySub}>Add expenses from within a project</Text>
-          </View>
-        ) : (
-          <View style={styles.list}>
-            {expenses.map(expense => (
-              <TouchableOpacity
-                key={expense.id}
-                style={styles.expenseCard}
-                onPress={() => router.push(`/project/${expense.projectId}/expenses` as any)}
-                activeOpacity={0.8}
-              >
-                <View style={styles.expenseLeft}>
-                  <View style={styles.expenseIconBox}>
-                    <View style={styles.expenseIconDot} />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.expenseVendor}>{expense.vendor}</Text>
-                    <Text style={styles.expenseDesc} numberOfLines={1}>{expense.description || expense.project?.name || ""}</Text>
-                    <Text style={styles.expenseDate}>{parseDateOnly(expense.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</Text>
-                  </View>
-                </View>
-                <Text style={styles.expenseAmount}>${expense.amount.toLocaleString()}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-      </ScrollView>
-    </View>
+      <Card style={styles.totalCard}>
+        <Text style={type.subhead}>Total</Text>
+        <Text style={styles.totalAmount} numberOfLines={1} adjustsFontSizeToFit>
+          ${total.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </Text>
+      </Card>
+
+      {expenses.length === 0 ? (
+        <EmptyState icon="wallet-outline" title="No expenses yet" subtitle="Add expenses from inside a project, or scan a receipt with Quick Add." />
+      ) : (
+        <Card>
+          {expenses.map((expense, index) => (
+            <Pressable
+              key={expense.id}
+              onPress={() => router.push(`/project/${expense.projectId}/expenses` as any)}
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.row, index > 0 && styles.rowDivider, pressed && { backgroundColor: colors.fillSubtle }]}
+            >
+              <View style={{ flex: 1, gap: 1 }}>
+                <Text style={type.headline} numberOfLines={1}>{expense.vendor || "Expense"}</Text>
+                <Text style={type.footnote} numberOfLines={1}>
+                  {[
+                    parseDateOnly(expense.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+                    expense.project?.name,
+                    expense.description,
+                  ].filter(Boolean).join(" · ")}
+                </Text>
+              </View>
+              <Text style={styles.amount}>${Number(expense.amount || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
+              <Ionicons name="chevron-forward" size={16} color={colors.chevron} />
+            </Pressable>
+          ))}
+        </Card>
+      )}
+    </Screen>
   )
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
-  content: { paddingBottom: 60 },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 28, marginBottom: 20, position: "relative", overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -60, right: -60, width: 220, height: 220, borderRadius: 110, backgroundColor: "rgba(249,115,22,0.08)" },
-  pageTitle: { fontSize: 14, fontWeight: "600", color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 },
-  totalAmount: { fontSize: 40, fontWeight: "700", color: "white", letterSpacing: -1, marginBottom: 4 },
-  totalSub: { fontSize: 13, color: "rgba(255,255,255,0.4)" },
-  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1", marginHorizontal: 16 },
-  emptyTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 6 },
-  emptySub: { fontSize: 13, color: "#9CA3AF", textAlign: "center" },
-  list: { paddingHorizontal: 16, gap: 8 },
-  expenseCard: { backgroundColor: "white", borderRadius: 14, padding: 14, borderWidth: 1, borderColor: "#E8E6E1", flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  expenseLeft: { flexDirection: "row", alignItems: "center", gap: 12, flex: 1, marginRight: 12 },
-  expenseIconBox: { width: 40, height: 40, borderRadius: 12, backgroundColor: "#FFF7ED", justifyContent: "center", alignItems: "center" },
-  expenseIconDot: { width: 14, height: 14, borderRadius: 4, backgroundColor: "#F97316" },
-  expenseVendor: { fontSize: 14, fontWeight: "700", color: "#1A1A1A", marginBottom: 2 },
-  expenseDesc: { fontSize: 12, color: "#9CA3AF", marginBottom: 2 },
-  expenseDate: { fontSize: 11, color: "#9CA3AF" },
-  expenseAmount: { fontSize: 16, fontWeight: "700", color: "#F97316" },
+  center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background },
+  totalCard: { padding: 16, gap: 2 },
+  totalAmount: { fontSize: 34, lineHeight: 41, fontWeight: "700", letterSpacing: -0.6, color: colors.text },
+  row: { minHeight: 60, paddingVertical: 10, paddingLeft: 16, paddingRight: 14, flexDirection: "row", alignItems: "center", gap: 10 },
+  rowDivider: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.separator },
+  amount: { fontSize: 17, fontWeight: "600", color: colors.text },
 })

@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from "react"
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl, ActivityIndicator, Image, Modal } from "react-native"
+import { View, Text, Pressable, TouchableOpacity, StyleSheet, RefreshControl, ActivityIndicator, Image, Modal } from "react-native"
 import { useRouter, useFocusEffect } from "expo-router"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { Ionicons } from "@expo/vector-icons"
+import { Screen, ScreenHeader, StatStrip, ListGroup, ListRow, SectionHeader, Card, Chip, ProgressBar, EmptyState } from "@/components/ui"
+import { colors, type, humanize } from "@/lib/theme"
 import { loadCached } from "@/lib/cache"
 
 export default function DashboardScreen() {
@@ -36,15 +38,15 @@ export default function DashboardScreen() {
   }
 
   const ALL_KPI_OPTIONS = [
-    { key: "active", label: "Active Projects", description: "Number of active projects", color: "white" },
+    { key: "active", label: "Active projects", description: "Number of active projects", color: "white" },
     ...(user?.role !== "FIELD_WORKER" ? [
-      { key: "contracted", label: "Total Contracted", description: "Sum of all contract values", color: "#F97316" },
+      { key: "contracted", label: "Contracted", description: "Sum of all contract values", color: "#F97316" },
     ] : []),
-    { key: "completion", label: "Avg Completion", description: "Average completion across projects", color: "#16A34A" },
-    { key: "preconstruction", label: "Pre-Construction", description: "Projects in pre-construction", color: "#3B82F6" },
-    { key: "totalLogs", label: "Total Logs", description: "Daily logs across all projects", color: "#8B5CF6" },
-    { key: "totalCOs", label: "Change Orders", description: "Total change orders", color: "#F97316" },
-    { key: "overdue", label: "Overdue Projects", description: "Projects past their end date", color: "#DC2626" },
+    { key: "completion", label: "Avg complete", description: "Average completion across projects", color: "#16A34A" },
+    { key: "preconstruction", label: "Pre-construction", description: "Projects in pre-construction", color: "#3B82F6" },
+    { key: "totalLogs", label: "Daily logs", description: "Daily logs across all projects", color: "#8B5CF6" },
+    { key: "totalCOs", label: "Change orders", description: "Total change orders", color: "#F97316" },
+    { key: "overdue", label: "Overdue", description: "Projects past their end date", color: "#DC2626" },
   ]
 
   const getKPIValue = (key: string) => {
@@ -87,134 +89,66 @@ export default function DashboardScreen() {
   const hour = new Date().getHours()
   const greeting = hour < 11 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening"
 
+  const isManager = user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER"
+  const initials = user?.name?.split(" ").map(n => n[0]).join("").toUpperCase() || "?"
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator color="#F97316" />
+        <ActivityIndicator color={colors.accent} />
       </View>
     )
   }
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#F97316" />}
+    <Screen
+      tabBar
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.accent} />}
     >
-      {/* Header Banner */}
-      <View style={styles.headerBanner}>
-        <View style={styles.headerOrangeCircle} />
-        <View style={styles.headerContent}>
-          <View style={styles.headerLeft}>
-            <Image source={require("../../assets/logo.png")} style={styles.headerLogo} resizeMode="contain" />
-            <View>
-              <Text style={styles.greeting}>{greeting},</Text>
-              <Text style={styles.name}>{firstName}</Text>
-            </View>
-          </View>
-          <TouchableOpacity onPress={() => router.push("/profile" as any)}>
+      <ScreenHeader
+        eyebrow={`${greeting},`}
+        title={firstName}
+        trailing={
+          <Pressable
+            onPress={() => router.push("/profile" as any)}
+            accessibilityRole="button"
+            accessibilityLabel="Profile and settings"
+            style={({ pressed }) => pressed && { opacity: 0.6 }}
+          >
             {user?.avatarUrl ? (
               <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
             ) : (
-              <View style={styles.avatarFallback}>
-                <Text style={styles.avatarText}>
-                  {user?.name?.split(" ").map(n => n[0]).join("").toUpperCase() || "?"}
-                </Text>
+              <View style={[styles.avatar, styles.avatarFallback]}>
+                <Text style={styles.avatarText}>{initials}</Text>
               </View>
             )}
-          </TouchableOpacity>
-        </View>
-      </View>
+          </Pressable>
+        }
+      />
 
-      {/* Assistant button */}
-      <TouchableOpacity
+      {/* Assistant */}
+      <Pressable
         onPress={() => router.push("/assistant")}
-        style={{
-          flexDirection: "row", alignItems: "center", gap: 10,
-          backgroundColor: "#1C1F26", padding: 14, borderRadius: 12, marginBottom: 16,
-        }}
+        accessibilityRole="button"
+        accessibilityLabel="Ask the assistant or jot a task"
+        style={({ pressed }) => [styles.askField, pressed && { opacity: 0.6 }]}
       >
-        <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "#F97316", alignItems: "center", justifyContent: "center" }}>
-          <Ionicons name="hardware-chip-outline" size={20} color="white" />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={{ color: "white", fontSize: 14, fontWeight: "700" }}>BuildTrack Assistant</Text>
-          <Text style={{ color: "rgba(255,255,255,0.4)", fontSize: 11 }}>Brain dump, create tasks, notes & more</Text>
-        </View>
-        <Text style={{ color: "rgba(255,255,255,0.3)", fontSize: 16 }}>→</Text>
-      </TouchableOpacity>
+        <Ionicons name="sparkles-outline" size={20} color={colors.tint} />
+        <Text style={styles.askFieldText} numberOfLines={1}>Ask the assistant or jot a task</Text>
+      </Pressable>
 
-      {/* Tasks & Notes quick links */}
-      <View style={{ flexDirection: "row", gap: 10, marginBottom: 10 }}>
-        <TouchableOpacity
-          onPress={() => router.push("/tasks")}
-          style={{
-            flex: 1, flexDirection: "row", alignItems: "center", gap: 10,
-            backgroundColor: "white", padding: 14, borderRadius: 12,
-            borderWidth: 1, borderColor: "#E8E6E1",
-          }}
-        >
-          <Ionicons name="checkmark-circle-outline" size={20} color="#F97316" />
-          <View>
-            <Text style={{ fontSize: 13, fontWeight: "700", color: "#1C1F26" }}>Tasks</Text>
-            <Text style={{ fontSize: 10, color: "#999" }}>Manage to-dos</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => router.push("/notes")}
-          style={{
-            flex: 1, flexDirection: "row", alignItems: "center", gap: 10,
-            backgroundColor: "white", padding: 14, borderRadius: 12,
-            borderWidth: 1, borderColor: "#E8E6E1",
-          }}
-        >
-          <Ionicons name="document-text-outline" size={20} color="#F97316" />
-          <View>
-            <Text style={{ fontSize: 13, fontWeight: "700", color: "#1C1F26" }}>Notes</Text>
-            <Text style={{ fontSize: 10, color: "#999" }}>View & pin notes</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-
-      {/* Time tracking link */}
-      <TouchableOpacity
-        onPress={() => router.push("/time")}
-        style={{
-          flexDirection: "row", alignItems: "center", gap: 10,
-          backgroundColor: "white", padding: 14, borderRadius: 12,
-          marginBottom: 16, borderWidth: 1, borderColor: "#E8E6E1",
-        }}
-      >
-        <Ionicons name="time-outline" size={20} color="#F97316" />
-        <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 13, fontWeight: "700", color: "#1C1F26" }}>Time tracking</Text>
-          <Text style={{ fontSize: 10, color: "#999" }}>Log hours & approve timesheets</Text>
-        </View>
-        <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
-      </TouchableOpacity>
-
-      {/* KPI strip */}
-      <View style={styles.kpiRow}>
-        {kpiTiles.map((tile) => (
-          <TouchableOpacity
-            key={tile.key}
-            style={styles.kpiCard}
-            onPress={() => setCustomizing(true)}
-            activeOpacity={0.8}
-          >
-            <View style={styles.kpiCircle} />
-            <Text style={styles.kpiLabel}>{tile.label}</Text>
-            <Text style={[styles.kpiValue, { color: tile.color }]}>{tile.value}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      {/* Headline numbers. Tap to choose which three to show. */}
+      <StatStrip
+        stats={kpiTiles.map(tile => ({ label: tile.label, value: tile.value }))}
+        onPress={() => setCustomizing(true)}
+      />
 
       {/* Customize Modal */}
       <Modal visible={customizing} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Customize Dashboard</Text>
-            <Text style={styles.modalSub}>Choose 3 metrics to display</Text>
+            <Text style={styles.modalTitle}>Dashboard numbers</Text>
+            <Text style={styles.modalSub}>Choose up to three to show</Text>
             {ALL_KPI_OPTIONS.map(option => {
               const isSelected = selectedKPIs.includes(option.key)
               const selectedIndex = selectedKPIs.indexOf(option.key)
@@ -259,191 +193,101 @@ export default function DashboardScreen() {
         </View>
       </Modal>
 
+      <ListGroup>
+        <ListRow icon="checkmark-circle-outline" title="Tasks" onPress={() => router.push("/tasks")} />
+        <ListRow icon="document-text-outline" title="Notes" onPress={() => router.push("/notes")} />
+        <ListRow icon="time-outline" title="Time tracking" onPress={() => router.push("/time")} />
+      </ListGroup>
+
       {/* Projects */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Active projects</Text>
-        {(user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER") && (
-          <TouchableOpacity onPress={() => router.push("/new-project" as any)} style={styles.newProjectBtn}>
-            <Text style={styles.newProjectBtnText}>+ New</Text>
-          </TouchableOpacity>
+      <View style={{ gap: 8 }}>
+        <SectionHeader
+          title="Projects"
+          actionLabel={isManager ? "New" : undefined}
+          actionIcon="add"
+          onAction={() => router.push("/new-project" as any)}
+        />
+        {projects.length === 0 ? (
+          <EmptyState
+            icon="business-outline"
+            title="No projects yet"
+            subtitle={isManager ? "Tap New to create your first project." : "Projects you are assigned to will show up here."}
+          />
+        ) : (
+          <Card>
+            {projects.map((project, index) => (
+              <Pressable
+                key={project.id}
+                onPress={() => router.push(`/project/${project.id}` as any)}
+                accessibilityRole="button"
+                accessibilityLabel={`${project.name}, ${project.completionPct} percent complete`}
+                style={({ pressed }) => [styles.projectRow, index > 0 && styles.projectRowDivider, pressed && { backgroundColor: colors.fillSubtle }]}
+              >
+                <View style={styles.projectTop}>
+                  <View style={{ flex: 1, gap: 1 }}>
+                    <Text style={type.headline} numberOfLines={1}>{project.name}</Text>
+                    <Text style={type.footnote} numberOfLines={1}>
+                      {[
+                        [project.city, project.state].filter(Boolean).join(", "),
+                        humanize(project.projectType),
+                        isManager ? `$${(project.contractValue / 1000).toFixed(0)}k` : null,
+                      ].filter(Boolean).join(" · ")}
+                    </Text>
+                  </View>
+                  {project.status !== "ACTIVE" && <Chip label={humanize(project.status)} tone="warning" />}
+                  <Text style={styles.projectPercent}>{project.completionPct}%</Text>
+                  <Ionicons name="chevron-forward" size={16} color={colors.chevron} />
+                </View>
+                <ProgressBar percent={project.completionPct} />
+              </Pressable>
+            ))}
+          </Card>
         )}
       </View>
-      {projects.length === 0 ? (
-        <View style={styles.emptyCard}>
-          <Text style={styles.emptyTitle}>No projects yet</Text>
-          <Text style={styles.emptySub}>Tap + New to create your first project</Text>
-        </View>
-      ) : (
-        projects.map(project => (
-          <TouchableOpacity
-            key={project.id}
-            style={styles.projectCard}
-            onPress={() => router.push(`/project/${project.id}` as any)}
-            activeOpacity={0.8}
-          >
-            <View style={styles.projectTop}>
-              <View style={[styles.projectDot, {
-                backgroundColor: project.completionPct > 70 ? "#2D5E0E" :
-                  project.completionPct > 40 ? "#854F0B" : "#1C1F26"
-              }]} />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.projectName}>{project.name}</Text>
-                <Text style={styles.projectSub}>{project.city}, {project.state} · {project.projectType}</Text>
-              </View>
-              <View style={[styles.statusBadge, {
-                backgroundColor: project.status === "ACTIVE" ? "#DCFCE7" : "#FEF3C7"
-              }]}>
-                <Text style={[styles.statusText, {
-                  color: project.status === "ACTIVE" ? "#16A34A" : "#D97706"
-                }]}>
-                  {project.status === "ACTIVE" ? "Active" : project.status}
-                </Text>
-              </View>
-            </View>
-            <View style={styles.progressRow}>
-              <View style={styles.progressBar}>
-                <View style={[styles.progressFill, {
-                  width: `${project.completionPct}%`,
-                  backgroundColor: project.completionPct > 70 ? "#16A34A" : "#F97316"
-                }]} />
-              </View>
-              <Text style={styles.progressText}>{project.completionPct}%</Text>
-            </View>
-            <View style={styles.projectStats}>
-              {(user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER") && (
-                <View style={styles.statPill}>
-                  <Text style={styles.statPillText}>Contract: ${(project.contractValue / 1000).toFixed(0)}k</Text>
-                </View>
-              )}
-              <View style={styles.statPill}>
-                <Text style={styles.statPillText}>Logs: {project._count?.dailyLogs || 0}</Text>
-              </View>
-              <View style={styles.statPill}>
-                <Text style={styles.statPillText}>COs: {project._count?.changeOrders || 0}</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        ))
-      )}
 
-
-      {/* Business Tiles */}
-      {(user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER") && (
-        <View style={{ marginBottom: 24 }}>
-          <Text style={{ fontSize: 13, fontWeight: "700", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>Business</Text>
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-
-            <TouchableOpacity onPress={() => router.push("/vendor-invoices" as any)} style={{ width: "48.5%", backgroundColor: "white", borderRadius: 14, padding: 16, borderWidth: 1, borderColor: "#E8E6E1" }}>
-              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "rgba(220,38,38,0.1)", justifyContent: "center", alignItems: "center", marginBottom: 10 }}>
-                <Ionicons name="receipt-outline" size={18} color="#DC2626" />
-              </View>
-              <Text style={{ fontSize: 14, fontWeight: "700", color: "#1C1F26", marginBottom: 2 }}>Vendor Invoices</Text>
-              <Text style={{ fontSize: 11, color: "#9CA3AF" }}>Bills & payments</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => router.push("/financials" as any)} style={{ width: "48.5%", backgroundColor: "white", borderRadius: 14, padding: 16, borderWidth: 1, borderColor: "#E8E6E1" }}>
-              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "rgba(22,163,74,0.1)", justifyContent: "center", alignItems: "center", marginBottom: 10 }}>
-                <Ionicons name="trending-up-outline" size={18} color="#16A34A" />
-              </View>
-              <Text style={{ fontSize: 14, fontWeight: "700", color: "#1C1F26", marginBottom: 2 }}>Financials</Text>
-              <Text style={{ fontSize: 11, color: "#9CA3AF" }}>P&L & cash flow</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => router.push("/rfis" as any)} style={{ width: "48.5%", backgroundColor: "white", borderRadius: 14, padding: 16, borderWidth: 1, borderColor: "#E8E6E1" }}>
-              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "rgba(59,130,246,0.1)", justifyContent: "center", alignItems: "center", marginBottom: 10 }}>
-                <Ionicons name="help-circle-outline" size={18} color="#3B82F6" />
-              </View>
-              <Text style={{ fontSize: 14, fontWeight: "700", color: "#1C1F26", marginBottom: 2 }}>RFIs</Text>
-              <Text style={{ fontSize: 11, color: "#9CA3AF" }}>Questions & answers</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => router.push("/estimates" as any)} style={{ width: "48.5%", backgroundColor: "white", borderRadius: 14, padding: 16, borderWidth: 1, borderColor: "#E8E6E1" }}>
-              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "rgba(249,115,22,0.1)", justifyContent: "center", alignItems: "center", marginBottom: 10 }}>
-                <Ionicons name="calculator-outline" size={18} color="#F97316" />
-              </View>
-              <Text style={{ fontSize: 14, fontWeight: "700", color: "#1C1F26", marginBottom: 2 }}>Estimates</Text>
-              <Text style={{ fontSize: 11, color: "#9CA3AF" }}>Bids & proposals</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => router.push("/invoices" as any)} style={{ width: "48.5%", backgroundColor: "white", borderRadius: 14, padding: 16, borderWidth: 1, borderColor: "#E8E6E1" }}>
-              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "rgba(124,58,237,0.1)", justifyContent: "center", alignItems: "center", marginBottom: 10 }}>
-                <Ionicons name="document-text-outline" size={18} color="#7C3AED" />
-              </View>
-              <Text style={{ fontSize: 14, fontWeight: "700", color: "#1C1F26", marginBottom: 2 }}>Invoices</Text>
-              <Text style={{ fontSize: 11, color: "#9CA3AF" }}>Billing & payments</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => router.push("/team" as any)} style={{ width: "48.5%", backgroundColor: "white", borderRadius: 14, padding: 16, borderWidth: 1, borderColor: "#E8E6E1" }}>
-              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "rgba(28,31,38,0.08)", justifyContent: "center", alignItems: "center", marginBottom: 10 }}>
-                <Ionicons name="people-outline" size={18} color="#1C1F26" />
-              </View>
-              <Text style={{ fontSize: 14, fontWeight: "700", color: "#1C1F26", marginBottom: 2 }}>Team</Text>
-              <Text style={{ fontSize: 11, color: "#9CA3AF" }}>Users & subs</Text>
-            </TouchableOpacity>
-
-          </View>
+      {/* Business */}
+      {isManager && (
+        <View style={{ gap: 8 }}>
+          <SectionHeader title="Business" />
+          <ListGroup>
+            <ListRow icon="receipt-outline" title="Vendor invoices" onPress={() => router.push("/vendor-invoices" as any)} />
+            <ListRow icon="trending-up-outline" title="Financials" onPress={() => router.push("/financials" as any)} />
+            <ListRow icon="help-circle-outline" title="RFIs" onPress={() => router.push("/rfis" as any)} />
+            <ListRow icon="calculator-outline" title="Estimates" onPress={() => router.push("/estimates" as any)} />
+            <ListRow icon="document-text-outline" title="Invoices" onPress={() => router.push("/invoices" as any)} />
+            <ListRow icon="people-outline" title="Team" onPress={() => router.push("/team" as any)} />
+          </ListGroup>
         </View>
       )}
-
-    </ScrollView>
+    </Screen>
   )
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
-  content: { padding: 20, paddingBottom: 40 },
-  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#F5F4F0" },
-  headerBanner: { backgroundColor: "#1C1F26", marginHorizontal: -20, marginTop: -20, paddingHorizontal: 20, paddingTop: 70, paddingBottom: 20, marginBottom: 20, position: "relative", overflow: "hidden" },
-  headerOrangeCircle: { position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: "rgba(249,115,22,0.08)" },
-  headerContent: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  headerLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
-  headerLogo: { width: 36, height: 36 },
-  greeting: { fontSize: 12, color: "rgba(255,255,255,0.5)", fontWeight: "500" },
-  name: { fontSize: 20, fontWeight: "700", color: "white", letterSpacing: -0.5 },
-  avatar: { width: 40, height: 40, borderRadius: 20 },
-  avatarFallback: { width: 40, height: 40, borderRadius: 20, backgroundColor: "#F97316", justifyContent: "center", alignItems: "center" },
-  avatarText: { fontSize: 14, fontWeight: "700", color: "white" },
-  kpiRow: { flexDirection: "row", gap: 8, marginBottom: 24 },
-  kpiCard: { flex: 1, backgroundColor: "#1C1F26", borderRadius: 14, padding: 12, position: "relative", overflow: "hidden" },
-  kpiCircle: { position: "absolute", top: -30, right: -30, width: 100, height: 100, borderRadius: 50, backgroundColor: "rgba(249,115,22,0.08)" },
-  kpiLabel: { fontSize: 9, color: "rgba(255,255,255,0.4)", fontWeight: "600", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 },
-  kpiValue: { fontSize: 20, fontWeight: "700", color: "white", letterSpacing: -0.5 },
-  sectionTitle: { fontSize: 13, fontWeight: "700", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 },
-  projectCard: { backgroundColor: "white", borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: "#E8E6E1", shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 3 },
-  projectTop: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 12 },
-  projectDot: { width: 28, height: 28, borderRadius: 6 },
-  projectName: { fontSize: 14, fontWeight: "700", color: "#1A1A1A", marginBottom: 2 },
-  projectSub: { fontSize: 11, color: "#9CA3AF" },
-  statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 },
-  statusText: { fontSize: 11, fontWeight: "600" },
-  progressRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10 },
-  progressBar: { flex: 1, height: 5, backgroundColor: "#E8E6E1", borderRadius: 99, overflow: "hidden" },
-  progressFill: { height: "100%", borderRadius: 99 },
-  progressText: { fontSize: 12, fontWeight: "700", color: "#6B7280", minWidth: 32, textAlign: "right" },
-  projectStats: { flexDirection: "row", gap: 14 },
-  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1" },
-  emptyTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 6 },
-  emptySub: { fontSize: 13, color: "#9CA3AF", textAlign: "center" },
-  statPill: { backgroundColor: "#F3F4F6", borderRadius: 99, paddingHorizontal: 10, paddingVertical: 4 },
-  statPillText: { fontSize: 11, color: "#6B7280", fontWeight: "600" },
+  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background },
+  avatar: { width: 44, height: 44, borderRadius: 22, marginBottom: 2 },
+  avatarFallback: { backgroundColor: colors.charcoal, justifyContent: "center", alignItems: "center" },
+  avatarText: { fontSize: 15, fontWeight: "600", color: colors.white },
+  askField: { height: 44, borderRadius: 14, backgroundColor: colors.fill, paddingHorizontal: 14, flexDirection: "row", alignItems: "center", gap: 10 },
+  askFieldText: { flex: 1, fontSize: 17, color: colors.textSecondary },
+  projectRow: { paddingVertical: 12, paddingLeft: 16, paddingRight: 14, gap: 8 },
+  projectRowDivider: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.separator },
+  projectTop: { flexDirection: "row", alignItems: "center", gap: 8 },
+  projectPercent: { fontSize: 15, fontWeight: "600", color: colors.textSecondary },
+
+  // "Customize dashboard" sheet
   modalOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" },
-  modalCard: { backgroundColor: "white", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, paddingBottom: 40 },
-  modalTitle: { fontSize: 18, fontWeight: "700", color: "#1A1A1A", marginBottom: 4 },
-  modalSub: { fontSize: 13, color: "#9CA3AF", marginBottom: 20 },
-  optionRow: { flexDirection: "row", alignItems: "center", gap: 14, padding: 14, borderRadius: 12, marginBottom: 8, backgroundColor: "#F9FAFB", borderWidth: 1, borderColor: "#E8E6E1" },
-  optionRowSelected: { backgroundColor: "#FFF7ED", borderColor: "#F97316" },
-  optionCheck: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: "#E8E6E1", justifyContent: "center", alignItems: "center" },
-  optionCheckSelected: { backgroundColor: "#F97316", borderColor: "#F97316" },
-  optionCheckText: { fontSize: 12, fontWeight: "700", color: "white" },
-  optionLabel: { fontSize: 14, fontWeight: "600", color: "#1A1A1A", marginBottom: 2 },
-  optionLabelSelected: { color: "#F97316" },
-  optionSub: { fontSize: 12, color: "#9CA3AF" },
-  modalDoneBtn: { backgroundColor: "#F97316", borderRadius: 12, padding: 16, alignItems: "center", marginTop: 8 },
-  modalDoneBtnText: { color: "white", fontSize: 16, fontWeight: "700" },
-  sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
-  newProjectBtn: { backgroundColor: "#F97316", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
-  newProjectBtnText: { color: "white", fontSize: 12, fontWeight: "700" },
-  estimatesSection: { marginBottom: 24 },
-  estimatesCard: { backgroundColor: "white", borderRadius: 14, padding: 16, borderWidth: 1, borderColor: "#E8E6E1" },
-  estimatesCardText: { fontSize: 14, fontWeight: "600", color: "#F97316" },
+  modalCard: { backgroundColor: colors.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
+  modalTitle: { fontSize: 22, fontWeight: "700", color: colors.text, marginBottom: 4 },
+  modalSub: { fontSize: 15, color: colors.textSecondary, marginBottom: 20 },
+  optionRow: { flexDirection: "row", alignItems: "center", gap: 14, padding: 14, borderRadius: 12, marginBottom: 8, backgroundColor: colors.fillSubtle },
+  optionRowSelected: { backgroundColor: colors.tintSoft },
+  optionCheck: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: colors.chevron, justifyContent: "center", alignItems: "center" },
+  optionCheckSelected: { backgroundColor: colors.tint, borderColor: colors.tint },
+  optionCheckText: { fontSize: 12, fontWeight: "700", color: colors.white },
+  optionLabel: { fontSize: 17, fontWeight: "600", color: colors.text, marginBottom: 2 },
+  optionLabelSelected: { color: colors.tint },
+  optionSub: { fontSize: 13, color: colors.textSecondary },
+  modalDoneBtn: { backgroundColor: colors.charcoal, borderRadius: 12, height: 50, alignItems: "center", justifyContent: "center", marginTop: 8 },
+  modalDoneBtnText: { color: colors.white, fontSize: 17, fontWeight: "600" },
 })

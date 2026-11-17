@@ -1,10 +1,13 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, RefreshControl } from "react-native"
+import { View, Text, StyleSheet, Pressable, ActivityIndicator, Alert, RefreshControl } from "react-native"
+import { Ionicons } from "@expo/vector-icons"
 import { useEffect, useState, useCallback } from "react"
 import { useAuth } from "@/lib/auth"
 import { useRouter, useFocusEffect } from "expo-router"
 import { API_URL } from "@/lib/api"
 import * as DocumentPicker from "expo-document-picker"
 import { openDocument as openInBluebeam } from "@/lib/openDocument"
+import { Screen, ScreenHeader, CircleButton, Card, EmptyState } from "@/components/ui"
+import { colors, type, humanize } from "@/lib/theme"
 import { loadCached } from "@/lib/cache"
 
 
@@ -93,81 +96,58 @@ export default function DocumentsScreen() {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
   }
 
-  if (loading) return <View style={styles.center}><ActivityIndicator color="#F97316" /></View>
+  if (loading) return <View style={styles.center}><ActivityIndicator color={colors.accent} /></View>
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadDocuments() }} tintColor="#F97316" />}
-      >
-        <View style={styles.headerBanner}>
-          <View style={styles.headerCircle} />
-          <Text style={styles.pageTitle}>Documents</Text>
-          <Text style={styles.subtitle}>{documents.length} file{documents.length !== 1 ? "s" : ""}</Text>
-        </View>
+    <Screen
+      tabBar
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadDocuments() }} tintColor={colors.accent} />}
+    >
+      <ScreenHeader
+        title="Documents"
+        subtitle={uploading ? "Uploading…" : `${documents.length} file${documents.length !== 1 ? "s" : ""}`}
+        actions={<CircleButton icon="add" label="Upload a document" onPress={uploadDocument} disabled={uploading} />}
+      />
 
-        {documents.length === 0 ? (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyTitle}>No documents yet</Text>
-            <Text style={styles.emptySub}>Upload contracts, plans, permits and more</Text>
-          </View>
-        ) : (
-          documents.map(doc => (
-            <TouchableOpacity
+      {documents.length === 0 ? (
+        <EmptyState icon="folder-open-outline" title="No documents yet" subtitle="Tap + to upload contracts, plans, permits and more." />
+      ) : (
+        <Card>
+          {documents.map((doc, index) => (
+            <Pressable
               key={doc.id}
-              style={styles.docCard}
               onPress={() => router.push(`/document/${doc.id}` as any)}
-              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel={`${doc.name}, ${getFileIcon(doc.mimeType)}`}
+              style={({ pressed }) => [styles.row, index > 0 && styles.rowDivider, pressed && { backgroundColor: colors.fillSubtle }]}
             >
-              <View style={[styles.fileIconBox, { backgroundColor: getFileColor(doc.mimeType) + "15" }]}>
-                <Text style={[styles.fileIconText, { color: getFileColor(doc.mimeType) }]}>
-                  {getFileIcon(doc.mimeType)}
+              <View style={[styles.fileIconBox, { backgroundColor: getFileColor(doc.mimeType) + "1A" }]}>
+                <Text style={[styles.fileIconText, { color: getFileColor(doc.mimeType) }]}>{getFileIcon(doc.mimeType)}</Text>
+              </View>
+              <View style={{ flex: 1, gap: 1 }}>
+                <Text style={type.headline} numberOfLines={1}>{doc.name}</Text>
+                <Text style={type.footnote} numberOfLines={1}>
+                  {[
+                    humanize(doc.category),
+                    formatSize(doc.fileSize),
+                    doc.project?.name,
+                    new Date(doc.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+                  ].filter(Boolean).join(" · ")}
                 </Text>
               </View>
-              <View style={styles.docInfo}>
-                <Text style={styles.docName} numberOfLines={1}>{doc.name}</Text>
-                <Text style={styles.docMeta}>
-                  {doc.category} · {formatSize(doc.fileSize)}
-                  {doc.project ? ` · ${doc.project.name}` : ""}
-                </Text>
-                <Text style={styles.docDate}>{new Date(doc.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</Text>
-              </View>
-              <Text style={styles.docArrow}>›</Text>
-            </TouchableOpacity>
-          ))
-        )}
-      </ScrollView>
-
-      <View style={styles.fab}>
-        <TouchableOpacity style={styles.fabBtn} onPress={uploadDocument} disabled={uploading}>
-          {uploading ? <ActivityIndicator color="white" /> : <Text style={styles.fabText}>Upload Document</Text>}
-        </TouchableOpacity>
-      </View>
-    </View>
+              <Ionicons name="chevron-forward" size={16} color={colors.chevron} />
+            </Pressable>
+          ))}
+        </Card>
+      )}
+    </Screen>
   )
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
-  content: { paddingBottom: 120 },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 24, marginBottom: 20, position: "relative", overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -60, right: -60, width: 220, height: 220, borderRadius: 110, backgroundColor: "rgba(249,115,22,0.08)" },
-  pageTitle: { fontSize: 28, fontWeight: "700", color: "white", letterSpacing: -0.5, marginBottom: 4 },
-  subtitle: { fontSize: 13, color: "rgba(255,255,255,0.4)" },
-  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1", marginHorizontal: 16 },
-  emptyTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 6 },
-  emptySub: { fontSize: 13, color: "#9CA3AF", textAlign: "center" },
-  docCard: { backgroundColor: "white", borderRadius: 14, padding: 14, marginHorizontal: 16, marginBottom: 10, flexDirection: "row", alignItems: "center", gap: 12, borderWidth: 1, borderColor: "#E8E6E1" },
-  fileIconBox: { width: 48, height: 48, borderRadius: 12, justifyContent: "center", alignItems: "center" },
-  fileIconText: { fontSize: 11, fontWeight: "800", letterSpacing: 0.5 },
-  docInfo: { flex: 1 },
-  docName: { fontSize: 14, fontWeight: "700", color: "#1A1A1A", marginBottom: 3 },
-  docMeta: { fontSize: 12, color: "#9CA3AF", marginBottom: 2, textTransform: "capitalize" },
-  docDate: { fontSize: 11, color: "#9CA3AF" },
-  docArrow: { fontSize: 20, color: "#D1D5DB" },
-  fab: { position: "absolute", bottom: 30, left: 16, right: 16 },
-  fabBtn: { backgroundColor: "#F97316", borderRadius: 14, padding: 16, alignItems: "center" },
-  fabText: { color: "white", fontSize: 15, fontWeight: "700" },
+  center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background },
+  row: { minHeight: 64, paddingVertical: 10, paddingLeft: 14, paddingRight: 14, flexDirection: "row", alignItems: "center", gap: 12 },
+  rowDivider: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.separator },
+  fileIconBox: { width: 44, height: 44, borderRadius: 10, justifyContent: "center", alignItems: "center" },
+  fileIconText: { fontSize: 12, fontWeight: "800", letterSpacing: 0.3 },
 })

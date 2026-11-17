@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Modal } from "react-native"
+import { View, Text, StyleSheet, ScrollView, Pressable, TouchableOpacity, ActivityIndicator, Alert, Modal } from "react-native"
+import { Ionicons } from "@expo/vector-icons"
 import { useState, useEffect } from "react"
 import { useAuth } from "@/lib/auth"
 import { useRouter } from "expo-router"
@@ -6,72 +7,11 @@ import { API_URL } from "@/lib/api"
 import * as ImagePicker from "expo-image-picker"
 import { toDateKey } from "@/lib/dates"
 import { loadCached } from "@/lib/cache"
+import { Screen, ScreenHeader, SectionHeader, Card } from "@/components/ui"
+import { colors, type, type as typography, humanize } from "@/lib/theme"
 
-const ACTION_ICONS: Record<string, { lines: number[], circle?: boolean }> = {
-  photo: { circle: true, lines: [14, 10] },
-  log: { lines: [16, 12, 8] },
-  receipt: { lines: [14, 12, 10, 8] },
-  expense: { lines: [14, 10], circle: true },
-  co: { lines: [16, 12, 8] },
-  message: { lines: [14, 10], circle: true },
-  project: { lines: [16, 12, 16] },
-}
+type IconName = keyof typeof Ionicons.glyphMap
 
-function ActionIcon({ type, color }: { type: string, color: string }) {
-  return (
-    <View style={{ gap: 4, alignItems: "flex-start", justifyContent: "center", flex: 1 }}>
-      {type === "photo" && (
-        <>
-          <View style={{ width: 22, height: 16, borderRadius: 3, borderWidth: 2, borderColor: color, justifyContent: "center", alignItems: "center" }}>
-            <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: color }} />
-          </View>
-        </>
-      )}
-      {type === "log" && (
-        <>
-          <View style={{ width: 18, height: 2, borderRadius: 1, backgroundColor: color }} />
-          <View style={{ width: 14, height: 2, borderRadius: 1, backgroundColor: color }} />
-          <View style={{ width: 10, height: 2, borderRadius: 1, backgroundColor: color }} />
-        </>
-      )}
-      {type === "receipt" && (
-        <>
-          <View style={{ width: 16, height: 2, borderRadius: 1, backgroundColor: color }} />
-          <View style={{ width: 12, height: 2, borderRadius: 1, backgroundColor: color }} />
-          <View style={{ width: 16, height: 2, borderRadius: 1, backgroundColor: color }} />
-          <View style={{ width: 10, height: 2, borderRadius: 1, backgroundColor: color }} />
-        </>
-      )}
-      {type === "expense" && (
-        <>
-          <View style={{ width: 18, height: 18, borderRadius: 9, borderWidth: 2, borderColor: color, justifyContent: "center", alignItems: "center" }}>
-            <Text style={{ fontSize: 10, fontWeight: "800", color }}>$</Text>
-          </View>
-        </>
-      )}
-      {type === "co" && (
-        <>
-          <View style={{ width: 16, height: 2, borderRadius: 1, backgroundColor: color }} />
-          <View style={{ width: 16, height: 2, borderRadius: 1, backgroundColor: color }} />
-          <View style={{ width: 10, height: 2, borderRadius: 1, backgroundColor: color, marginLeft: 6 }} />
-        </>
-      )}
-      {type === "message" && (
-        <>
-          <View style={{ width: 20, height: 14, borderRadius: 3, borderWidth: 2, borderColor: color }}>
-            <View style={{ position: "absolute", bottom: -4, left: 3, width: 6, height: 4, backgroundColor: color, borderRadius: 1 }} />
-          </View>
-        </>
-      )}
-      {type === "project" && (
-        <>
-          <View style={{ width: 20, height: 14, borderRadius: 2, borderWidth: 2, borderColor: color }} />
-          <View style={{ width: 8, height: 2, borderRadius: 1, backgroundColor: color, marginLeft: 6 }} />
-        </>
-      )}
-    </View>
-  )
-}
 
 export default function QuickActionsScreen() {
   const { token, user } = useAuth()
@@ -307,265 +247,256 @@ export default function QuickActionsScreen() {
 
   const actions = [
     {
-      label: "Take Photo",
+      label: "Take photo",
       sub: "Capture & attach to a project",
       color: "#3B82F6",
-      iconType: "photo",
+      icon: "camera-outline" as IconName,
       onPress: () => requireProject("photo"),
       loading: uploading,
       roles: ["ADMIN", "PROJECT_MANAGER", "FIELD_WORKER"],
     },
     {
-      label: "Add Daily Log",
+      label: "Add daily log",
       sub: "Log today's site activity",
       color: "#16A34A",
-      iconType: "log",
+      icon: "document-text-outline" as IconName,
       onPress: () => requireProject("log"),
       loading: false,
       roles: ["ADMIN", "PROJECT_MANAGER", "FIELD_WORKER"],
     },
     {
-      label: "Scan Receipt",
-      sub: "AI-powered expense scanning",
+      label: "Scan receipt",
+      sub: "Read a receipt into an expense",
       color: "#8B5CF6",
-      iconType: "receipt",
+      icon: "scan-outline" as IconName,
       onPress: scanReceipt,
       loading: scanning,
       roles: ["ADMIN", "PROJECT_MANAGER", "FIELD_WORKER"],
     },
     {
-      label: "Log Expense",
+      label: "Log expense",
       sub: "Add an expense to a project",
       color: "#F97316",
-      iconType: "expense",
+      icon: "wallet-outline" as IconName,
       onPress: () => requireProject("expense"),
       loading: false,
       roles: ["ADMIN", "PROJECT_MANAGER", "FIELD_WORKER"],
     },
     {
-      label: "New Change Order",
+      label: "New change order",
       sub: "Create a change order",
       color: "#DC2626",
-      iconType: "co",
+      icon: "swap-horizontal-outline" as IconName,
       onPress: () => requireProject("change-order"),
       loading: false,
       roles: ["ADMIN", "PROJECT_MANAGER"],
     },
     {
-      label: "Send Message",
+      label: "Send message",
       sub: "Message a project team",
       color: "#EC4899",
-      iconType: "message",
+      icon: "chatbubble-outline" as IconName,
       onPress: () => requireProject("message"),
       loading: false,
       roles: ["ADMIN", "PROJECT_MANAGER", "FIELD_WORKER"],
     },
     {
-      label: "Overhead Receipt",
-      sub: "Scan receipt for overhead expense",
+      label: "Overhead receipt",
+      sub: "Scan a receipt for company overhead",
       color: "#DC2626",
-      iconType: "receipt",
+      icon: "receipt-outline" as IconName,
       onPress: scanOverheadReceipt,
       loading: scanningOverhead,
       roles: ["ADMIN", "PROJECT_MANAGER"],
     },
     {
-      label: "New Project",
+      label: "New project",
       sub: "Create a new project",
       color: "#1C1F26",
-      iconType: "project",
+      icon: "business-outline" as IconName,
       onPress: () => router.push("/new-project" as any),
       loading: false,
       roles: ["ADMIN", "PROJECT_MANAGER"],
     },
   ].filter(a => a.roles.includes(user?.role || ""))
 
+  const OFFICE_ACTIONS = ["New change order", "Overhead receipt", "New project"]
+  const groups = [
+    { title: "On site", items: actions.filter(a => !OFFICE_ACTIONS.includes(a.label)) },
+    { title: "Office", items: actions.filter(a => OFFICE_ACTIONS.includes(a.label)) },
+  ].filter(group => group.items.length > 0)
+
   return (
-    <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.headerBanner}>
-          <View style={styles.headerCircle} />
-          <Text style={styles.title}>Quick Actions</Text>
-          <Text style={styles.subtitle}>What do you need to do?</Text>
-        </View>
+    <Screen tabBar>
+      <ScreenHeader title="Quick add" subtitle="What do you need to do?" />
 
-        <View style={styles.grid}>
-          {actions.map((action, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[styles.actionCard, { borderLeftColor: action.color }]}
-              onPress={action.onPress}
-              disabled={action.loading}
-              activeOpacity={0.8}
-            >
-              <View style={styles.actionLeft}>
-                <View style={[styles.iconBox, { backgroundColor: action.color + "12" }]}>
-                  <ActionIcon type={action.iconType} color={action.color} />
+      {groups.map(group => (
+        <View key={group.title} style={{ gap: 8 }}>
+          <SectionHeader title={group.title} />
+          <Card>
+            {group.items.map((action, index) => (
+              <Pressable
+                key={action.label}
+                onPress={action.onPress}
+                disabled={action.loading}
+                accessibilityRole="button"
+                accessibilityLabel={`${action.label}. ${action.sub}`}
+                accessibilityState={{ busy: action.loading }}
+                style={({ pressed }) => [styles.actionRow, index > 0 && styles.actionDivider, pressed && { backgroundColor: colors.fillSubtle }]}
+              >
+                <View style={styles.iconBox}>
+                  <Ionicons name={action.icon} size={22} color={colors.tint} />
                 </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.actionLabel}>{action.label}</Text>
-                  <Text style={styles.actionSub}>{action.sub}</Text>
+                <View style={{ flex: 1, gap: 1 }}>
+                  <Text style={type.headline}>{action.label}</Text>
+                  <Text style={type.footnote}>{action.sub}</Text>
                 </View>
-              </View>
-              {action.loading
-                ? <ActivityIndicator color={action.color} size="small" />
-                : <Text style={[styles.actionArrow, { color: action.color }]}>›</Text>
-              }
-            </TouchableOpacity>
-          ))}
+                {action.loading
+                  ? <ActivityIndicator color={colors.tint} size="small" />
+                  : <Ionicons name="chevron-forward" size={16} color={colors.chevron} />}
+              </Pressable>
+            ))}
+          </Card>
         </View>
-      </ScrollView>
+      ))}
 
-      <Modal visible={showProjectPicker} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Select Project</Text>
-            <Text style={styles.modalSub}>Which project is this for?</Text>
-            <ScrollView style={styles.projectList}>
-              {loading ? (
-                <ActivityIndicator color="#F97316" style={{ marginTop: 20 }} />
-              ) : projects.length === 0 ? (
-                <Text style={styles.noProjects}>No projects found</Text>
-              ) : (
-                projects.map(project => (
-                  <TouchableOpacity
-                    key={project.id}
-                    style={styles.projectRow}
-                    onPress={() => handleProjectSelected(project)}
-                    activeOpacity={0.8}
-                  >
-                    <View style={styles.projectRowLeft}>
-                      <View style={[styles.projectDot, {
-                        backgroundColor: project.status === "ACTIVE" ? "#16A34A" : "#9CA3AF"
-                      }]} />
-                      <View>
-                        <Text style={styles.projectRowName}>{project.name}</Text>
-                        <Text style={styles.projectRowSub}>{project.city}, {project.state} · {project.status}</Text>
-                      </View>
-                    </View>
-                    <Text style={styles.projectRowArrow}>›</Text>
-                  </TouchableOpacity>
-                ))
-              )}
-            </ScrollView>
-            <TouchableOpacity style={styles.cancelBtn} onPress={() => { setShowProjectPicker(false); setPendingAction(null) }}>
-              <Text style={styles.cancelBtnText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Overhead Receipt Modal */}
-      <Modal visible={showOverheadModal} animationType="slide" transparent>
-        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "flex-end" }}>
-          <View style={{ backgroundColor: "white", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, maxHeight: "80%" }}>
-            <Text style={{ fontSize: 18, fontWeight: "700", color: "#1C1F26", marginBottom: 4 }}>Overhead Expense</Text>
-            <Text style={{ fontSize: 13, color: "#6B7280", marginBottom: 16 }}>AI scanned your receipt</Text>
-
-            {overheadScanned && (
-              <ScrollView style={{ maxHeight: 400 }}>
-                <View style={{ gap: 12 }}>
-                  <View>
-                    <Text style={{ fontSize: 11, fontWeight: "700", color: "#9CA3AF", marginBottom: 4 }}>VENDOR</Text>
-                    <Text style={{ fontSize: 16, fontWeight: "600", color: "#1C1F26" }}>{overheadScanned.vendor || "Unknown"}</Text>
-                  </View>
-                  <View>
-                    <Text style={{ fontSize: 11, fontWeight: "700", color: "#9CA3AF", marginBottom: 4 }}>AMOUNT</Text>
-                    <Text style={{ fontSize: 24, fontWeight: "800", color: "#F97316" }}>${(overheadScanned.amount || 0).toLocaleString()}</Text>
-                  </View>
-                  <View>
-                    <Text style={{ fontSize: 11, fontWeight: "700", color: "#9CA3AF", marginBottom: 4 }}>DATE</Text>
-                    <Text style={{ fontSize: 14, color: "#1C1F26" }}>{overheadScanned.date || "Today"}</Text>
-                  </View>
-                  <View>
-                    <Text style={{ fontSize: 11, fontWeight: "700", color: "#9CA3AF", marginBottom: 4 }}>DESCRIPTION</Text>
-                    <Text style={{ fontSize: 14, color: "#1C1F26" }}>{overheadScanned.description || "—"}</Text>
-                  </View>
-
-                  {overheadScanned.lineItems?.length > 0 && (
+    <Modal visible={showProjectPicker} animationType="slide" transparent>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalCard}>
+          <Text style={styles.modalTitle}>Choose a project</Text>
+          <Text style={styles.modalSub}>Which project is this for?</Text>
+          <ScrollView style={styles.projectList}>
+            {loading ? (
+              <ActivityIndicator color={colors.accent} style={{ marginTop: 20 }} />
+            ) : projects.length === 0 ? (
+              <Text style={styles.noProjects}>No projects found</Text>
+            ) : (
+              projects.map(project => (
+                <TouchableOpacity
+                  key={project.id}
+                  style={styles.projectRow}
+                  onPress={() => handleProjectSelected(project)}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.projectRowLeft}>
+                    <View style={[styles.projectDot, {
+                      backgroundColor: project.status === "ACTIVE" ? colors.success : colors.chevron
+                    }]} />
                     <View>
-                      <Text style={{ fontSize: 11, fontWeight: "700", color: "#9CA3AF", marginBottom: 6 }}>ITEMS ({overheadScanned.lineItems.length})</Text>
-                      {overheadScanned.lineItems.map((item: any, i: number) => (
-                        <View key={i} style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: "#F3F4F6" }}>
-                          <View style={{ flex: 1 }}>
-                            <Text style={{ fontSize: 13, color: "#1C1F26" }}>{item.description}</Text>
-                            <Text style={{ fontSize: 10, color: "#F97316", fontWeight: "600" }}>{item.materialTag || "Other"}</Text>
-                          </View>
-                          <Text style={{ fontSize: 13, fontWeight: "600", color: "#1C1F26" }}>${(item.amount || 0).toFixed(2)}</Text>
+                      <Text style={styles.projectRowName}>{project.name}</Text>
+                      <Text style={styles.projectRowSub}>{[[project.city, project.state].filter(Boolean).join(", "), humanize(project.status)].filter(Boolean).join(" · ")}</Text>
+                    </View>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color={colors.chevron} />
+                </TouchableOpacity>
+              ))
+            )}
+          </ScrollView>
+          <TouchableOpacity style={styles.cancelBtn} onPress={() => { setShowProjectPicker(false); setPendingAction(null) }}>
+            <Text style={styles.cancelBtnText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+
+    {/* Overhead Receipt Modal */}
+    <Modal visible={showOverheadModal} animationType="slide" transparent>
+      <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "flex-end" }}>
+        <View style={{ backgroundColor: colors.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40, maxHeight: "80%" }}>
+          <Text style={styles.modalTitle}>Overhead expense</Text>
+          <Text style={styles.modalSub}>Check what was read from the receipt</Text>
+
+          {overheadScanned && (
+            <ScrollView style={{ maxHeight: 400 }}>
+              <View style={{ gap: 12 }}>
+                <View>
+                  <Text style={[styles.fieldLabel, { marginBottom: 4 }]}>Vendor</Text>
+                  <Text style={typography.headline}>{overheadScanned.vendor || "Unknown"}</Text>
+                </View>
+                <View>
+                  <Text style={[styles.fieldLabel, { marginBottom: 4 }]}>Amount</Text>
+                  <Text style={typography.title2}>${(overheadScanned.amount || 0).toLocaleString()}</Text>
+                </View>
+                <View>
+                  <Text style={[styles.fieldLabel, { marginBottom: 4 }]}>Date</Text>
+                  <Text style={typography.body}>{overheadScanned.date || "Today"}</Text>
+                </View>
+                <View>
+                  <Text style={[styles.fieldLabel, { marginBottom: 4 }]}>Description</Text>
+                  <Text style={typography.body}>{overheadScanned.description || "—"}</Text>
+                </View>
+
+                {overheadScanned.lineItems?.length > 0 && (
+                  <View>
+                    <Text style={[styles.fieldLabel, { marginBottom: 6 }]}>Items ({overheadScanned.lineItems.length})</Text>
+                    {overheadScanned.lineItems.map((item: any, i: number) => (
+                      <View key={i} style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 4, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.separator }}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={typography.subhead}>{item.description}</Text>
+                          <Text style={{ fontSize: 12, color: colors.tint, fontWeight: "600" }}>{item.materialTag || "Other"}</Text>
                         </View>
+                        <Text style={{ fontSize: 15, fontWeight: "600", color: colors.text }}>${(item.amount || 0).toFixed(2)}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+                <View>
+                  <Text style={[styles.fieldLabel, { marginBottom: 4 }]}>Category</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    <View style={{ flexDirection: "row", gap: 6 }}>
+                      {overheadCategories.map((cat: any) => (
+                        <TouchableOpacity key={cat.id} onPress={() => setSelectedOverheadCat(cat.id)}
+                          style={{ paddingHorizontal: 14, height: 36, justifyContent: "center", borderRadius: 18,
+                            backgroundColor: selectedOverheadCat === cat.id ? colors.charcoal : colors.fillSubtle }}>
+                          <Text style={{ fontSize: 14, fontWeight: "600",
+                            color: selectedOverheadCat === cat.id ? colors.white : colors.text }}>{cat.name}</Text>
+                        </TouchableOpacity>
                       ))}
                     </View>
-                  )}
-
-                  <View>
-                    <Text style={{ fontSize: 11, fontWeight: "700", color: "#9CA3AF", marginBottom: 4 }}>CATEGORY</Text>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                      <View style={{ flexDirection: "row", gap: 6 }}>
-                        {overheadCategories.map((cat: any) => (
-                          <TouchableOpacity key={cat.id} onPress={() => setSelectedOverheadCat(cat.id)}
-                            style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8,
-                              backgroundColor: selectedOverheadCat === cat.id ? "#F97316" : "#F3F4F6" }}>
-                            <Text style={{ fontSize: 12, fontWeight: "600",
-                              color: selectedOverheadCat === cat.id ? "white" : "#6B7280" }}>{cat.name}</Text>
-                          </TouchableOpacity>
-                        ))}
-                      </View>
-                    </ScrollView>
-                  </View>
+                  </ScrollView>
                 </View>
-              </ScrollView>
-            )}
+              </View>
+            </ScrollView>
+          )}
 
-            <View style={{ flexDirection: "row", gap: 10, marginTop: 16 }}>
-              <TouchableOpacity onPress={() => { setShowOverheadModal(false); setOverheadScanned(null) }}
-                style={{ flex: 1, padding: 14, borderRadius: 10, backgroundColor: "#F3F4F6", alignItems: "center" }}>
-                <Text style={{ fontSize: 14, fontWeight: "600", color: "#6B7280" }}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={saveOverheadExpense} disabled={savingOverhead || !selectedOverheadCat}
-                style={{ flex: 1, padding: 14, borderRadius: 10, backgroundColor: "#F97316", alignItems: "center", opacity: savingOverhead ? 0.5 : 1 }}>
-                <Text style={{ fontSize: 14, fontWeight: "700", color: "white" }}>{savingOverhead ? "Saving..." : "Save Expense"}</Text>
-              </TouchableOpacity>
-            </View>
+          <View style={{ flexDirection: "row", gap: 10, marginTop: 16 }}>
+            <TouchableOpacity onPress={() => { setShowOverheadModal(false); setOverheadScanned(null) }}
+              style={{ flex: 1, height: 50, borderRadius: 12, backgroundColor: colors.fillSubtle, alignItems: "center", justifyContent: "center" }}>
+              <Text style={{ fontSize: 17, fontWeight: "600", color: colors.text }}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={saveOverheadExpense} disabled={savingOverhead || !selectedOverheadCat}
+              style={{ flex: 1, height: 50, borderRadius: 12, backgroundColor: colors.charcoal, alignItems: "center", justifyContent: "center", opacity: savingOverhead || !selectedOverheadCat ? 0.5 : 1 }}>
+              <Text style={{ fontSize: 17, fontWeight: "600", color: colors.white }}>{savingOverhead ? "Saving…" : "Save expense"}</Text>
+            </TouchableOpacity>
           </View>
         </View>
-      </Modal>
-    </View>
+      </View>
+    </Modal>
+    </Screen>
   )
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
-  content: { paddingBottom: 40 },
-  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 24, marginBottom: 20, position: "relative", overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -60, right: -60, width: 220, height: 220, borderRadius: 110, backgroundColor: "rgba(249,115,22,0.08)" },
-  title: { fontSize: 28, fontWeight: "700", color: "white", letterSpacing: -0.5, marginBottom: 4 },
-  subtitle: { fontSize: 13, color: "rgba(255,255,255,0.4)" },
-  grid: { paddingHorizontal: 16, gap: 10 },
-  actionCard: { backgroundColor: "white", borderRadius: 14, padding: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderWidth: 1, borderColor: "#E8E6E1", borderLeftWidth: 4 },
-  actionLeft: { flexDirection: "row", alignItems: "center", gap: 12, flex: 1 },
-  iconBox: { width: 44, height: 44, borderRadius: 12, justifyContent: "center", alignItems: "center", paddingHorizontal: 10 },
-  actionLabel: { fontSize: 15, fontWeight: "700", color: "#1A1A1A", marginBottom: 2 },
-  actionSub: { fontSize: 12, color: "#9CA3AF" },
-  actionArrow: { fontSize: 24, fontWeight: "300" },
+  actionRow: { minHeight: 64, paddingVertical: 10, paddingLeft: 14, paddingRight: 14, flexDirection: "row", alignItems: "center", gap: 12 },
+  actionDivider: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.separator },
+  iconBox: { width: 40, height: 40, borderRadius: 10, backgroundColor: colors.tintSoft, justifyContent: "center", alignItems: "center" },
+
+  // "Choose a project" sheet
   modalOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" },
-  modalCard: { backgroundColor: "white", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, paddingBottom: 40, maxHeight: "75%" },
-  modalTitle: { fontSize: 18, fontWeight: "700", color: "#1A1A1A", marginBottom: 4 },
-  modalSub: { fontSize: 13, color: "#9CA3AF", marginBottom: 16 },
+  modalCard: { backgroundColor: colors.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40, maxHeight: "75%" },
+  modalTitle: { fontSize: 22, fontWeight: "700", color: colors.text, marginBottom: 4 },
+  modalSub: { fontSize: 15, color: colors.textSecondary, marginBottom: 16 },
   projectList: { maxHeight: 400 },
-  noProjects: { textAlign: "center", color: "#9CA3AF", marginTop: 20 },
-  projectRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 14, borderRadius: 12, backgroundColor: "#F9FAFB", borderWidth: 1, borderColor: "#E8E6E1", marginBottom: 8 },
+  noProjects: { textAlign: "center", color: colors.textSecondary, fontSize: 15, marginTop: 20 },
+  projectRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", minHeight: 60, paddingHorizontal: 14, borderRadius: 12, backgroundColor: colors.fillSubtle, marginBottom: 8 },
   projectRowLeft: { flexDirection: "row", alignItems: "center", gap: 10, flex: 1 },
   projectDot: { width: 8, height: 8, borderRadius: 4 },
-  projectRowName: { fontSize: 14, fontWeight: "700", color: "#1A1A1A", marginBottom: 2 },
-  projectRowSub: { fontSize: 12, color: "#9CA3AF" },
-  projectRowArrow: { fontSize: 20, color: "#D1D5DB" },
-  cancelBtn: { backgroundColor: "#F3F4F6", borderRadius: 12, padding: 14, alignItems: "center", marginTop: 8 },
-  cancelBtnText: { fontSize: 15, fontWeight: "600", color: "#6B7280" },
+  projectRowName: { fontSize: 17, fontWeight: "600", color: colors.text, marginBottom: 2 },
+  projectRowSub: { fontSize: 13, color: colors.textSecondary },
+  cancelBtn: { backgroundColor: colors.fillSubtle, borderRadius: 12, height: 50, alignItems: "center", justifyContent: "center", marginTop: 8 },
+  cancelBtnText: { fontSize: 17, fontWeight: "600", color: colors.text },
+
+  // Overhead receipt sheet
+  fieldLabel: { fontSize: 13, fontWeight: "600", color: colors.textSecondary, marginBottom: 4 },
 })
-
-
-
-
-
-
-

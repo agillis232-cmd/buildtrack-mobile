@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, TextInput, Alert, Modal, Dimensions } from "react-native"
+import { View, Text, StyleSheet, ScrollView, Pressable, TouchableOpacity, ActivityIndicator, RefreshControl, TextInput, Alert, Modal, Dimensions } from "react-native"
 import { useEffect, useState, useRef, useCallback } from "react"
 import { useFocusEffect } from "expo-router"
 import { useAuth } from "@/lib/auth"
@@ -7,6 +7,9 @@ import { toDateKey, dateKeyOf, parseDateOnly, parseTimeLabel } from "@/lib/dates
 import DateTimePicker from "@react-native-community/datetimepicker"
 import { Linking } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
+import { Screen, ScreenHeader, CircleButton, SegmentedControl, Card, Button, Chip, EmptyState } from "@/components/ui"
+import { colors, type as typo, humanize } from "@/lib/theme"
+import { showMenu } from "@/lib/menu"
 import { loadCached } from "@/lib/cache"
 
 const EVENT_TYPES = ["MEETING", "INSPECTION", "DELIVERY", "ORDER", "WORK", "OTHER"]
@@ -255,473 +258,437 @@ export default function ScheduleScreen() {
   const dayEvents = eventsForDay(selectedDay)
   const projectsInView = [...new Set(events.filter(e => e.project).map(e => e.project.name))]
 
-  if (loading) return <View style={s.center}><ActivityIndicator color="#F97316" /></View>
+  // "Nov 15 – 21", or "Nov 29 – Dec 5" across a month boundary.
+  const weekLabel = weekDays[0].getMonth() === weekDays[6].getMonth()
+    ? `${weekDays[0].toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${weekDays[6].getDate()}`
+    : `${weekDays[0].toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${weekDays[6].toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+  const canEdit = user?.role !== "CLIENT"
+
+  function startAdd() {
+    resetForm()
+    setSelectedDate(selectedDay)
+    setAdding(true)
+  }
+
+  function startReschedule(event: any) {
+    const nextDay = parseDateOnly(event.date)
+    nextDay.setDate(nextDay.getDate() + 1)
+    setSelectedDate(nextDay)
+    setTitle(event.title)
+    setType(event.type)
+    setNotes(event.notes || "")
+    setProjectId(event.projectId || "")
+    setAdding(true)
+  }
+
+  function openEventMenu(event: any) {
+    showMenu(event.title, [
+      { label: "Reschedule to next day", onPress: () => startReschedule(event) },
+      { label: "Delete event", onPress: () => deleteEvent(event.id), destructive: true },
+    ])
+  }
+
+  function openCalendarMenu() {
+    showMenu("Google Calendar", calendarConnected
+      ? [{ label: "Import from Google Calendar", onPress: syncFromGoogle }]
+      : [{ label: "Connect Google Calendar", onPress: connectCalendar }])
+  }
+
+  if (loading) return <View style={s.center}><ActivityIndicator color={colors.accent} /></View>
 
   return (
-    <View style={s.container}>
-      <ScrollView
-        contentContainerStyle={s.scrollContent}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadEvents() }} tintColor="#F97316" />}
+    <Screen
+      tabBar
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadEvents() }} tintColor={colors.accent} />}
+    >
+      <ScreenHeader
+        title="Schedule"
+        subtitle={`${events.length} event${events.length === 1 ? "" : "s"} · ${projectsInView.length} project${projectsInView.length === 1 ? "" : "s"}`}
+        actions={
+          <>
+            {canEdit && <CircleButton icon="add" label="Add event" onPress={startAdd} />}
+            <CircleButton icon="ellipsis-horizontal" label="Google Calendar options" onPress={openCalendarMenu} disabled={syncing} />
+          </>
+        }
       >
-        {/* Header Banner */}
-        <View style={s.headerBanner}>
-          <View style={s.headerCircle} />
-          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
-            <View>
-              <Text style={s.headerTitle}>Schedule</Text>
-              <Text style={s.headerSub}>{events.length} events across {projectsInView.length} projects</Text>
-              <View style={{ flexDirection: "row", gap: 6, marginTop: 8 }}>
-                {(["week", "gantt"] as const).map(mode => (
-                  <TouchableOpacity key={mode} onPress={() => setViewMode(mode)} style={{ paddingHorizontal: 12, paddingVertical: 5, borderRadius: 99, backgroundColor: viewMode === mode ? "#F97316" : "rgba(255,255,255,0.1)", borderWidth: 1, borderColor: viewMode === mode ? "#F97316" : "rgba(255,255,255,0.15)" }}>
-                    <Text style={{ fontSize: 11, fontWeight: "600", color: viewMode === mode ? "white" : "rgba(255,255,255,0.5)" }}>{mode === "week" ? "Calendar" : "Gantt"}</Text>
+        <SegmentedControl
+          options={[{ key: "week", label: "Calendar" }, { key: "gantt", label: "Gantt" }]}
+          value={viewMode}
+          onChange={setViewMode}
+        />
+      </ScreenHeader>
+
+      {/* Add/Edit Form */}
+      {adding && (
+        <View style={s.addCard}>
+          <View style={s.addHeader}>
+            <Text style={s.addTitle}>{editingEvent ? "Edit event" : "New event"}</Text>
+            <TouchableOpacity onPress={() => { resetForm(); setAdding(false) }} accessibilityRole="button" accessibilityLabel="Close" hitSlop={10}>
+              <Ionicons name="close" size={24} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+          <View style={s.field}>
+            <Text style={s.label}>Title *</Text>
+            <TextInput style={s.input} value={title} onChangeText={setTitle} placeholder="Site inspection, delivery..." placeholderTextColor={colors.chevron} />
+          </View>
+          <View style={s.field}>
+            <Text style={s.label}>Type</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={s.typeRow}>
+                {EVENT_TYPES.map(t => (
+                  <TouchableOpacity
+                    key={t}
+                    style={[s.typeBtn, type === t && { backgroundColor: EVENT_COLORS[t] + "20", borderColor: EVENT_COLORS[t] }]}
+                    onPress={() => setType(t)}
+                  >
+                    <Ionicons name={(EVENT_ICONS[t] || "ellipse-outline") as any} size={14} color={type === t ? EVENT_COLORS[t] : colors.textSecondary} />
+                    <Text style={[s.typeBtnText, type === t && { color: EVENT_COLORS[t] }]}>{humanize(t)}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
-            </View>
-            <View style={s.headerActions}>
-              {calendarConnected ? (
-                <TouchableOpacity style={s.syncChip} onPress={syncFromGoogle} disabled={syncing}>
-                  {syncing ? <ActivityIndicator color="white" size="small" /> : (
-                    <>
-                      <Ionicons name="sync-outline" size={14} color="white" />
-                      <Text style={s.syncChipText}>Sync</Text>
-                    </>
-                  )}
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity style={s.connectChip} onPress={connectCalendar}>
-                  <Ionicons name="logo-google" size={14} color="white" />
-                  <Text style={s.syncChipText}>Connect</Text>
-                </TouchableOpacity>
-              )}
-            </View>
+            </ScrollView>
           </View>
-        </View>
-
-        <View style={{ backgroundColor: "#1C1F26", marginTop: -1, paddingTop: 8, paddingBottom: 16, borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }}>
-        {viewMode !== "gantt" ? (
-          <>
-            {/* Week Navigation */}
-            <View style={s.weekNav}>
-              <TouchableOpacity onPress={() => shiftWeek(-1)} style={s.weekArrow}>
-                <Ionicons name="chevron-back" size={20} color="rgba(255,255,255,0.6)" />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setWeekBase(new Date())}>
-                <Text style={s.weekLabel}>
-                  {weekDays[0].toLocaleDateString("en-US", { month: "short", day: "numeric" })} — {weekDays[6].toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+          <View style={s.field}>
+            <Text style={s.label}>Date *</Text>
+            <TouchableOpacity style={s.pickerBtn} onPress={() => setActivePicker("date")}>
+              <Ionicons name="calendar-outline" size={16} color={colors.textSecondary} />
+              <Text style={s.pickerBtnText}>
+                {selectedDate.toLocaleDateString("en-US", { weekday: "short", month: "long", day: "numeric" })}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View style={s.timeRow}>
+            <View style={[s.field, { flex: 1 }]}>
+              <Text style={s.label}>Start</Text>
+              <TouchableOpacity style={s.pickerBtn} onPress={() => setActivePicker("start")}>
+                <Ionicons name="time-outline" size={16} color={colors.textSecondary} />
+                <Text style={s.pickerBtnText}>
+                  {startTime ? startTime.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "Set time"}
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => shiftWeek(1)} style={s.weekArrow}>
-                <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.6)" />
+            </View>
+            <View style={[s.field, { flex: 1 }]}>
+              <Text style={s.label}>End</Text>
+              <TouchableOpacity style={s.pickerBtn} onPress={() => setActivePicker("end")}>
+                <Ionicons name="time-outline" size={16} color={colors.textSecondary} />
+                <Text style={s.pickerBtnText}>
+                  {endTime ? endTime.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "Set time"}
+                </Text>
               </TouchableOpacity>
             </View>
+          </View>
+          <View style={s.field}>
+            <Text style={s.label}>Project</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={s.typeRow}>
+                <TouchableOpacity
+                  style={[s.typeBtn, !projectId && { backgroundColor: colors.tintSoft, borderColor: colors.tint }]}
+                  onPress={() => setProjectId("")}
+                >
+                  <Text style={[s.typeBtnText, !projectId && { color: colors.tint }]}>None</Text>
+                </TouchableOpacity>
+                {projects.map(p => (
+                  <TouchableOpacity
+                    key={p.id}
+                    style={[s.typeBtn, projectId === p.id && { backgroundColor: colors.tintSoft, borderColor: colors.tint }]}
+                    onPress={() => setProjectId(p.id)}
+                  >
+                    <Text style={[s.typeBtnText, projectId === p.id && { color: colors.tint }]} numberOfLines={1}>{p.name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView>
+          </View>
+          <View style={s.field}>
+            <Text style={s.label}>Location</Text>
+            <TextInput style={s.input} value={locationText} onChangeText={setLocationText} placeholder="Address or description" placeholderTextColor={colors.chevron} />
+          </View>
+          <View style={s.field}>
+            <Text style={s.label}>Notes</Text>
+            <TextInput style={[s.input, { height: 70, textAlignVertical: "top" }]} value={notes} onChangeText={setNotes} placeholder="Additional details..." placeholderTextColor={colors.chevron} multiline />
+          </View>
+          <View style={s.formBtns}>
+            <TouchableOpacity style={s.cancelBtn} onPress={() => { resetForm(); setAdding(false) }}>
+              <Text style={s.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[s.saveBtn, saving && { opacity: 0.6 }]} onPress={saveEvent} disabled={saving}>
+              {saving ? <ActivityIndicator color={colors.white} /> : <Text style={s.saveBtnText}>{editingEvent ? "Save changes" : "Add event"}</Text>}
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
-            {/* Week Strip */}
+      {viewMode !== "gantt" ? (
+        <>
+          {/* Week */}
+          <Card style={s.weekCard}>
+            <View style={s.weekNav}>
+              <Pressable onPress={() => shiftWeek(-1)} style={s.weekArrow} accessibilityRole="button" accessibilityLabel="Previous week">
+                <Ionicons name="chevron-back" size={20} color={colors.tint} />
+              </Pressable>
+              <Pressable onPress={() => { setWeekBase(new Date()); setSelectedDay(new Date()) }} accessibilityRole="button" accessibilityLabel={`Week of ${weekLabel}. Go to today`}>
+                <Text style={typo.headline}>{weekLabel}</Text>
+              </Pressable>
+              <Pressable onPress={() => shiftWeek(1)} style={s.weekArrow} accessibilityRole="button" accessibilityLabel="Next week">
+                <Ionicons name="chevron-forward" size={20} color={colors.tint} />
+              </Pressable>
+            </View>
             <View style={s.weekStrip}>
               {weekDays.map((day, i) => {
                 const isToday = isSameDay(day, today)
                 const isSelected = isSameDay(day, selectedDay)
-                const dayEvts = eventsForDay(day)
+                const count = eventsForDay(day).length
                 return (
-                  <TouchableOpacity
+                  <Pressable
                     key={i}
-                    style={[s.dayCell, isSelected && s.dayCellSelected, isToday && !isSelected && s.dayCellToday]}
+                    style={s.dayCell}
                     onPress={() => setSelectedDay(day)}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: isSelected }}
+                    accessibilityLabel={`${day.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}${isToday ? ", today" : ""}, ${count} event${count === 1 ? "" : "s"}`}
                   >
-                    <Text style={[s.dayName, isSelected && s.dayNameSelected]}>{day.toLocaleDateString("en-US", { weekday: "short" }).slice(0, 2)}</Text>
-                    <Text style={[s.dayNum, isSelected && s.dayNumSelected, isToday && !isSelected && s.dayNumToday]}>{day.getDate()}</Text>
-                    {dayEvts.length > 0 && (
-                      <View style={{ flexDirection: "row", gap: 2, marginTop: 3 }}>
-                        {dayEvts.slice(0, 3).map((e, j) => (
-                          <View key={j} style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: isSelected ? "white" : EVENT_COLORS[e.type] || "#6B7280" }} />
-                        ))}
-                      </View>
-                    )}
-                  </TouchableOpacity>
+                    <Text style={[s.dayName, (isSelected || isToday) && { color: colors.tint, fontWeight: "600" }]}>
+                      {day.toLocaleDateString("en-US", { weekday: "short" })}
+                    </Text>
+                    <View style={[s.dayCircle, isSelected && s.dayCircleSelected]}>
+                      <Text style={[s.dayNum, isSelected && { color: colors.white, fontWeight: "600" }, isToday && !isSelected && { color: colors.tint, fontWeight: "700" }]}>
+                        {day.getDate()}
+                      </Text>
+                    </View>
+                    <View style={[s.dayDot, count > 0 && { backgroundColor: colors.accent }]} />
+                  </Pressable>
                 )
               })}
             </View>
+          </Card>
 
-            {/* Day Header */}
-            <View style={s.dayHeader}>
-              <Text style={s.dayHeaderText}>
-                {selectedDay.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
-              </Text>
-              <Text style={s.dayHeaderCount}>{dayEvents.length} event{dayEvents.length !== 1 ? "s" : ""}</Text>
-            </View>
+          {/* Selected day */}
+          <View style={s.dayHeader}>
+            <Text style={typo.title2} accessibilityRole="header">
+              {selectedDay.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+            </Text>
+            <Text style={typo.subhead}>{dayEvents.length} event{dayEvents.length !== 1 ? "s" : ""}</Text>
+          </View>
 
-            {/* Day Events */}
-            {dayEvents.length === 0 ? (
-              <View style={s.emptyDay}>
-                <Ionicons name="calendar-outline" size={32} color="#D1D5DB" />
-                <Text style={s.emptyDayText}>No events this day</Text>
-              </View>
-            ) : (
-              dayEvents.map(event => {
-                const color = EVENT_COLORS[event.type] || "#6B7280"
-                const iconName = EVENT_ICONS[event.type] || "ellipse-outline"
-                return (
-                  <View key={event.id} style={[s.eventCard, { borderLeftColor: color, opacity: event.completed ? 0.5 : 1 }]}>
-                    <View style={s.eventTop}>
-                      <View style={[s.eventIconBox, { backgroundColor: color + "15" }]}>
-                        <Ionicons name={iconName as any} size={18} color={color} />
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={[s.eventTitle, event.completed && { textDecorationLine: "line-through" }]}>{event.title}</Text>
-                        <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 2 }}>
-                          <Text style={s.eventType}>{event.type}</Text>
-                          {event.startTime && <Text style={s.eventTime}>{event.startTime}{event.endTime ? ` - ${event.endTime}` : ""}</Text>}
-                        </View>
-                        {event.project && (
-                          <Text style={s.eventProject}>{event.project.name}</Text>
-                        )}
-                        {event.location && <Text style={s.eventLocation}>{event.location}</Text>}
-                        {event.notes && <Text style={s.eventNotes}>{event.notes}</Text>}
-                      </View>
-                    </View>
-                    {user?.role !== "CLIENT" && (
-                    <View style={s.eventActions}>
-                      {!event.completed && (
-                        <TouchableOpacity style={s.actionBtn} onPress={() => completeEvent(event.id)}>
-                          <Ionicons name="checkmark-outline" size={14} color="#16A34A" />
-                          <Text style={[s.actionBtnText, { color: "#16A34A" }]}>Complete</Text>
-                        </TouchableOpacity>
-                      )}
-                      <TouchableOpacity style={s.actionBtn} onPress={() => startEdit(event)}>
-                        <Ionicons name="pencil-outline" size={14} color="#374151" />
-                        <Text style={s.actionBtnText}>Edit</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity style={s.actionBtn} onPress={() => {
-                        const nextDay = parseDateOnly(event.date)
-                        nextDay.setDate(nextDay.getDate() + 1)
-                        setSelectedDate(nextDay)
-                        setTitle(event.title)
-                        setType(event.type)
-                        setNotes(event.notes || "")
-                        setProjectId(event.projectId || "")
-                        setAdding(true)
-                      }}>
-                        <Ionicons name="arrow-forward-outline" size={14} color="#374151" />
-                        <Text style={s.actionBtnText}>Reschedule</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity style={[s.actionBtn, s.actionBtnDanger]} onPress={() => deleteEvent(event.id)}>
-                        <Ionicons name="trash-outline" size={14} color="#DC2626" />
-                        <Text style={[s.actionBtnText, { color: "#DC2626" }]}>Delete</Text>
-                      </TouchableOpacity>
-                    </View>
-                    )}
-                  </View>
-                )
-              })
-            )}
-          </>
-        ) : (
-          /* Gantt Chart View */
-          <View style={{ paddingHorizontal: 16, paddingBottom: 100 }}>
-            <Text style={{ fontSize: 14, fontWeight: "700", color: "white", marginBottom: 12 }}>Project timeline</Text>
-            {(() => {
-              const sortedEvents = [...events].filter(e => e.date).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-              if (sortedEvents.length === 0) return <Text style={{ color: "rgba(255,255,255,0.4)", textAlign: "center", padding: 40 }}>No events to display</Text>
-              const minDate = parseDateOnly(sortedEvents[0].date)
-              const maxDate = parseDateOnly(sortedEvents[sortedEvents.length - 1].date)
-              const totalDays = Math.max(Math.ceil((maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24)) + 1, 7)
-              const barWidth = SCREEN_WIDTH - 140
-              const byProject: Record<string, any[]> = {}
-              sortedEvents.forEach(e => {
-                const pName = e.project?.name || "No project"
-                if (!byProject[pName]) byProject[pName] = []
-                byProject[pName].push(e)
-              })
-              const months: { label: string; offset: number }[] = []
-              const mStart = new Date(minDate)
-              while (mStart <= maxDate) {
-                const dayOffset = Math.ceil((mStart.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24))
-                months.push({ label: mStart.toLocaleDateString("en-US", { month: "short" }), offset: (dayOffset / totalDays) * barWidth })
-                mStart.setMonth(mStart.getMonth() + 1)
-                mStart.setDate(1)
-              }
+          {dayEvents.length === 0 ? (
+            <EmptyState icon="calendar-outline" title="Nothing scheduled" subtitle={canEdit ? "Tap + to add an event." : undefined} />
+          ) : (
+            dayEvents.map(event => {
+              const color = EVENT_COLORS[event.type] || "#6B7280"
+              const iconName = EVENT_ICONS[event.type] || "ellipse-outline"
+              const meta = [
+                humanize(event.type),
+                event.startTime ? `${event.startTime}${event.endTime ? ` – ${event.endTime}` : ""}` : null,
+              ].filter(Boolean).join(" · ")
               return (
-                <View>
-                  <View style={{ flexDirection: "row", marginLeft: 100, marginBottom: 8, height: 16, position: "relative" }}>
-                    {months.map((m, i) => (
-                      <Text key={i} style={{ position: "absolute", left: m.offset, fontSize: 9, color: "rgba(255,255,255,0.4)", fontWeight: "600" }}>{m.label}</Text>
-                    ))}
+                <Card key={event.id} style={[s.eventCard, event.completed && { opacity: 0.6 }]}>
+                  <View style={s.eventTop}>
+                    <View style={[s.eventIconBox, { backgroundColor: color + "1F" }]}>
+                      <Ionicons name={iconName as any} size={20} color={color} />
+                    </View>
+                    <View style={{ flex: 1, gap: 3 }}>
+                      <Text style={[typo.headline, event.completed && { textDecorationLine: "line-through" }]}>{event.title}</Text>
+                      <Text style={typo.footnote}>
+                        {meta}
+                        {event.project ? <Text style={{ color: colors.tint, fontWeight: "600" }}>{meta ? " · " : ""}{event.project.name}</Text> : null}
+                      </Text>
+                      {!!event.location && (
+                        <View style={s.eventLocation}>
+                          <Ionicons name="location-outline" size={14} color={colors.textSecondary} />
+                          <Text style={typo.footnote}>{event.location}</Text>
+                        </View>
+                      )}
+                      {!!event.notes && <Text style={s.eventNotes}>{event.notes}</Text>}
+                    </View>
                   </View>
-                  {Object.entries(byProject).map(([projectName, projectEvents]) => (
-                    <View key={projectName} style={{ marginBottom: 16 }}>
-                      <Text style={{ fontSize: 11, fontWeight: "700", color: "rgba(255,255,255,0.6)", marginBottom: 6 }}>{projectName}</Text>
-                      {projectEvents.map((event) => {
-                        const startDay = Math.ceil((parseDateOnly(event.date).getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24))
-                        const endDay = event.endDate ? Math.ceil((parseDateOnly(event.endDate).getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24)) : startDay + 1
-                        const duration = Math.max(endDay - startDay, 1)
-                        const left = (startDay / totalDays) * barWidth
-                        const width = Math.max((duration / totalDays) * barWidth, 20)
-                        const color = EVENT_COLORS[event.type] || "#6B7280"
-                        const isPast = dateKeyOf(event.date) < toDateKey(new Date())
-                        return (
-                          <TouchableOpacity key={event.id} onPress={() => Alert.alert(event.title, `${event.type}\n${parseDateOnly(event.date).toLocaleDateString()}${event.notes ? `\n\n${event.notes}` : ""}`)} style={{ flexDirection: "row", alignItems: "center", marginBottom: 4, height: 28 }}>
-                            <Text style={{ width: 96, fontSize: 10, color: "rgba(255,255,255,0.4)", paddingRight: 4 }} numberOfLines={1}>{event.title}</Text>
-                            <View style={{ flex: 1, position: "relative", height: 22 }}>
-                              <View style={{ position: "absolute", left, width, height: 20, borderRadius: 4, backgroundColor: color + (isPast ? "40" : "CC"), borderLeftWidth: 3, borderLeftColor: color, justifyContent: "center", paddingHorizontal: 6 }}>
-                                {width > 50 && <Text style={{ fontSize: 8, color: "white", fontWeight: "600" }} numberOfLines={1}>{parseDateOnly(event.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</Text>}
-                              </View>
+                  {canEdit && (
+                    <View style={s.eventActions}>
+                      {event.completed ? (
+                        <View style={{ flex: 1, justifyContent: "center" }}><Chip label="Completed" tone="success" /></View>
+                      ) : (
+                        <Button label="Mark complete" icon="checkmark" tone="success" onPress={() => completeEvent(event.id)} style={{ flex: 1 }} />
+                      )}
+                      <Button label="Edit" onPress={() => startEdit(event)} />
+                      <Pressable
+                        onPress={() => openEventMenu(event)}
+                        accessibilityRole="button"
+                        accessibilityLabel="More: reschedule, delete"
+                        style={({ pressed }) => [s.moreBtn, pressed && { opacity: 0.55 }]}
+                      >
+                        <Ionicons name="ellipsis-horizontal" size={20} color={colors.text} />
+                      </Pressable>
+                    </View>
+                  )}
+                </Card>
+              )
+            })
+          )}
+        </>
+      ) : (
+        /* Gantt Chart View */
+        <Card style={{ padding: 16 }}>
+        <View>
+          <Text style={[typo.headline, { marginBottom: 12 }]}>Project timeline</Text>
+          {(() => {
+            const sortedEvents = [...events].filter(e => e.date).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+            if (sortedEvents.length === 0) return <Text style={[typo.subhead, { textAlign: "center", padding: 40 }]}>No events to display</Text>
+            const minDate = parseDateOnly(sortedEvents[0].date)
+            const maxDate = parseDateOnly(sortedEvents[sortedEvents.length - 1].date)
+            const totalDays = Math.max(Math.ceil((maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24)) + 1, 7)
+            const barWidth = SCREEN_WIDTH - 172
+            const byProject: Record<string, any[]> = {}
+            sortedEvents.forEach(e => {
+              const pName = e.project?.name || "No project"
+              if (!byProject[pName]) byProject[pName] = []
+              byProject[pName].push(e)
+            })
+            const months: { label: string; offset: number }[] = []
+            const mStart = new Date(minDate)
+            while (mStart <= maxDate) {
+              const dayOffset = Math.ceil((mStart.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24))
+              months.push({ label: mStart.toLocaleDateString("en-US", { month: "short" }), offset: (dayOffset / totalDays) * barWidth })
+              mStart.setMonth(mStart.getMonth() + 1)
+              mStart.setDate(1)
+            }
+            return (
+              <View>
+                <View style={{ flexDirection: "row", marginLeft: 100, marginBottom: 8, height: 16, position: "relative" }}>
+                  {months.map((m, i) => (
+                    <Text key={i} style={{ position: "absolute", left: m.offset, fontSize: 12, color: colors.textSecondary, fontWeight: "600" }}>{m.label}</Text>
+                  ))}
+                </View>
+                {Object.entries(byProject).map(([projectName, projectEvents]) => (
+                  <View key={projectName} style={{ marginBottom: 16 }}>
+                    <Text style={[typo.footnote, { fontWeight: "600", color: colors.text, marginBottom: 6 }]}>{projectName}</Text>
+                    {projectEvents.map((event) => {
+                      const startDay = Math.ceil((parseDateOnly(event.date).getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24))
+                      const endDay = event.endDate ? Math.ceil((parseDateOnly(event.endDate).getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24)) : startDay + 1
+                      const duration = Math.max(endDay - startDay, 1)
+                      const left = (startDay / totalDays) * barWidth
+                      const width = Math.max((duration / totalDays) * barWidth, 20)
+                      const color = EVENT_COLORS[event.type] || "#6B7280"
+                      const isPast = dateKeyOf(event.date) < toDateKey(new Date())
+                      return (
+                        <TouchableOpacity key={event.id} onPress={() => Alert.alert(event.title, `${humanize(event.type)}\n${parseDateOnly(event.date).toLocaleDateString()}${event.notes ? `\n\n${event.notes}` : ""}`)} style={{ flexDirection: "row", alignItems: "center", marginBottom: 4, height: 28 }}>
+                          <Text style={{ width: 96, fontSize: 12, color: colors.textSecondary, paddingRight: 4 }} numberOfLines={1}>{event.title}</Text>
+                          <View style={{ flex: 1, position: "relative", height: 22 }}>
+                            <View style={{ position: "absolute", left, width, height: 20, borderRadius: 4, backgroundColor: color + (isPast ? "40" : "CC"), borderLeftWidth: 3, borderLeftColor: color, justifyContent: "center", paddingHorizontal: 6 }}>
+                              {width > 60 && <Text style={{ fontSize: 11, color: "white", fontWeight: "600" }} numberOfLines={1}>{parseDateOnly(event.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</Text>}
                             </View>
-                          </TouchableOpacity>
-                        )
-                      })}
+                          </View>
+                        </TouchableOpacity>
+                      )
+                    })}
+                  </View>
+                ))}
+                <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12, paddingTop: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.separator }}>
+                  {Object.entries(EVENT_COLORS).slice(0, 6).map(([t, color]) => (
+                    <View key={t} style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                      <View style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: color }} />
+                      <Text style={{ fontSize: 12, color: colors.textSecondary }}>{humanize(t)}</Text>
                     </View>
                   ))}
-                  <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.08)" }}>
-                    {Object.entries(EVENT_COLORS).slice(0, 6).map(([t, color]) => (
-                      <View key={t} style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                        <View style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: color }} />
-                        <Text style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>{t}</Text>
-                      </View>
-                    ))}
-                  </View>
                 </View>
-              )
-            })()}
-          </View>
-        )}
+              </View>
+            )
+          })()}
         </View>
-
-        {/* Add/Edit Form */}
-        {adding && (
-          <View style={s.addCard}>
-            <View style={s.addHeader}>
-              <Text style={s.addTitle}>{editingEvent ? "Edit Event" : "New Event"}</Text>
-              <TouchableOpacity onPress={() => { resetForm(); setAdding(false) }}>
-                <Ionicons name="close" size={22} color="#6B7280" />
-              </TouchableOpacity>
-            </View>
-            <View style={s.field}>
-              <Text style={s.label}>Title *</Text>
-              <TextInput style={s.input} value={title} onChangeText={setTitle} placeholder="Site inspection, delivery..." placeholderTextColor="#9CA3AF" />
-            </View>
-            <View style={s.field}>
-              <Text style={s.label}>Type</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View style={s.typeRow}>
-                  {EVENT_TYPES.map(t => (
-                    <TouchableOpacity
-                      key={t}
-                      style={[s.typeBtn, type === t && { backgroundColor: EVENT_COLORS[t] + "20", borderColor: EVENT_COLORS[t] }]}
-                      onPress={() => setType(t)}
-                    >
-                      <Ionicons name={(EVENT_ICONS[t] || "ellipse-outline") as any} size={14} color={type === t ? EVENT_COLORS[t] : "#6B7280"} />
-                      <Text style={[s.typeBtnText, type === t && { color: EVENT_COLORS[t] }]}>{t}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </ScrollView>
-            </View>
-            <View style={s.field}>
-              <Text style={s.label}>Date *</Text>
-              <TouchableOpacity style={s.pickerBtn} onPress={() => setActivePicker("date")}>
-                <Ionicons name="calendar-outline" size={16} color="#6B7280" />
-                <Text style={s.pickerBtnText}>
-                  {selectedDate.toLocaleDateString("en-US", { weekday: "short", month: "long", day: "numeric" })}
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <View style={s.timeRow}>
-              <View style={[s.field, { flex: 1 }]}>
-                <Text style={s.label}>Start</Text>
-                <TouchableOpacity style={s.pickerBtn} onPress={() => setActivePicker("start")}>
-                  <Ionicons name="time-outline" size={16} color="#6B7280" />
-                  <Text style={s.pickerBtnText}>
-                    {startTime ? startTime.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "Set time"}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              <View style={[s.field, { flex: 1 }]}>
-                <Text style={s.label}>End</Text>
-                <TouchableOpacity style={s.pickerBtn} onPress={() => setActivePicker("end")}>
-                  <Ionicons name="time-outline" size={16} color="#6B7280" />
-                  <Text style={s.pickerBtnText}>
-                    {endTime ? endTime.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "Set time"}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-            <View style={s.field}>
-              <Text style={s.label}>Project</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View style={s.typeRow}>
-                  <TouchableOpacity
-                    style={[s.typeBtn, !projectId && { backgroundColor: "#F9731620", borderColor: "#F97316" }]}
-                    onPress={() => setProjectId("")}
-                  >
-                    <Text style={[s.typeBtnText, !projectId && { color: "#F97316" }]}>None</Text>
-                  </TouchableOpacity>
-                  {projects.map(p => (
-                    <TouchableOpacity
-                      key={p.id}
-                      style={[s.typeBtn, projectId === p.id && { backgroundColor: "#F9731620", borderColor: "#F97316" }]}
-                      onPress={() => setProjectId(p.id)}
-                    >
-                      <Text style={[s.typeBtnText, projectId === p.id && { color: "#F97316" }]} numberOfLines={1}>{p.name}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </ScrollView>
-            </View>
-            <View style={s.field}>
-              <Text style={s.label}>Location</Text>
-              <TextInput style={s.input} value={locationText} onChangeText={setLocationText} placeholder="Address or description" placeholderTextColor="#9CA3AF" />
-            </View>
-            <View style={s.field}>
-              <Text style={s.label}>Notes</Text>
-              <TextInput style={[s.input, { height: 70, textAlignVertical: "top" }]} value={notes} onChangeText={setNotes} placeholder="Additional details..." placeholderTextColor="#9CA3AF" multiline />
-            </View>
-            <View style={s.formBtns}>
-              <TouchableOpacity style={s.cancelBtn} onPress={() => { resetForm(); setAdding(false) }}>
-                <Text style={s.cancelText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[s.saveBtn, saving && { opacity: 0.6 }]} onPress={saveEvent} disabled={saving}>
-                {saving ? <ActivityIndicator color="white" /> : <Text style={s.saveBtnText}>{editingEvent ? "Save Changes" : "Create Event"}</Text>}
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-
-        {/* Date/Time Picker Modal */}
-        <Modal visible={!!activePicker} transparent animationType="slide">
-          <View style={s.modalOverlay}>
-            <View style={s.modalCard}>
-              <View style={s.modalHeader}>
-                <Text style={s.modalTitle}>
-                  {activePicker === "date" ? "Select Date" : activePicker === "start" ? "Start Time" : "End Time"}
-                </Text>
-                <TouchableOpacity style={s.modalDone} onPress={() => setActivePicker(null)}>
-                  <Text style={s.modalDoneText}>Done</Text>
-                </TouchableOpacity>
-              </View>
-              {activePicker === "date" && (
-                <DateTimePicker
-                  value={selectedDate}
-                  mode="date"
-                  display="spinner"
-                  onChange={(e: any, date?: Date) => { if (date) setSelectedDate(date) }}
-                />
-              )}
-              {activePicker === "start" && (
-                <DateTimePicker
-                  value={startTime || new Date()}
-                  mode="time"
-                  display="spinner"
-                  onChange={(e: any, date?: Date) => { if (date) setStartTime(date) }}
-                />
-              )}
-              {activePicker === "end" && (
-                <DateTimePicker
-                  value={endTime || new Date()}
-                  mode="time"
-                  display="spinner"
-                  onChange={(e: any, date?: Date) => { if (date) setEndTime(date) }}
-                />
-              )}
-            </View>
-          </View>
-        </Modal>
-
-      </ScrollView>
-
-      {/* FAB */}
-      {!adding && user?.role !== "CLIENT" && (
-        <TouchableOpacity style={s.fab} onPress={() => { setSelectedDate(selectedDay); setAdding(true) }}>
-          <Ionicons name="add" size={24} color="white" />
-          <Text style={s.fabText}>Add Event</Text>
-        </TouchableOpacity>
+        </Card>
       )}
-    </View>
+
+      {/* Date/Time Picker Modal */}
+      <Modal visible={!!activePicker} transparent animationType="slide">
+        <View style={s.modalOverlay}>
+          <View style={s.modalCard}>
+            <View style={s.modalHeader}>
+              <Text style={s.modalTitle}>
+                {activePicker === "date" ? "Date" : activePicker === "start" ? "Start time" : "End time"}
+              </Text>
+              <TouchableOpacity style={s.modalDone} onPress={() => setActivePicker(null)}>
+                <Text style={s.modalDoneText}>Done</Text>
+              </TouchableOpacity>
+            </View>
+            {activePicker === "date" && (
+              <DateTimePicker
+                value={selectedDate}
+                mode="date"
+                display="spinner"
+                onChange={(e: any, date?: Date) => { if (date) setSelectedDate(date) }}
+              />
+            )}
+            {activePicker === "start" && (
+              <DateTimePicker
+                value={startTime || new Date()}
+                mode="time"
+                display="spinner"
+                onChange={(e: any, date?: Date) => { if (date) setStartTime(date) }}
+              />
+            )}
+            {activePicker === "end" && (
+              <DateTimePicker
+                value={endTime || new Date()}
+                mode="time"
+                display="spinner"
+                onChange={(e: any, date?: Date) => { if (date) setEndTime(date) }}
+              />
+            )}
+          </View>
+        </View>
+      </Modal>
+    </Screen>
   )
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
-  scrollContent: { paddingBottom: 120 },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background },
 
-  // Header
-  headerBanner: { backgroundColor: "#1C1F26", paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20, position: "relative", overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: "rgba(249,115,22,0.08)" },
-  headerTitle: { fontSize: 24, fontWeight: "700", color: "white", letterSpacing: -0.5 },
-  headerSub: { fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 2 },
-  headerActions: { flexDirection: "row", gap: 8 },
-  syncChip: { flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "#4285F4", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 },
-  connectChip: { flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "rgba(255,255,255,0.1)", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: "rgba(255,255,255,0.2)" },
-  syncChipText: { color: "white", fontSize: 12, fontWeight: "600" },
+  // Week
+  weekCard: { paddingHorizontal: 8, paddingTop: 4, paddingBottom: 12 },
+  weekNav: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  weekArrow: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
+  weekStrip: { flexDirection: "row" },
+  dayCell: { flex: 1, alignItems: "center", gap: 4 },
+  dayName: { fontSize: 12, lineHeight: 16, color: colors.textSecondary },
+  dayCircle: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
+  dayCircleSelected: { backgroundColor: colors.charcoal },
+  dayNum: { fontSize: 17, fontWeight: "500", color: colors.text },
+  dayDot: { width: 5, height: 5, borderRadius: 3, backgroundColor: "transparent" },
 
-  // Week nav
-  weekNav: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12, paddingHorizontal: 16, marginTop: 16 },
-  weekArrow: { padding: 4 },
-  weekLabel: { fontSize: 13, fontWeight: "600", color: "rgba(255,255,255,0.7)" },
-
-  // Week strip
-  weekStrip: { flexDirection: "row", gap: 4, marginBottom: 12, paddingHorizontal: 16 },
-  dayCell: { flex: 1, alignItems: "center", paddingVertical: 8, borderRadius: 10, backgroundColor: "rgba(255,255,255,0.05)" },
-  dayCellSelected: { backgroundColor: "#F97316" },
-  dayCellToday: { borderWidth: 1, borderColor: "rgba(249,115,22,0.5)" },
-  dayName: { fontSize: 10, color: "rgba(255,255,255,0.4)", fontWeight: "600", marginBottom: 2 },
-  dayNameSelected: { color: "rgba(255,255,255,0.8)" },
-  dayNum: { fontSize: 16, fontWeight: "700", color: "white" },
-  dayNumSelected: { color: "white" },
-  dayNumToday: { color: "#F97316" },
-
-  // Day header
-  dayHeader: { paddingHorizontal: 16, marginBottom: 12 },
-  dayHeaderText: { fontSize: 16, fontWeight: "700", color: "white" },
-  dayHeaderCount: { fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 2 },
-
-  // Empty day
-  emptyDay: { alignItems: "center", padding: 40, marginHorizontal: 16, backgroundColor: "rgba(255,255,255,0.03)", borderRadius: 14, borderWidth: 1, borderColor: "rgba(255,255,255,0.06)" },
-  emptyDayText: { fontSize: 14, color: "rgba(255,255,255,0.3)", marginTop: 8 },
+  dayHeader: { flexDirection: "row", alignItems: "baseline", justifyContent: "space-between", paddingHorizontal: 4, paddingTop: 4, gap: 8 },
 
   // Event card
-  eventCard: { backgroundColor: "white", borderRadius: 14, padding: 16, marginHorizontal: 16, marginBottom: 10, borderLeftWidth: 4, shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 2 },
-  eventTop: { flexDirection: "row", gap: 12, marginBottom: 10 },
-  eventIconBox: { width: 36, height: 36, borderRadius: 10, justifyContent: "center", alignItems: "center" },
-  eventTitle: { fontSize: 15, fontWeight: "700", color: "#1A1A1A", marginBottom: 2 },
-  eventType: { fontSize: 11, fontWeight: "600", color: "#9CA3AF" },
-  eventTime: { fontSize: 11, color: "#6B7280" },
-  eventProject: { fontSize: 12, color: "#F97316", fontWeight: "600", marginTop: 3 },
-  eventLocation: { fontSize: 11, color: "#9CA3AF", marginTop: 2 },
-  eventNotes: { fontSize: 12, color: "#6B7280", marginTop: 4, lineHeight: 18 },
-  eventActions: { flexDirection: "row", gap: 6, paddingTop: 10, borderTopWidth: 1, borderTopColor: "#F3F4F6", flexWrap: "wrap" },
-  actionBtn: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, backgroundColor: "#F3F4F6" },
-  actionBtnDanger: { backgroundColor: "#FEE2E2" },
-  actionBtnText: { fontSize: 12, fontWeight: "600", color: "#374151" },
+  eventCard: { padding: 16, gap: 14 },
+  eventTop: { flexDirection: "row", gap: 12 },
+  eventIconBox: { width: 40, height: 40, borderRadius: 12, justifyContent: "center", alignItems: "center" },
+  eventLocation: { flexDirection: "row", alignItems: "center", gap: 4 },
+  eventNotes: { fontSize: 15, lineHeight: 21, color: "#3A404B", marginTop: 4 },
+  eventActions: { flexDirection: "row", gap: 8 },
+  moreBtn: { width: 44, height: 44, borderRadius: 12, backgroundColor: colors.fillSubtle, alignItems: "center", justifyContent: "center" },
 
   // Add/Edit form
-  addCard: { backgroundColor: "white", borderRadius: 16, padding: 20, marginHorizontal: 16, marginBottom: 20, borderWidth: 1, borderColor: "#E8E6E1", shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 3 },
+  addCard: { backgroundColor: colors.card, borderRadius: 20, padding: 20 },
   addHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
-  addTitle: { fontSize: 17, fontWeight: "700", color: "#1A1A1A" },
+  addTitle: { fontSize: 22, fontWeight: "700", color: colors.text },
   field: { marginBottom: 14 },
-  label: { fontSize: 13, fontWeight: "600", color: "#374151", marginBottom: 6 },
-  input: { backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, fontSize: 15, color: "#1A1A1A", borderWidth: 1, borderColor: "#E8E6E1" },
+  label: { fontSize: 15, fontWeight: "600", color: colors.text, marginBottom: 6 },
+  input: { backgroundColor: colors.fillSubtle, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 17, color: colors.text },
   typeRow: { flexDirection: "row", gap: 8 },
-  typeBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 99, borderWidth: 1, borderColor: "#E8E6E1", backgroundColor: "#F9FAFB" },
-  typeBtnText: { fontSize: 12, fontWeight: "600", color: "#6B7280" },
-  pickerBtn: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, borderWidth: 1, borderColor: "#E8E6E1" },
-  pickerBtnText: { fontSize: 14, color: "#374151" },
+  typeBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, height: 36, borderRadius: 18, borderWidth: 1, borderColor: colors.separator, backgroundColor: colors.card },
+  typeBtnText: { fontSize: 14, fontWeight: "600", color: colors.textSecondary },
+  pickerBtn: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: colors.fillSubtle, borderRadius: 12, paddingHorizontal: 14, height: 46 },
+  pickerBtnText: { fontSize: 17, color: colors.text },
   timeRow: { flexDirection: "row", gap: 12 },
   formBtns: { flexDirection: "row", gap: 10, marginTop: 8 },
-  cancelBtn: { flex: 1, backgroundColor: "#F3F4F6", borderRadius: 10, padding: 13, alignItems: "center" },
-  cancelText: { fontSize: 15, fontWeight: "600", color: "#6B7280" },
-  saveBtn: { flex: 1, backgroundColor: "#F97316", borderRadius: 10, padding: 13, alignItems: "center" },
-  saveBtnText: { color: "white", fontSize: 15, fontWeight: "700" },
+  cancelBtn: { flex: 1, backgroundColor: colors.fillSubtle, borderRadius: 12, height: 50, alignItems: "center", justifyContent: "center" },
+  cancelText: { fontSize: 17, fontWeight: "600", color: colors.text },
+  saveBtn: { flex: 1, backgroundColor: colors.charcoal, borderRadius: 12, height: 50, alignItems: "center", justifyContent: "center" },
+  saveBtnText: { color: colors.white, fontSize: 17, fontWeight: "600" },
 
-  // Modal
+  // Date/time picker sheet
   modalOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.4)" },
-  modalCard: { backgroundColor: "white", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, paddingBottom: 40 },
+  modalCard: { backgroundColor: colors.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, paddingBottom: 40 },
   modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
-  modalTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A" },
-  modalDone: { backgroundColor: "#F97316", paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8 },
-  modalDoneText: { color: "white", fontWeight: "700", fontSize: 14 },
-
-  // FAB
-  fab: { position: "absolute", bottom: 30, left: 20, right: 20, backgroundColor: "#F97316", borderRadius: 14, padding: 16, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, shadowColor: "#F97316", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
-  fabText: { color: "white", fontSize: 15, fontWeight: "700" },
+  modalTitle: { fontSize: 17, fontWeight: "600", color: colors.text },
+  modalDone: { height: 44, paddingHorizontal: 8, justifyContent: "center" },
+  modalDoneText: { color: colors.tint, fontWeight: "600", fontSize: 17 },
 })

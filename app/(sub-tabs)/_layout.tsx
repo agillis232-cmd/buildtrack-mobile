@@ -5,7 +5,6 @@ import OfflineBanner from "../components/OfflineBanner"
 export default function SubTabsLayout() {
   return (
     <View style={{ flex: 1 }}>
-      <OfflineBanner />
       <Tabs
         screenOptions={{
           headerShown: false,
@@ -73,6 +72,7 @@ export default function SubTabsLayout() {
           ),
         }} />
       </Tabs>
+      <OfflineBanner />
     </View>
   )
 }

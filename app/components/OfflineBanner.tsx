@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react"
 import { View, Text, TouchableOpacity, Animated } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { TAB_BAR_HEIGHT, tabBarBottom } from "@/lib/theme"
 import { isOnline, onNetworkChange, getQueueCount, syncQueue } from "../../lib/offline"
 
 export default function OfflineBanner() {
@@ -8,6 +10,7 @@ export default function OfflineBanner() {
   const [queueCount, setQueueCount] = useState(0)
   const [syncing, setSyncing] = useState(false)
   const [syncResult, setSyncResult] = useState<string | null>(null)
+  const insets = useSafeAreaInsets()
 
   useEffect(() => {
     isOnline().then(setOnline)
@@ -50,8 +53,12 @@ export default function OfflineBanner() {
   if (online && queueCount === 0 && !syncResult) return null
 
   return (
+    // Floats just above the tab bar, so it never pushes the page down or hides under the status bar.
     <View style={{
-      paddingHorizontal: 16, paddingVertical: 8,
+      position: "absolute", left: 16, right: 16,
+      bottom: tabBarBottom(insets.bottom) + TAB_BAR_HEIGHT + 10,
+      borderRadius: 14, paddingHorizontal: 16, paddingVertical: 10,
+      shadowColor: "#1C1F26", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.18, shadowRadius: 12, elevation: 6,
       backgroundColor: !online ? "#DC2626" : syncing ? "#D97706" : syncResult ? "#16A34A" : "#D97706",
       flexDirection: "row", alignItems: "center", justifyContent: "space-between",
     }}>
@@ -61,7 +68,7 @@ export default function OfflineBanner() {
           size={16}
           color="white"
         />
-        <Text style={{ color: "white", fontSize: 12, fontWeight: "600" }}>
+        <Text style={{ color: "white", fontSize: 13, fontWeight: "600" }}>
           {!online
             ? `Offline${queueCount > 0 ? ` · ${queueCount} pending` : ""}`
             : syncing
@@ -74,7 +81,7 @@ export default function OfflineBanner() {
       </View>
       {online && queueCount > 0 && !syncing && (
         <TouchableOpacity onPress={handleSync}>
-          <Text style={{ color: "white", fontSize: 12, fontWeight: "700" }}>Sync now</Text>
+          <Text style={{ color: "white", fontSize: 13, fontWeight: "700" }}>Sync now</Text>
         </TouchableOpacity>
       )}
     </View>
