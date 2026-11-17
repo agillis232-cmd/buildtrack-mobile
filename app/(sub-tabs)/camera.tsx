@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { View, Text, ScrollView, TouchableOpacity, Alert, ActivityIndicator, StyleSheet } from "react-native"
 import * as ImagePicker from "expo-image-picker"
 import { useAuth } from "@/lib/auth"
+import { colors } from "@/lib/theme"
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || "https://buildtrackpro.app"
 
@@ -64,34 +65,33 @@ export default function SubCameraScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.headerCircle} />
         <Text style={styles.title}>Site Photos</Text>
         <Text style={styles.subtitle}>Take and upload project photos</Text>
       </View>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 130 }}>
         {uploading && (
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8, padding: 14, backgroundColor: "#FFF7ED", borderRadius: 10, marginBottom: 12 }}>
-            <ActivityIndicator color="#F97316" />
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8, padding: 14, backgroundColor: colors.tintSoft, borderRadius: 10, marginBottom: 12 }}>
+            <ActivityIndicator color={colors.tint} />
             <Text style={{ fontSize: 13, color: "#D97706", fontWeight: "600" }}>Uploading photo...</Text>
           </View>
         )}
         {loading ? (
-          <Text style={{ textAlign: "center", color: "#9CA3AF", marginTop: 40 }}>Loading...</Text>
+          <Text style={{ textAlign: "center", color: colors.textSecondary, marginTop: 40 }}>Loading...</Text>
         ) : projects.length === 0 ? (
           <View style={{ alignItems: "center", marginTop: 60 }}>
-            <Text style={{ fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 4 }}>No projects assigned</Text>
-            <Text style={{ fontSize: 13, color: "#9CA3AF" }}>Photos will appear when you are assigned to a project</Text>
+            <Text style={{ fontSize: 16, fontWeight: "700", color: colors.text, marginBottom: 4 }}>No projects assigned</Text>
+            <Text style={{ fontSize: 13, color: colors.textSecondary }}>Photos will appear when you are assigned to a project</Text>
           </View>
         ) : (
           projects.map((p: any) => (
             <TouchableOpacity key={p.id} style={styles.card} onPress={() => takePhoto(p.projectId)}>
               <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
                 <View>
-                  {p.orgName && <Text style={{ fontSize: 10, fontWeight: "700", color: "#F97316", textTransform: "uppercase", marginBottom: 2 }}>{p.orgName}</Text>}
-                  <Text style={{ fontSize: 14, fontWeight: "700", color: "#1A1A1A" }}>{p.projectName}</Text>
-                  <Text style={{ fontSize: 12, color: "#9CA3AF" }}>{p.trade}</Text>
+                  {p.orgName && <Text style={{ fontSize: 11, fontWeight: "700", color: colors.tint, marginBottom: 2 }}>{p.orgName}</Text>}
+                  <Text style={{ fontSize: 14, fontWeight: "700", color: colors.text }}>{p.projectName}</Text>
+                  <Text style={{ fontSize: 12, color: colors.textSecondary }}>{p.trade}</Text>
                 </View>
-                <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: "#F97316", alignItems: "center", justifyContent: "center" }}>
+                <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: colors.charcoal, alignItems: "center", justifyContent: "center" }}>
                   <Text style={{ color: "white", fontSize: 20 }}>+</Text>
                 </View>
               </View>
@@ -104,10 +104,10 @@ export default function SubCameraScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
-  header: { backgroundColor: "#1C1F26", paddingTop: 60, paddingBottom: 24, paddingHorizontal: 20, overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: "rgba(249,115,22,0.08)" },
-  title: { fontSize: 22, fontWeight: "800", color: "white", marginBottom: 4 },
-  subtitle: { fontSize: 13, color: "rgba(255,255,255,0.4)" },
-  card: { backgroundColor: "white", borderRadius: 14, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: "#E8E6E1" },
+  container: { flex: 1, backgroundColor: colors.background },
+  header: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 8 },
+  headerCircle: { display: "none" },
+  title: { fontSize: 34, lineHeight: 41, fontWeight: "800", color: colors.text, marginBottom: 4, letterSpacing: -0.6 },
+  subtitle: { fontSize: 15, color: colors.textSecondary },
+  card: { backgroundColor: "white", borderRadius: 14, padding: 16, marginBottom: 10 },
 })

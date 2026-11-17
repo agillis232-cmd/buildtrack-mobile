@@ -6,6 +6,8 @@ import { API_URL } from "@/lib/api"
 import DatePicker from "@/components/DatePicker"
 import * as DocumentPicker from "expo-document-picker"
 import { parseDateOnly } from "@/lib/dates"
+import { colors } from "@/lib/theme"
+import { CircleButton } from "@/components/ui"
 
 const STATUS_COLORS: Record<string, string> = {
   OPEN: "#3B82F6",
@@ -210,19 +212,16 @@ export default function RFIsScreen() {
   const filtered = rfis.filter(r => filter === "ALL" ? true : r.status === filter)
   const openCount = rfis.filter(r => r.status === "OPEN").length
 
-  if (loading) return <View style={styles.center}><ActivityIndicator color="#F97316" /></View>
+  if (loading) return <View style={styles.center}><ActivityIndicator color={colors.tint} /></View>
 
   return (
     <View style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadRFIs() }} tintColor="#F97316" />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadRFIs() }} tintColor={colors.tint} />}
       >
         <View style={styles.headerBanner}>
-          <View style={styles.headerCircle} />
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backText}>← Back</Text>
-          </TouchableOpacity>
+          <CircleButton icon="chevron-back" label="Back" onPress={() => router.back()} />
           <Text style={styles.title}>RFIs</Text>
           <Text style={styles.subtitle}>{openCount} open · {rfis.length} total</Text>
         </View>
@@ -271,7 +270,7 @@ export default function RFIsScreen() {
               <View style={styles.rfiMeta}>
                 <Text style={styles.rfiMetaText}>By {rfi.submittedBy?.name}</Text>
                 {rfi.assignedToUser && <Text style={styles.rfiMetaText}>→ {rfi.assignedToUser?.name}</Text>}
-                {rfi.dueDate && <Text style={[styles.rfiMetaText, new Date(rfi.dueDate) < new Date() && rfi.status === "OPEN" && { color: "#DC2626" }]}>Due {parseDateOnly(rfi.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</Text>}
+                {rfi.dueDate && <Text style={[styles.rfiMetaText, new Date(rfi.dueDate) < new Date() && rfi.status === "OPEN" && { color: colors.danger }]}>Due {parseDateOnly(rfi.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</Text>}
                 <Text style={styles.rfiMetaText}>{rfi._count?.responses || 0} response{rfi._count?.responses !== 1 ? "s" : ""}</Text>
               </View>
             </TouchableOpacity>
@@ -294,7 +293,7 @@ export default function RFIsScreen() {
               <View style={styles.field}>
                 <Text style={styles.label}>Project *</Text>
                 <TouchableOpacity style={styles.selectBtn} onPress={() => setShowProjectPicker(true)}>
-                  <Text style={[styles.selectBtnText, !projectId && { color: "#9CA3AF" }]}>
+                  <Text style={[styles.selectBtnText, !projectId && { color: colors.textSecondary }]}>
                     {projectId ? projects.find(p => p.id === projectId)?.name || "Select..." : "Select project..."}
                   </Text>
                   <Text style={styles.arrow}>›</Text>
@@ -303,17 +302,17 @@ export default function RFIsScreen() {
 
               <View style={styles.field}>
                 <Text style={styles.label}>Subject *</Text>
-                <TextInput style={styles.input} value={subject} onChangeText={setSubject} placeholder="Clarification needed on..." placeholderTextColor="#9CA3AF" />
+                <TextInput style={styles.input} value={subject} onChangeText={setSubject} placeholder="Clarification needed on..." placeholderTextColor={colors.chevron} />
               </View>
 
               <View style={styles.field}>
                 <Text style={styles.label}>Description *</Text>
-                <TextInput style={[styles.input, { height: 80, textAlignVertical: "top" }]} value={description} onChangeText={setDescription} placeholder="Detailed description of the request..." placeholderTextColor="#9CA3AF" multiline />
+                <TextInput style={[styles.input, { height: 80, textAlignVertical: "top" }]} value={description} onChangeText={setDescription} placeholder="Detailed description of the request..." placeholderTextColor={colors.chevron} multiline />
               </View>
 
               <View style={styles.field}>
                 <Text style={styles.label}>Drawing Reference</Text>
-                <TextInput style={styles.input} value={drawingRef} onChangeText={setDrawingRef} placeholder="e.g. A2.1, S-101..." placeholderTextColor="#9CA3AF" />
+                <TextInput style={styles.input} value={drawingRef} onChangeText={setDrawingRef} placeholder="e.g. A2.1, S-101..." placeholderTextColor={colors.chevron} />
               </View>
 
               <View style={styles.field}>
@@ -334,7 +333,7 @@ export default function RFIsScreen() {
               <View style={styles.field}>
                 <Text style={styles.label}>Assign To</Text>
                 <TouchableOpacity style={styles.selectBtn} onPress={() => setShowAssigneePicker(true)}>
-                  <Text style={[styles.selectBtnText, !assignedTo && { color: "#9CA3AF" }]}>
+                  <Text style={[styles.selectBtnText, !assignedTo && { color: colors.textSecondary }]}>
                     {assignedTo ? teamMembers.find(m => m.id === assignedTo)?.name || "Select..." : "Select team member..."}
                   </Text>
                   <Text style={styles.arrow}>›</Text>
@@ -415,7 +414,7 @@ export default function RFIsScreen() {
                     onPress={() => uploadDocument(showDetailModal.id)}
                     disabled={uploadingDoc}
                   >
-                    {uploadingDoc ? <ActivityIndicator size="small" color="#F97316" /> : <Text style={styles.attachBtnText}>+ Attach</Text>}
+                    {uploadingDoc ? <ActivityIndicator size="small" color={colors.tint} /> : <Text style={styles.attachBtnText}>+ Attach</Text>}
                   </TouchableOpacity>
                 </View>
                 {showDetailModal?.documents?.length > 0 ? (
@@ -467,7 +466,7 @@ export default function RFIsScreen() {
                     value={response}
                     onChangeText={setResponse}
                     placeholder="Type your response..."
-                    placeholderTextColor="#9CA3AF"
+                    placeholderTextColor={colors.chevron}
                     multiline
                   />
                   <View style={styles.modalBtns}>
@@ -495,7 +494,7 @@ export default function RFIsScreen() {
             <ScrollView style={{ maxHeight: 400 }}>
               {projects.map(p => (
                 <TouchableOpacity key={p.id} style={[styles.pickerOption, projectId === p.id && styles.pickerOptionActive]} onPress={() => { setProjectId(p.id); setShowProjectPicker(false) }}>
-                  <Text style={[styles.pickerOptionText, projectId === p.id && { color: "#F97316", fontWeight: "700" }]}>{p.name}</Text>
+                  <Text style={[styles.pickerOptionText, projectId === p.id && { color: colors.tint, fontWeight: "700" }]}>{p.name}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -517,7 +516,7 @@ export default function RFIsScreen() {
               </TouchableOpacity>
               {teamMembers.map(m => (
                 <TouchableOpacity key={m.id} style={[styles.pickerOption, assignedTo === m.id && styles.pickerOptionActive]} onPress={() => { setAssignedTo(m.id); setShowAssigneePicker(false) }}>
-                  <Text style={[styles.pickerOptionText, assignedTo === m.id && { color: "#F97316", fontWeight: "700" }]}>{m.name} · {m.role.replace("_", " ")}</Text>
+                  <Text style={[styles.pickerOptionText, assignedTo === m.id && { color: colors.tint, fontWeight: "700" }]}>{m.name} · {m.role.replace("_", " ")}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -532,91 +531,91 @@ export default function RFIsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
+  container: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 120 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 24, marginBottom: 16, position: "relative", overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: "rgba(249,115,22,0.08)" },
+  headerBanner: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 8 },
+  headerCircle: { display: "none" },
   backBtn: { marginBottom: 12 },
-  backText: { color: "rgba(255,255,255,0.6)", fontSize: 15, fontWeight: "600" },
-  title: { fontSize: 26, fontWeight: "700", color: "white", letterSpacing: -0.5, marginBottom: 4 },
-  subtitle: { fontSize: 13, color: "rgba(255,255,255,0.4)" },
+  backText: { color: colors.textSecondary, fontSize: 15, fontWeight: "600" },
+  title: { fontSize: 34, lineHeight: 41, fontWeight: "700", color: colors.text, letterSpacing: -0.6, marginBottom: 4 },
+  subtitle: { fontSize: 15, color: colors.textSecondary },
   filterRow: { flexDirection: "row", gap: 8, paddingHorizontal: 16, marginBottom: 16 },
-  filterBtn: { flex: 1, paddingVertical: 8, borderRadius: 99, backgroundColor: "white", borderWidth: 1, borderColor: "#E8E6E1", alignItems: "center" },
-  filterBtnActive: { backgroundColor: "#1C1F26", borderColor: "#1C1F26" },
-  filterText: { fontSize: 11, fontWeight: "600", color: "#6B7280" },
+  filterBtn: { flex: 1, paddingVertical: 8, borderRadius: 99, backgroundColor: "white", alignItems: "center" },
+  filterBtnActive: { backgroundColor: colors.charcoal, borderColor: "#1C1F26" },
+  filterText: { fontSize: 11, fontWeight: "600", color: colors.textSecondary },
   filterTextActive: { color: "white" },
-  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1", marginHorizontal: 16 },
-  emptyTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 6 },
-  emptySub: { fontSize: 13, color: "#9CA3AF", textAlign: "center" },
-  rfiCard: { backgroundColor: "white", borderRadius: 14, padding: 16, marginHorizontal: 16, marginBottom: 10, borderWidth: 1, borderColor: "#E8E6E1" },
+  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", marginHorizontal: 16 },
+  emptyTitle: { fontSize: 16, fontWeight: "700", color: colors.text, marginBottom: 6 },
+  emptySub: { fontSize: 13, color: colors.textSecondary, textAlign: "center" },
+  rfiCard: { backgroundColor: "white", borderRadius: 14, padding: 16, marginHorizontal: 16, marginBottom: 10 },
   rfiTop: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
   rfiLeft: { flex: 1 },
-  rfiNumber: { fontSize: 12, fontWeight: "700", color: "#9CA3AF", marginBottom: 2 },
-  rfiProject: { fontSize: 12, color: "#F97316", fontWeight: "600" },
+  rfiNumber: { fontSize: 12, fontWeight: "700", color: colors.textSecondary, marginBottom: 2 },
+  rfiProject: { fontSize: 12, color: colors.tint, fontWeight: "600" },
   rfiRight: { gap: 4, alignItems: "flex-end" },
-  rfiSubject: { fontSize: 15, fontWeight: "700", color: "#1A1A1A", marginBottom: 4 },
-  rfiDrawing: { fontSize: 12, color: "#6B7280", marginBottom: 6 },
+  rfiSubject: { fontSize: 15, fontWeight: "700", color: colors.text, marginBottom: 4 },
+  rfiDrawing: { fontSize: 12, color: colors.textSecondary, marginBottom: 6 },
   rfiMeta: { flexDirection: "row", gap: 10, flexWrap: "wrap" },
-  rfiMetaText: { fontSize: 11, color: "#9CA3AF" },
+  rfiMetaText: { fontSize: 11, color: colors.textSecondary },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 },
   statusText: { fontSize: 11, fontWeight: "700" },
   priorityBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 },
   priorityText: { fontSize: 11, fontWeight: "700" },
   fab: { position: "absolute", bottom: 30, left: 16, right: 16 },
-  fabBtn: { backgroundColor: "#F97316", borderRadius: 14, padding: 16, alignItems: "center" },
+  fabBtn: { backgroundColor: colors.charcoal, borderRadius: 14, padding: 16, alignItems: "center" },
   fabText: { color: "white", fontSize: 15, fontWeight: "700" },
   modalOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" },
   modalCard: { backgroundColor: "white", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, paddingBottom: 40, maxHeight: "85%" },
-  modalTitle: { fontSize: 18, fontWeight: "700", color: "#1A1A1A", marginBottom: 16 },
+  modalTitle: { fontSize: 18, fontWeight: "700", color: colors.text, marginBottom: 16 },
   field: { marginBottom: 14 },
-  label: { fontSize: 13, fontWeight: "600", color: "#374151", marginBottom: 6 },
-  input: { backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, fontSize: 15, color: "#1A1A1A", borderWidth: 1, borderColor: "#E8E6E1" },
-  selectBtn: { backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, borderWidth: 1, borderColor: "#E8E6E1", flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  selectBtnText: { fontSize: 15, color: "#1A1A1A" },
-  arrow: { fontSize: 18, color: "#9CA3AF" },
+  label: { fontSize: 13, fontWeight: "600", color: colors.text, marginBottom: 6 },
+  input: { backgroundColor: colors.fillSubtle, borderRadius: 10, padding: 12, fontSize: 15, color: colors.text },
+  selectBtn: { backgroundColor: colors.fillSubtle, borderRadius: 10, padding: 12, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  selectBtnText: { fontSize: 15, color: colors.text },
+  arrow: { fontSize: 18, color: colors.textSecondary },
   priorityRow: { flexDirection: "row", gap: 8 },
-  priorityBtn: { flex: 1, paddingVertical: 8, borderRadius: 8, backgroundColor: "#F3F4F6", borderWidth: 1, borderColor: "#E8E6E1", alignItems: "center" },
-  priorityBtnText: { fontSize: 12, fontWeight: "600", color: "#6B7280" },
+  priorityBtn: { flex: 1, paddingVertical: 8, borderRadius: 8, backgroundColor: colors.fillSubtle, alignItems: "center" },
+  priorityBtnText: { fontSize: 12, fontWeight: "600", color: colors.textSecondary },
   modalBtns: { flexDirection: "row", gap: 10, marginTop: 12 },
-  cancelBtn: { flex: 1, backgroundColor: "#F3F4F6", borderRadius: 12, padding: 14, alignItems: "center" },
-  cancelBtnText: { fontSize: 15, fontWeight: "600", color: "#6B7280" },
-  saveBtn: { flex: 2, backgroundColor: "#F97316", borderRadius: 12, padding: 14, alignItems: "center" },
+  cancelBtn: { flex: 1, backgroundColor: colors.fillSubtle, borderRadius: 12, padding: 14, alignItems: "center" },
+  cancelBtnText: { fontSize: 15, fontWeight: "600", color: colors.textSecondary },
+  saveBtn: { flex: 2, backgroundColor: colors.charcoal, borderRadius: 12, padding: 14, alignItems: "center" },
   saveBtnText: { color: "white", fontSize: 15, fontWeight: "700" },
   detailHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 },
-  detailRfiNumber: { fontSize: 13, fontWeight: "700", color: "#9CA3AF", marginBottom: 2 },
-  detailProject: { fontSize: 13, color: "#F97316", fontWeight: "600" },
-  closeBtn: { fontSize: 18, color: "#6B7280", padding: 4 },
-  detailSubject: { fontSize: 18, fontWeight: "700", color: "#1A1A1A", marginBottom: 10 },
+  detailRfiNumber: { fontSize: 13, fontWeight: "700", color: colors.textSecondary, marginBottom: 2 },
+  detailProject: { fontSize: 13, color: colors.tint, fontWeight: "600" },
+  closeBtn: { fontSize: 18, color: colors.textSecondary, padding: 4 },
+  detailSubject: { fontSize: 18, fontWeight: "700", color: colors.text, marginBottom: 10 },
   detailMeta: { flexDirection: "row", gap: 8, marginBottom: 12 },
-  detailDescription: { fontSize: 14, color: "#374151", lineHeight: 22, marginBottom: 12 },
+  detailDescription: { fontSize: 14, color: colors.text, lineHeight: 22, marginBottom: 12 },
   drawingRef: { backgroundColor: "#EEF2FF", borderRadius: 8, padding: 10, marginBottom: 12, borderWidth: 1, borderColor: "#C7D2FE" },
   drawingRefText: { fontSize: 13, color: "#4F46E5", fontWeight: "600" },
-  detailInfoRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: "#F3F4F6" },
-  detailInfoLabel: { fontSize: 13, color: "#6B7280" },
-  detailInfoValue: { fontSize: 13, fontWeight: "600", color: "#1A1A1A" },
+  detailInfoRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: colors.separator },
+  detailInfoLabel: { fontSize: 13, color: colors.textSecondary },
+  detailInfoValue: { fontSize: 13, fontWeight: "600", color: colors.text },
   responsesSection: { marginTop: 16, marginBottom: 8 },
-  responsesTitle: { fontSize: 13, fontWeight: "700", color: "#374151", marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 },
-  responseCard: { backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, marginBottom: 8, borderWidth: 1, borderColor: "#E8E6E1" },
+  responsesTitle: { fontSize: 13, fontWeight: "700", color: colors.text, marginBottom: 10 },
+  responseCard: { backgroundColor: colors.fillSubtle, borderRadius: 10, padding: 12, marginBottom: 8 },
   responseHeader: { flexDirection: "row", gap: 8, alignItems: "center", marginBottom: 6 },
-  responseName: { fontSize: 13, fontWeight: "700", color: "#1A1A1A" },
-  responseRole: { fontSize: 11, color: "#9CA3AF", flex: 1 },
-  responseTime: { fontSize: 11, color: "#9CA3AF" },
-  responseMessage: { fontSize: 14, color: "#374151", lineHeight: 20 },
+  responseName: { fontSize: 13, fontWeight: "700", color: colors.text },
+  responseRole: { fontSize: 11, color: colors.textSecondary, flex: 1 },
+  responseTime: { fontSize: 11, color: colors.textSecondary },
+  responseMessage: { fontSize: 14, color: colors.text, lineHeight: 20 },
   responseInput: { marginTop: 16 },
-  closeRFIBtn: { flex: 1, backgroundColor: "#F3F4F6", borderRadius: 12, padding: 14, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1" },
-  closeRFIBtnText: { fontSize: 15, fontWeight: "600", color: "#6B7280" },
-  pickerOption: { padding: 14, borderRadius: 10, backgroundColor: "#F9FAFB", borderWidth: 1, borderColor: "#E8E6E1", marginBottom: 8 },
-  pickerOptionActive: { backgroundColor: "#FFF7ED", borderColor: "#F97316" },
-  pickerOptionText: { fontSize: 14, color: "#1A1A1A", fontWeight: "500" },
+  closeRFIBtn: { flex: 1, backgroundColor: colors.fillSubtle, borderRadius: 12, padding: 14, alignItems: "center" },
+  closeRFIBtnText: { fontSize: 15, fontWeight: "600", color: colors.textSecondary },
+  pickerOption: { padding: 14, borderRadius: 10, backgroundColor: colors.fillSubtle, marginBottom: 8 },
+  pickerOptionActive: { backgroundColor: colors.tintSoft, borderColor: "#F97316" },
+  pickerOptionText: { fontSize: 14, color: colors.text, fontWeight: "500" },
   docsSection: { marginTop: 16, marginBottom: 8 },
-  attachBtn: { backgroundColor: "#FFF7ED", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: "#FED7AA" },
-  attachBtnText: { fontSize: 12, fontWeight: "700", color: "#F97316" },
-  docRow: { flexDirection: "row", alignItems: "center", gap: 8, padding: 10, backgroundColor: "#F9FAFB", borderRadius: 8, marginBottom: 6, borderWidth: 1, borderColor: "#E8E6E1" },
+  attachBtn: { backgroundColor: colors.tintSoft, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: "#FED7AA" },
+  attachBtnText: { fontSize: 12, fontWeight: "700", color: colors.tint },
+  docRow: { flexDirection: "row", alignItems: "center", gap: 8, padding: 10, backgroundColor: colors.fillSubtle, borderRadius: 8, marginBottom: 6 },
   docIcon: { fontSize: 16 },
-  docName: { flex: 1, fontSize: 13, color: "#374151", fontWeight: "500" },
-  docOpen: { fontSize: 12, color: "#F97316", fontWeight: "600" },
-  noDocsText: { fontSize: 13, color: "#9CA3AF", fontStyle: "italic" },
-  pdfBtn: { backgroundColor: "#1C1F26", borderRadius: 10, padding: 12, alignItems: "center", marginBottom: 12 },
+  docName: { flex: 1, fontSize: 13, color: colors.text, fontWeight: "500" },
+  docOpen: { fontSize: 12, color: colors.tint, fontWeight: "600" },
+  noDocsText: { fontSize: 13, color: colors.textSecondary, fontStyle: "italic" },
+  pdfBtn: { backgroundColor: colors.charcoal, borderRadius: 10, padding: 12, alignItems: "center", marginBottom: 12 },
   pdfBtnText: { color: "white", fontWeight: "700", fontSize: 14 },
 })

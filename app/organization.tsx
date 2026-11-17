@@ -4,6 +4,8 @@ import { useAuth } from "@/lib/auth"
 import { useRouter } from "expo-router"
 import { API_URL } from "@/lib/api"
 import * as ImagePicker from "expo-image-picker"
+import { colors } from "@/lib/theme"
+import { CircleButton } from "@/components/ui"
 
 export default function OrganizationScreen() {
   const { token } = useAuth()
@@ -107,15 +109,12 @@ export default function OrganizationScreen() {
     setUploadingLogo(false)
   }
 
-  if (loading) return <View style={styles.center}><ActivityIndicator color="#F97316" /></View>
+  if (loading) return <View style={styles.center}><ActivityIndicator color={colors.tint} /></View>
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.headerBanner}>
-        <View style={styles.headerCircle} />
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={styles.backText}>← Back</Text>
-        </TouchableOpacity>
+        <CircleButton icon="chevron-back" label="Back" onPress={() => router.back()} />
         <Text style={styles.title}>Company Profile</Text>
         <Text style={styles.subtitle}>Used on estimates, invoices and reports</Text>
       </View>
@@ -210,7 +209,7 @@ function Field({ label, value, onChange, placeholder, keyboardType }: any) {
         value={value}
         onChangeText={onChange}
         placeholder={placeholder}
-        placeholderTextColor="#9CA3AF"
+        placeholderTextColor={colors.chevron}
         keyboardType={keyboardType || "default"}
         autoCapitalize="none"
       />
@@ -219,37 +218,37 @@ function Field({ label, value, onChange, placeholder, keyboardType }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
+  container: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 60 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 24, marginBottom: 20, position: "relative", overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: "rgba(249,115,22,0.08)" },
+  headerBanner: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 8 },
+  headerCircle: { display: "none" },
   backBtn: { marginBottom: 12 },
-  backText: { color: "rgba(255,255,255,0.6)", fontSize: 15, fontWeight: "600" },
-  title: { fontSize: 26, fontWeight: "700", color: "white", letterSpacing: -0.5, marginBottom: 4 },
-  subtitle: { fontSize: 13, color: "rgba(255,255,255,0.4)" },
-  logoCard: { backgroundColor: "white", borderRadius: 16, padding: 20, marginHorizontal: 16, marginBottom: 16, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1" },
+  backText: { color: colors.textSecondary, fontSize: 15, fontWeight: "600" },
+  title: { fontSize: 34, lineHeight: 41, fontWeight: "700", color: colors.text, letterSpacing: -0.6, marginBottom: 4 },
+  subtitle: { fontSize: 15, color: colors.textSecondary },
+  logoCard: { backgroundColor: "white", borderRadius: 16, padding: 20, marginHorizontal: 16, marginBottom: 16, alignItems: "center" },
   logoWrapper: { position: "relative", marginBottom: 10 },
   logoImage: { width: 120, height: 120, borderRadius: 16, resizeMode: "contain" },
-  logoPlaceholder: { width: 120, height: 120, borderRadius: 16, backgroundColor: "#F3F4F6", borderWidth: 2, borderColor: "#E8E6E1", borderStyle: "dashed", justifyContent: "center", alignItems: "center" },
-  logoPlaceholderText: { fontSize: 10, fontWeight: "700", color: "#9CA3AF", textAlign: "center" },
+  logoPlaceholder: { width: 120, height: 120, borderRadius: 16, backgroundColor: colors.fillSubtle, borderWidth: 2, borderColor: colors.separator, borderStyle: "dashed", justifyContent: "center", alignItems: "center" },
+  logoPlaceholderText: { fontSize: 11, fontWeight: "700", color: colors.textSecondary, textAlign: "center" },
   logoOverlay: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", borderRadius: 16, justifyContent: "center", alignItems: "center" },
-  logoHint: { fontSize: 12, color: "#9CA3AF" },
+  logoHint: { fontSize: 12, color: colors.textSecondary },
   section: { paddingHorizontal: 16, marginBottom: 20 },
-  card: { backgroundColor: "white", borderRadius: 14, borderWidth: 1, borderColor: "#E8E6E1", overflow: "hidden", marginBottom: 12 },
-  row: { flexDirection: "row", justifyContent: "space-between", padding: 14, borderBottomWidth: 1, borderBottomColor: "#F3F4F6" },
-  rowLabel: { fontSize: 14, color: "#6B7280", flex: 1 },
-  rowValue: { fontSize: 14, fontWeight: "600", color: "#1A1A1A", maxWidth: "55%", textAlign: "right" },
-  editBtn: { backgroundColor: "#1C1F26", borderRadius: 12, padding: 14, alignItems: "center" },
+  card: { backgroundColor: "white", borderRadius: 14, overflow: "hidden", marginBottom: 12 },
+  row: { flexDirection: "row", justifyContent: "space-between", padding: 14, borderBottomWidth: 1, borderBottomColor: colors.separator },
+  rowLabel: { fontSize: 14, color: colors.textSecondary, flex: 1 },
+  rowValue: { fontSize: 14, fontWeight: "600", color: colors.text, maxWidth: "55%", textAlign: "right" },
+  editBtn: { backgroundColor: colors.charcoal, borderRadius: 12, padding: 14, alignItems: "center" },
   editBtnText: { color: "white", fontWeight: "700", fontSize: 15 },
-  formCard: { backgroundColor: "white", borderRadius: 16, padding: 20, borderWidth: 1, borderColor: "#E8E6E1" },
+  formCard: { backgroundColor: "white", borderRadius: 16, padding: 20 },
   twoCol: { flexDirection: "row", gap: 8 },
   field: { marginBottom: 14 },
-  fieldLabel: { fontSize: 13, fontWeight: "600", color: "#374151", marginBottom: 6 },
-  input: { backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, fontSize: 15, color: "#1A1A1A", borderWidth: 1, borderColor: "#E8E6E1" },
+  fieldLabel: { fontSize: 13, fontWeight: "600", color: colors.text, marginBottom: 6 },
+  input: { backgroundColor: colors.fillSubtle, borderRadius: 10, padding: 12, fontSize: 15, color: colors.text },
   formBtns: { flexDirection: "row", gap: 10, marginTop: 8 },
-  cancelBtn: { flex: 1, backgroundColor: "#F3F4F6", borderRadius: 10, padding: 13, alignItems: "center" },
-  cancelBtnText: { fontSize: 15, fontWeight: "600", color: "#6B7280" },
-  saveBtn: { flex: 1, backgroundColor: "#F97316", borderRadius: 10, padding: 13, alignItems: "center" },
+  cancelBtn: { flex: 1, backgroundColor: colors.fillSubtle, borderRadius: 10, padding: 13, alignItems: "center" },
+  cancelBtnText: { fontSize: 15, fontWeight: "600", color: colors.textSecondary },
+  saveBtn: { flex: 1, backgroundColor: colors.charcoal, borderRadius: 10, padding: 13, alignItems: "center" },
   saveBtnText: { color: "white", fontSize: 15, fontWeight: "700" },
 })

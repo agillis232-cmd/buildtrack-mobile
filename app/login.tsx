@@ -6,6 +6,7 @@ import {
 } from "react-native"
 import { useRouter } from "expo-router"
 import { useAuth, homeRouteFor } from "@/lib/auth"
+import { StatusBar } from "expo-status-bar"
 
 export default function LoginScreen() {
   const router = useRouter()
@@ -34,6 +35,7 @@ export default function LoginScreen() {
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
+      <StatusBar style="light" />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {/* Header circle decoration */}
         <View style={styles.decorCircle} />

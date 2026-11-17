@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert, StyleSheet } from "react-native"
 import { useAuth } from "@/lib/auth"
+import { colors } from "@/lib/theme"
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || "https://buildtrackpro.app"
 
@@ -63,14 +64,13 @@ export default function SubDailyLogScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.headerCircle} />
         <Text style={styles.title}>Daily Log</Text>
         <Text style={styles.subtitle}>{today}</Text>
       </View>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 60 }}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 130 }}>
         {saved && (
           <View style={{ backgroundColor: "#F0FDF4", borderRadius: 10, padding: 14, marginBottom: 12, alignItems: "center" }}>
-            <Text style={{ fontSize: 14, fontWeight: "700", color: "#16A34A" }}>Log saved successfully!</Text>
+            <Text style={{ fontSize: 14, fontWeight: "700", color: colors.success }}>Log saved successfully!</Text>
           </View>
         )}
 
@@ -81,7 +81,7 @@ export default function SubDailyLogScreen() {
               {projects.map(p => (
                 <TouchableOpacity key={p.projectId} onPress={() => setSelectedProject(p.projectId)}
                   style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8, backgroundColor: selectedProject === p.projectId ? "#F97316" : "#F3F4F6" }}>
-                  <Text style={{ fontSize: 12, fontWeight: "700", color: selectedProject === p.projectId ? "white" : "#6B7280" }}>{p.projectName}</Text>
+                  <Text style={{ fontSize: 12, fontWeight: "700", color: selectedProject === p.projectId ? "white" : colors.textSecondary }}>{p.projectName}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -89,34 +89,34 @@ export default function SubDailyLogScreen() {
 
           <Text style={styles.label}>WORK PERFORMED *</Text>
           <TextInput value={workPerformed} onChangeText={setWorkPerformed} placeholder="Describe today's work..."
-            placeholderTextColor="#9CA3AF" multiline numberOfLines={4} textAlignVertical="top"
+            placeholderTextColor={colors.chevron} multiline numberOfLines={4} textAlignVertical="top"
             style={[styles.input, { minHeight: 100 }]} />
 
           <View style={{ flexDirection: "row", gap: 10, marginBottom: 14 }}>
             <View style={{ flex: 1 }}>
               <Text style={styles.label}>CREW SIZE</Text>
               <TextInput value={crewSize} onChangeText={setCrewSize} placeholder="0" keyboardType="number-pad"
-                placeholderTextColor="#9CA3AF" style={styles.input} />
+                placeholderTextColor={colors.chevron} style={styles.input} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.label}>HOURS WORKED</Text>
               <TextInput value={hoursWorked} onChangeText={setHoursWorked} placeholder="0" keyboardType="decimal-pad"
-                placeholderTextColor="#9CA3AF" style={styles.input} />
+                placeholderTextColor={colors.chevron} style={styles.input} />
             </View>
           </View>
 
           <Text style={styles.label}>MATERIALS USED</Text>
           <TextInput value={materials} onChangeText={setMaterials} placeholder="List materials used today..."
-            placeholderTextColor="#9CA3AF" multiline numberOfLines={2} textAlignVertical="top"
+            placeholderTextColor={colors.chevron} multiline numberOfLines={2} textAlignVertical="top"
             style={[styles.input, { minHeight: 60 }]} />
 
           <Text style={styles.label}>NOTES</Text>
           <TextInput value={notes} onChangeText={setNotes} placeholder="Weather, delays, issues..."
-            placeholderTextColor="#9CA3AF" multiline numberOfLines={2} textAlignVertical="top"
+            placeholderTextColor={colors.chevron} multiline numberOfLines={2} textAlignVertical="top"
             style={[styles.input, { minHeight: 60 }]} />
 
           <TouchableOpacity onPress={submitLog} disabled={saving}
-            style={{ backgroundColor: "#F97316", borderRadius: 12, padding: 16, alignItems: "center", marginTop: 4, opacity: saving ? 0.6 : 1 }}>
+            style={{ backgroundColor: colors.charcoal, borderRadius: 12, height: 50, justifyContent: "center", alignItems: "center", marginTop: 4, opacity: saving ? 0.6 : 1 }}>
             <Text style={{ color: "white", fontSize: 16, fontWeight: "700" }}>{saving ? "Saving..." : "Submit Daily Log"}</Text>
           </TouchableOpacity>
         </View>
@@ -126,12 +126,12 @@ export default function SubDailyLogScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
-  header: { backgroundColor: "#1C1F26", paddingTop: 60, paddingBottom: 24, paddingHorizontal: 20, overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: "rgba(249,115,22,0.08)" },
-  title: { fontSize: 22, fontWeight: "800", color: "white", marginBottom: 4 },
-  subtitle: { fontSize: 13, color: "rgba(255,255,255,0.4)" },
-  card: { backgroundColor: "white", borderRadius: 14, padding: 16, borderWidth: 1, borderColor: "#E8E6E1" },
-  label: { fontSize: 11, fontWeight: "700", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 },
-  input: { backgroundColor: "#F9FAFB", borderRadius: 8, padding: 12, fontSize: 14, borderWidth: 1, borderColor: "#E8E6E1", marginBottom: 14, color: "#1A1A1A" },
+  container: { flex: 1, backgroundColor: colors.background },
+  header: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 8 },
+  headerCircle: { display: "none" },
+  title: { fontSize: 34, lineHeight: 41, fontWeight: "800", color: colors.text, marginBottom: 4, letterSpacing: -0.6 },
+  subtitle: { fontSize: 15, color: colors.textSecondary },
+  card: { backgroundColor: "white", borderRadius: 14, padding: 16 },
+  label: { fontSize: 11, fontWeight: "700", color: colors.textSecondary, marginBottom: 6 },
+  input: { backgroundColor: colors.fillSubtle, borderRadius: 8, padding: 12, fontSize: 14, marginBottom: 14, color: colors.text },
 })

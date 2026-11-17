@@ -5,6 +5,8 @@ import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
 import DateTimePicker from "@react-native-community/datetimepicker"
 import { toDateKey } from "@/lib/dates"
+import { colors } from "@/lib/theme"
+import { CircleButton } from "@/components/ui"
 
 const PROJECT_TYPES = [
   "Full Renovation",
@@ -80,10 +82,7 @@ export default function NewProjectScreen() {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.headerBanner}>
-          <View style={styles.headerCircle} />
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backText}>← Back</Text>
-          </TouchableOpacity>
+          <CircleButton icon="chevron-back" label="Back" onPress={() => router.back()} />
           <Text style={styles.title}>New Project</Text>
           <Text style={styles.subtitle}>Fill in the project details below</Text>
         </View>
@@ -93,7 +92,7 @@ export default function NewProjectScreen() {
 
           <View style={styles.field}>
             <Text style={styles.label}>Project Name *</Text>
-            <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="123 Main St Renovation" placeholderTextColor="#9CA3AF" />
+            <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="123 Main St Renovation" placeholderTextColor={colors.chevron} />
           </View>
 
           <View style={styles.field}>
@@ -115,7 +114,7 @@ export default function NewProjectScreen() {
                 value={contractValue}
                 onChangeText={setContractValue}
                 placeholder="0.00"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.chevron}
                 keyboardType="decimal-pad"
               />
             </View>
@@ -127,13 +126,13 @@ export default function NewProjectScreen() {
 
           <View style={styles.field}>
             <Text style={styles.label}>Street Address *</Text>
-            <TextInput style={styles.input} value={address} onChangeText={setAddress} placeholder="123 Main Street" placeholderTextColor="#9CA3AF" />
+            <TextInput style={styles.input} value={address} onChangeText={setAddress} placeholder="123 Main Street" placeholderTextColor={colors.chevron} />
           </View>
 
           <View style={styles.twoCol}>
             <View style={[styles.field, { flex: 2 }]}>
               <Text style={styles.label}>City *</Text>
-              <TextInput style={styles.input} value={city} onChangeText={setCity} placeholder="San Jose" placeholderTextColor="#9CA3AF" />
+              <TextInput style={styles.input} value={city} onChangeText={setCity} placeholder="San Jose" placeholderTextColor={colors.chevron} />
             </View>
             <View style={[styles.field, { flex: 1 }]}>
               <Text style={styles.label}>State</Text>
@@ -262,41 +261,41 @@ export default function NewProjectScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
+  container: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 120 },
-  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 24, marginBottom: 20, position: "relative", overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -60, right: -60, width: 220, height: 220, borderRadius: 110, backgroundColor: "rgba(249,115,22,0.08)" },
+  headerBanner: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 8 },
+  headerCircle: { display: "none" },
   backBtn: { marginBottom: 12 },
-  backText: { color: "rgba(255,255,255,0.6)", fontSize: 15, fontWeight: "600" },
-  title: { fontSize: 26, fontWeight: "700", color: "white", letterSpacing: -0.5, marginBottom: 4 },
-  subtitle: { fontSize: 13, color: "rgba(255,255,255,0.4)" },
-  formCard: { backgroundColor: "white", borderRadius: 16, padding: 20, marginHorizontal: 16, marginBottom: 12, borderWidth: 1, borderColor: "#E8E6E1" },
-  sectionLabel: { fontSize: 11, fontWeight: "700", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 16 },
+  backText: { color: colors.textSecondary, fontSize: 15, fontWeight: "600" },
+  title: { fontSize: 34, lineHeight: 41, fontWeight: "700", color: colors.text, letterSpacing: -0.6, marginBottom: 4 },
+  subtitle: { fontSize: 15, color: colors.textSecondary },
+  formCard: { backgroundColor: "white", borderRadius: 16, padding: 20, marginHorizontal: 16, marginBottom: 12 },
+  sectionLabel: { fontSize: 11, fontWeight: "700", color: colors.textSecondary, marginBottom: 16 },
   field: { marginBottom: 14 },
-  label: { fontSize: 13, fontWeight: "600", color: "#374151", marginBottom: 6 },
-  input: { backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, fontSize: 15, color: "#1A1A1A", borderWidth: 1, borderColor: "#E8E6E1" },
+  label: { fontSize: 13, fontWeight: "600", color: colors.text, marginBottom: 6 },
+  input: { backgroundColor: colors.fillSubtle, borderRadius: 10, padding: 12, fontSize: 15, color: colors.text },
   twoCol: { flexDirection: "row", gap: 12 },
-  amountRow: { flexDirection: "row", alignItems: "center", backgroundColor: "#F9FAFB", borderRadius: 10, borderWidth: 1, borderColor: "#E8E6E1", paddingLeft: 12 },
-  currencySymbol: { fontSize: 16, fontWeight: "700", color: "#374151", marginRight: 4 },
+  amountRow: { flexDirection: "row", alignItems: "center", backgroundColor: colors.fillSubtle, borderRadius: 10, paddingLeft: 12 },
+  currencySymbol: { fontSize: 16, fontWeight: "700", color: colors.text, marginRight: 4 },
   amountInput: { flex: 1, backgroundColor: "transparent", borderWidth: 0, paddingLeft: 0 },
-  selectBtn: { backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, borderWidth: 1, borderColor: "#E8E6E1", flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  selectBtnText: { fontSize: 15, color: "#1A1A1A", fontWeight: "500" },
-  selectBtnPlaceholder: { color: "#9CA3AF" },
-  selectArrow: { fontSize: 18, color: "#9CA3AF" },
-  footer: { position: "absolute", bottom: 0, left: 0, right: 0, padding: 16, backgroundColor: "white", borderTopWidth: 1, borderTopColor: "#E8E6E1", flexDirection: "row", gap: 12 },
-  cancelBtn: { flex: 1, backgroundColor: "#F3F4F6", borderRadius: 12, padding: 14, alignItems: "center" },
-  cancelText: { fontSize: 15, fontWeight: "600", color: "#6B7280" },
-  saveBtn: { flex: 2, backgroundColor: "#F97316", borderRadius: 12, padding: 14, alignItems: "center" },
+  selectBtn: { backgroundColor: colors.fillSubtle, borderRadius: 10, padding: 12, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  selectBtnText: { fontSize: 15, color: colors.text, fontWeight: "500" },
+  selectBtnPlaceholder: { color: colors.textSecondary },
+  selectArrow: { fontSize: 18, color: colors.textSecondary },
+  footer: { position: "absolute", bottom: 0, left: 0, right: 0, padding: 16, backgroundColor: "white", borderTopWidth: 1, borderTopColor: colors.separator, flexDirection: "row", gap: 12 },
+  cancelBtn: { flex: 1, backgroundColor: colors.fillSubtle, borderRadius: 12, padding: 14, alignItems: "center" },
+  cancelText: { fontSize: 15, fontWeight: "600", color: colors.textSecondary },
+  saveBtn: { flex: 2, backgroundColor: colors.charcoal, borderRadius: 12, padding: 14, alignItems: "center" },
   saveBtnText: { color: "white", fontSize: 15, fontWeight: "700" },
   modalOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" },
   modalCard: { backgroundColor: "white", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, paddingBottom: 40, maxHeight: "70%" },
   modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
-  modalTitle: { fontSize: 17, fontWeight: "700", color: "#1A1A1A" },
-  modalDone: { backgroundColor: "#F97316", paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8 },
+  modalTitle: { fontSize: 17, fontWeight: "700", color: colors.text },
+  modalDone: { backgroundColor: colors.charcoal, paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8 },
   modalDoneText: { color: "white", fontWeight: "700", fontSize: 14 },
-  optionRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 14, borderRadius: 10, marginBottom: 6, backgroundColor: "#F9FAFB", borderWidth: 1, borderColor: "#E8E6E1" },
-  optionRowSelected: { backgroundColor: "#FFF7ED", borderColor: "#F97316" },
-  optionText: { fontSize: 15, color: "#1A1A1A", fontWeight: "500" },
-  optionTextSelected: { color: "#F97316", fontWeight: "700" },
-  optionCheck: { fontSize: 16, color: "#F97316", fontWeight: "700" },
+  optionRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 14, borderRadius: 10, marginBottom: 6, backgroundColor: colors.fillSubtle },
+  optionRowSelected: { backgroundColor: colors.tintSoft, borderColor: "#F97316" },
+  optionText: { fontSize: 15, color: colors.text, fontWeight: "500" },
+  optionTextSelected: { color: colors.tint, fontWeight: "700" },
+  optionCheck: { fontSize: 16, color: colors.tint, fontWeight: "700" },
 })

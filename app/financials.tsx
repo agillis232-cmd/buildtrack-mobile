@@ -3,6 +3,8 @@ import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { useRouter } from "expo-router"
 import { API_URL } from "@/lib/api"
+import { colors } from "@/lib/theme"
+import { CircleButton } from "@/components/ui"
 
 export default function CompanyFinancialsScreen() {
   const { token } = useAuth()
@@ -29,7 +31,7 @@ export default function CompanyFinancialsScreen() {
     setRefreshing(false)
   }
 
-  if (loading) return <View style={styles.center}><ActivityIndicator color="#F97316" /></View>
+  if (loading) return <View style={styles.center}><ActivityIndicator color={colors.tint} /></View>
   if (!data) return <View style={styles.center}><Text style={styles.errorText}>Could not load financials</Text></View>
 
   const { summary, projects } = data
@@ -39,13 +41,10 @@ export default function CompanyFinancialsScreen() {
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.content}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadFinancials() }} tintColor="#F97316" />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadFinancials() }} tintColor={colors.tint} />}
     >
       <View style={styles.headerBanner}>
-        <View style={styles.headerCircle} />
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={styles.backText}>← Back</Text>
-        </TouchableOpacity>
+        <CircleButton icon="chevron-back" label="Back" onPress={() => router.back()} />
         <Text style={styles.title}>Company Financials</Text>
         <Text style={styles.subtitle}>{summary.activeProjects} active · {summary.totalProjects} total projects</Text>
       </View>
@@ -58,7 +57,7 @@ export default function CompanyFinancialsScreen() {
         </View>
         <View style={styles.kpiCard}>
           <Text style={styles.kpiLabel}>Received</Text>
-          <Text style={[styles.kpiValue, { color: "#16A34A" }]}>${(summary.totalReceived / 1000).toFixed(0)}k</Text>
+          <Text style={[styles.kpiValue, { color: colors.success }]}>${(summary.totalReceived / 1000).toFixed(0)}k</Text>
         </View>
         <View style={styles.kpiCard}>
           <Text style={styles.kpiLabel}>Projected Profit</Text>
@@ -112,7 +111,7 @@ export default function CompanyFinancialsScreen() {
             <View style={styles.projectTop}>
               <Text style={styles.projectName}>{project.name}</Text>
               <View style={[styles.statusPill, { backgroundColor: project.status === "ACTIVE" ? "#DCFCE7" : project.status === "COMPLETED" ? "#DBEAFE" : "#F3F4F6" }]}>
-                <Text style={[styles.statusPillText, { color: project.status === "ACTIVE" ? "#16A34A" : project.status === "COMPLETED" ? "#3B82F6" : "#6B7280" }]}>
+                <Text style={[styles.statusPillText, { color: project.status === "ACTIVE" ? "#16A34A" : project.status === "COMPLETED" ? "#3B82F6" : colors.textSecondary }]}>
                   {project.status}
                 </Text>
               </View>
@@ -124,7 +123,7 @@ export default function CompanyFinancialsScreen() {
               </View>
               <View style={styles.projectStat}>
                 <Text style={styles.projectStatLabel}>Expenses</Text>
-                <Text style={[styles.projectStatValue, { color: "#DC2626" }]}>${(project.totalExpenses / 1000).toFixed(0)}k</Text>
+                <Text style={[styles.projectStatValue, { color: colors.danger }]}>${(project.totalExpenses / 1000).toFixed(0)}k</Text>
               </View>
               <View style={styles.projectStat}>
                 <Text style={styles.projectStatLabel}>Profit</Text>
@@ -166,43 +165,43 @@ function FinRow({ label, value, bold, negative, profit }: {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
+  container: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 60 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  errorText: { fontSize: 16, color: "#6B7280" },
-  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 24, marginBottom: 20, position: "relative", overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: "rgba(249,115,22,0.08)" },
+  errorText: { fontSize: 16, color: colors.textSecondary },
+  headerBanner: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 8 },
+  headerCircle: { display: "none" },
   backBtn: { marginBottom: 12 },
-  backText: { color: "rgba(255,255,255,0.6)", fontSize: 15, fontWeight: "600" },
-  title: { fontSize: 26, fontWeight: "700", color: "white", letterSpacing: -0.5, marginBottom: 4 },
-  subtitle: { fontSize: 13, color: "rgba(255,255,255,0.4)" },
+  backText: { color: colors.textSecondary, fontSize: 15, fontWeight: "600" },
+  title: { fontSize: 34, lineHeight: 41, fontWeight: "700", color: colors.text, letterSpacing: -0.6, marginBottom: 4 },
+  subtitle: { fontSize: 15, color: colors.textSecondary },
   kpiGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, paddingHorizontal: 16, marginBottom: 20 },
-  kpiCard: { width: "47%", backgroundColor: "#1C1F26", borderRadius: 14, padding: 14 },
-  kpiLabel: { fontSize: 11, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 },
+  kpiCard: { width: "47%", backgroundColor: colors.charcoal, borderRadius: 14, padding: 14 },
+  kpiLabel: { fontSize: 11, color: "rgba(255,255,255,0.4)", marginBottom: 6 },
   kpiValue: { fontSize: 22, fontWeight: "700", color: "white" },
   alertsSection: { paddingHorizontal: 16, marginBottom: 20, gap: 8 },
   alertCard: { backgroundColor: "#FEE2E2", borderRadius: 12, padding: 14, borderWidth: 1, borderColor: "#FECACA" },
   alertCardWarning: { backgroundColor: "#FEF3C7", borderColor: "#FDE68A" },
-  alertTitle: { fontSize: 14, fontWeight: "700", color: "#DC2626", marginBottom: 2 },
-  alertSub: { fontSize: 12, color: "#DC2626" },
+  alertTitle: { fontSize: 14, fontWeight: "700", color: colors.danger, marginBottom: 2 },
+  alertSub: { fontSize: 12, color: colors.danger },
   section: { paddingHorizontal: 16, marginBottom: 20 },
-  sectionTitle: { fontSize: 11, fontWeight: "700", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 },
-  card: { backgroundColor: "white", borderRadius: 14, borderWidth: 1, borderColor: "#E8E6E1", overflow: "hidden" },
-  row: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "#F3F4F6" },
-  rowBold: { backgroundColor: "#F9FAFB", borderBottomWidth: 0 },
-  rowLabel: { fontSize: 14, color: "#6B7280" },
-  rowLabelBold: { fontWeight: "700", color: "#1A1A1A" },
+  sectionTitle: { fontSize: 11, fontWeight: "700", color: colors.textSecondary, marginBottom: 10 },
+  card: { backgroundColor: "white", borderRadius: 14, overflow: "hidden" },
+  row: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.separator },
+  rowBold: { backgroundColor: colors.fillSubtle, borderBottomWidth: 0 },
+  rowLabel: { fontSize: 14, color: colors.textSecondary },
+  rowLabelBold: { fontWeight: "700", color: colors.text },
   rowValue: { fontSize: 14, fontWeight: "600" },
   rowValueBold: { fontSize: 16, fontWeight: "700" },
-  projectCard: { backgroundColor: "white", borderRadius: 14, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: "#E8E6E1" },
+  projectCard: { backgroundColor: "white", borderRadius: 14, padding: 16, marginBottom: 10 },
  projectTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
    statusPill: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 },
   statusPillText: { fontSize: 11, fontWeight: "700" },
-  projectName: { fontSize: 15, fontWeight: "700", color: "#1A1A1A", flex: 1 },
+  projectName: { fontSize: 15, fontWeight: "700", color: colors.text, flex: 1 },
   statusDot: { width: 8, height: 8, borderRadius: 4 },
   projectStats: { flexDirection: "row", marginBottom: 10 },
   projectStat: { flex: 1, alignItems: "center" },
-  projectStatLabel: { fontSize: 10, color: "#9CA3AF", textTransform: "uppercase", marginBottom: 4 },
-  projectStatValue: { fontSize: 15, fontWeight: "700", color: "#1A1A1A" },
-  projectArrow: { fontSize: 12, color: "#F97316", fontWeight: "600" },
+  projectStatLabel: { fontSize: 11, color: colors.textSecondary, marginBottom: 4 },
+  projectStatValue: { fontSize: 15, fontWeight: "700", color: colors.text },
+  projectArrow: { fontSize: 12, color: colors.tint, fontWeight: "600" },
 })

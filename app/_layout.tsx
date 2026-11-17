@@ -71,7 +71,7 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <SessionGate />
       <Stack screenOptions={{ headerShown: false }} />
     </AuthProvider>

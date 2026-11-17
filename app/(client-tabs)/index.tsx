@@ -6,12 +6,13 @@ import { API_URL } from "@/lib/api"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { parseDateOnly } from "@/lib/dates"
 import { loadCached } from "@/lib/cache"
+import { colors } from "@/lib/theme"
 
 const CLIENT_KPI_OPTIONS = [
   { key: "contract", label: "Contract Total", description: "Total contract value including approved COs", color: "white" },
-  { key: "completion", label: "Completion", description: "Overall project completion percentage", color: "#F97316" },
+  { key: "completion", label: "Completion", description: "Overall project completion percentage", color: colors.tint },
   { key: "pending_cos", label: "Pending Approvals", description: "Change orders awaiting your approval", color: "#D97706" },
-  { key: "approved_cos", label: "Approved COs", description: "Number of approved change orders", color: "#16A34A" },
+  { key: "approved_cos", label: "Approved COs", description: "Number of approved change orders", color: colors.success },
   { key: "photos", label: "Site Photos", description: "Total photos uploaded", color: "#3B82F6" },
   { key: "logs", label: "Site Updates", description: "Daily log entries", color: "#8B5CF6" },
 ]
@@ -64,7 +65,7 @@ export default function ClientDashboard() {
     setRefreshing(false)
   }
 
-  if (loading) return <View style={styles.center}><ActivityIndicator color="#F97316" /></View>
+  if (loading) return <View style={styles.center}><ActivityIndicator color={colors.tint} /></View>
 
   const firstName = user?.name?.split(" ")[0] || "there"
   const pendingCOs = project?.changeOrders?.filter((co: any) => co.status === "PENDING_APPROVAL") || []
@@ -93,10 +94,9 @@ export default function ClientDashboard() {
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.content}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadProject() }} tintColor="#F97316" />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadProject() }} tintColor={colors.tint} />}
     >
       <View style={styles.headerBanner}>
-        <View style={styles.headerCircle} />
         <View style={styles.headerTop}>
           <View>
             <Text style={styles.greeting}>Welcome back,</Text>
@@ -181,7 +181,7 @@ export default function ClientDashboard() {
                     <Text style={styles.coCost}>+${co.costImpact.toLocaleString()}</Text>
                   </View>
                   <Text style={[styles.coStatus, {
-                    color: co.status === "APPROVED" ? "#16A34A" : co.status === "PENDING_APPROVAL" ? "#D97706" : "#6B7280"
+                    color: co.status === "APPROVED" ? "#16A34A" : co.status === "PENDING_APPROVAL" ? "#D97706" : colors.textSecondary
                   }]}>
                     {co.status.replace("_", " ")}
                   </Text>
@@ -261,66 +261,66 @@ export default function ClientDashboard() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
-  content: { paddingBottom: 60 },
+  container: { flex: 1, backgroundColor: colors.background },
+  content: { paddingBottom: 130 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 24, marginBottom: 16, position: "relative", overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -60, right: -60, width: 220, height: 220, borderRadius: 110, backgroundColor: "rgba(249,115,22,0.08)" },
+  headerBanner: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 8 },
+  headerCircle: { display: "none" },
   headerTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
-  greeting: { fontSize: 13, color: "rgba(255,255,255,0.5)", fontWeight: "500" },
-  name: { fontSize: 22, fontWeight: "700", color: "white", letterSpacing: -0.5 },
-  avatarFallback: { width: 40, height: 40, borderRadius: 20, backgroundColor: "#F97316", justifyContent: "center", alignItems: "center" },
+  greeting: { fontSize: 15, color: colors.textSecondary, fontWeight: "500" },
+  name: { fontSize: 34, lineHeight: 41, fontWeight: "700", color: colors.text, letterSpacing: -0.6 },
+  avatarFallback: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.charcoal, justifyContent: "center", alignItems: "center" },
   avatarText: { fontSize: 16, fontWeight: "700", color: "white" },
   projectInfo: { gap: 4 },
-  projectName: { fontSize: 18, fontWeight: "700", color: "white", marginBottom: 2 },
-  projectSub: { fontSize: 13, color: "rgba(255,255,255,0.5)", marginBottom: 16 },
+  projectName: { fontSize: 18, fontWeight: "700", color: colors.text, marginBottom: 2 },
+  projectSub: { fontSize: 15, color: colors.textSecondary, marginBottom: 16 },
   progressSection: { gap: 8 },
   progressHeader: { flexDirection: "row", justifyContent: "space-between" },
-  progressLabel: { fontSize: 12, color: "rgba(255,255,255,0.4)" },
-  progressValue: { fontSize: 12, fontWeight: "700", color: "white" },
-  progressBar: { height: 6, backgroundColor: "rgba(255,255,255,0.1)", borderRadius: 99, overflow: "hidden" },
-  progressFill: { height: "100%", backgroundColor: "#F97316", borderRadius: 99 },
-  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1", marginHorizontal: 16 },
-  emptyTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 6 },
-  emptySub: { fontSize: 13, color: "#9CA3AF", textAlign: "center" },
+  progressLabel: { fontSize: 15, color: colors.textSecondary },
+  progressValue: { fontSize: 15, fontWeight: "700", color: colors.text },
+  progressBar: { height: 8, backgroundColor: colors.track, borderRadius: 99, overflow: "hidden" },
+  progressFill: { height: "100%", backgroundColor: colors.accent, borderRadius: 99 },
+  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", marginHorizontal: 16 },
+  emptyTitle: { fontSize: 16, fontWeight: "700", color: colors.text, marginBottom: 6 },
+  emptySub: { fontSize: 13, color: colors.textSecondary, textAlign: "center" },
   actionBanner: { backgroundColor: "#FEF3C7", borderRadius: 14, padding: 16, marginHorizontal: 16, marginBottom: 12, flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: "#FDE68A" },
   actionBannerLeft: { flex: 1 },
   actionBannerTitle: { fontSize: 14, fontWeight: "700", color: "#D97706", marginBottom: 2 },
   actionBannerSub: { fontSize: 12, color: "#D97706" },
   actionBannerArrow: { fontSize: 20, color: "#D97706" },
   financeRow: { flexDirection: "row", gap: 10, paddingHorizontal: 16, marginBottom: 20 },
-  financeCard: { flex: 1, backgroundColor: "#1C1F26", borderRadius: 14, padding: 14 },
-  financeLabel: { fontSize: 10, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 },
+  financeCard: { flex: 1, backgroundColor: colors.charcoal, borderRadius: 14, padding: 14 },
+  financeLabel: { fontSize: 11, color: "rgba(255,255,255,0.4)", marginBottom: 6 },
   financeValue: { fontSize: 20, fontWeight: "700", color: "white", marginBottom: 2 },
   section: { paddingHorizontal: 16, marginBottom: 20 },
-  sectionTitle: { fontSize: 13, fontWeight: "700", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 },
-  logCard: { backgroundColor: "white", borderRadius: 12, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: "#E8E6E1" },
-  logDate: { fontSize: 12, fontWeight: "700", color: "#F97316", marginBottom: 4 },
-  logSummary: { fontSize: 14, color: "#1A1A1A", lineHeight: 20, marginBottom: 4 },
-  logMeta: { fontSize: 11, color: "#9CA3AF" },
-  coCard: { backgroundColor: "white", borderRadius: 12, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: "#E8E6E1" },
+  sectionTitle: { fontSize: 13, fontWeight: "700", color: colors.textSecondary, marginBottom: 10 },
+  logCard: { backgroundColor: "white", borderRadius: 12, padding: 14, marginBottom: 8 },
+  logDate: { fontSize: 12, fontWeight: "700", color: colors.tint, marginBottom: 4 },
+  logSummary: { fontSize: 14, color: colors.text, lineHeight: 20, marginBottom: 4 },
+  logMeta: { fontSize: 11, color: colors.textSecondary },
+  coCard: { backgroundColor: "white", borderRadius: 12, padding: 14, marginBottom: 8 },
   coTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 4 },
-  coTitle: { fontSize: 14, fontWeight: "700", color: "#1A1A1A", flex: 1, marginRight: 8 },
-  coCost: { fontSize: 15, fontWeight: "700", color: "#F97316" },
+  coTitle: { fontSize: 14, fontWeight: "700", color: colors.text, flex: 1, marginRight: 8 },
+  coCost: { fontSize: 15, fontWeight: "700", color: colors.tint },
   coStatus: { fontSize: 11, fontWeight: "600" },
-  eventCard: { backgroundColor: "white", borderRadius: 12, padding: 14, marginBottom: 8, flexDirection: "row", alignItems: "center", gap: 12, borderWidth: 1, borderColor: "#E8E6E1" },
-  eventDateBox: { width: 44, height: 44, backgroundColor: "#FFF7ED", borderRadius: 10, justifyContent: "center", alignItems: "center" },
-  eventMonth: { fontSize: 10, color: "#F97316", fontWeight: "700", textTransform: "uppercase" },
-  eventDay: { fontSize: 18, fontWeight: "700", color: "#1A1A1A" },
-  eventTitle: { fontSize: 14, fontWeight: "600", color: "#1A1A1A", marginBottom: 2 },
-  eventType: { fontSize: 12, color: "#9CA3AF" },
+  eventCard: { backgroundColor: "white", borderRadius: 12, padding: 14, marginBottom: 8, flexDirection: "row", alignItems: "center", gap: 12 },
+  eventDateBox: { width: 44, height: 44, backgroundColor: colors.tintSoft, borderRadius: 10, justifyContent: "center", alignItems: "center" },
+  eventMonth: { fontSize: 11, color: colors.tint, fontWeight: "700" },
+  eventDay: { fontSize: 18, fontWeight: "700", color: colors.text },
+  eventTitle: { fontSize: 14, fontWeight: "600", color: colors.text, marginBottom: 2 },
+  eventType: { fontSize: 12, color: colors.textSecondary },
   modalOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" },
   modalCard: { backgroundColor: "white", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, paddingBottom: 40 },
-  modalTitle: { fontSize: 18, fontWeight: "700", color: "#1A1A1A", marginBottom: 4 },
-  modalSub: { fontSize: 13, color: "#9CA3AF", marginBottom: 20 },
-  optionRow: { flexDirection: "row", alignItems: "center", gap: 14, padding: 14, borderRadius: 12, marginBottom: 8, backgroundColor: "#F9FAFB", borderWidth: 1, borderColor: "#E8E6E1" },
-  optionRowSelected: { backgroundColor: "#FFF7ED", borderColor: "#F97316" },
-  optionCheck: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: "#E8E6E1", justifyContent: "center", alignItems: "center" },
-  optionCheckSelected: { backgroundColor: "#F97316", borderColor: "#F97316" },
+  modalTitle: { fontSize: 18, fontWeight: "700", color: colors.text, marginBottom: 4 },
+  modalSub: { fontSize: 13, color: colors.textSecondary, marginBottom: 20 },
+  optionRow: { flexDirection: "row", alignItems: "center", gap: 14, padding: 14, borderRadius: 12, marginBottom: 8, backgroundColor: colors.fillSubtle },
+  optionRowSelected: { backgroundColor: colors.tintSoft, borderColor: "#F97316" },
+  optionCheck: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: colors.separator, justifyContent: "center", alignItems: "center" },
+  optionCheckSelected: { backgroundColor: colors.charcoal, borderColor: colors.charcoal },
   optionCheckText: { fontSize: 12, fontWeight: "700", color: "white" },
-  optionLabel: { fontSize: 14, fontWeight: "600", color: "#1A1A1A", marginBottom: 2 },
-  optionLabelSelected: { color: "#F97316" },
-  optionSub: { fontSize: 12, color: "#9CA3AF" },
-  modalDoneBtn: { backgroundColor: "#F97316", borderRadius: 12, padding: 16, alignItems: "center", marginTop: 8 },
+  optionLabel: { fontSize: 14, fontWeight: "600", color: colors.text, marginBottom: 2 },
+  optionLabelSelected: { color: colors.tint },
+  optionSub: { fontSize: 12, color: colors.textSecondary },
+  modalDoneBtn: { backgroundColor: colors.charcoal, borderRadius: 12, padding: 16, alignItems: "center", marginTop: 8 },
   modalDoneBtnText: { color: "white", fontSize: 16, fontWeight: "700" },
 })

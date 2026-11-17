@@ -5,6 +5,8 @@ import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
 import { Ionicons } from "@expo/vector-icons"
 import { loadCached } from "@/lib/cache"
+import { colors } from "@/lib/theme"
+import { CircleButton } from "@/components/ui"
 
 const WEATHER_OPTIONS = ["Clear", "Partly Cloudy", "Cloudy", "Rain", "Snow", "Windy", "Hot", "Cold"]
 const DELAY_REASONS = ["None", "Weather", "Material delay", "Sub no-show", "Inspection delay", "Client decision", "Permit issue", "Other"]
@@ -159,17 +161,14 @@ export default function LogsScreen() {
     ])
   }
 
-  if (loading) return <View style={s.center}><ActivityIndicator color="#F97316" /></View>
+  if (loading) return <View style={s.center}><ActivityIndicator color={colors.tint} /></View>
 
   return (
     <View style={s.container}>
       <ScrollView contentContainerStyle={s.content}>
         {/* Header */}
         <View style={s.header}>
-          <View style={s.headerCircle} />
-          <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 8 }}>
-            <Ionicons name="arrow-back" size={20} color="white" />
-          </TouchableOpacity>
+          <CircleButton icon="chevron-back" label="Back" onPress={() => router.back()} />
           <Text style={s.headerTitle}>Daily logs</Text>
           <Text style={s.headerSub}>{logs.length} logs filed</Text>
         </View>
@@ -180,7 +179,7 @@ export default function LogsScreen() {
             <View style={s.formHeader}>
               <Text style={s.formTitle}>{editingLog ? "Edit log" : "New daily log"}</Text>
               <TouchableOpacity onPress={() => { setAdding(false); setEditingLog(null); resetForm() }}>
-                <Ionicons name="close" size={20} color="#9CA3AF" />
+                <Ionicons name="close" size={20} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
@@ -227,7 +226,7 @@ export default function LogsScreen() {
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                 <Text style={s.label}>Timeline entries</Text>
                 <TouchableOpacity onPress={() => setEntries(prev => [...prev, { time: "", description: "" }])}>
-                  <Text style={{ fontSize: 12, color: "#F97316", fontWeight: "600" }}>+ Add entry</Text>
+                  <Text style={{ fontSize: 12, color: colors.tint, fontWeight: "600" }}>+ Add entry</Text>
                 </TouchableOpacity>
               </View>
               {entries.map((entry, i) => (
@@ -235,7 +234,7 @@ export default function LogsScreen() {
                   <TextInput value={entry.time} onChangeText={t => setEntries(prev => prev.map((e, idx) => idx === i ? { ...e, time: t } : e))} placeholder="8:00 AM" style={[s.input, { width: 80, fontSize: 12 }]} />
                   <TextInput value={entry.description} onChangeText={t => setEntries(prev => prev.map((e, idx) => idx === i ? { ...e, description: t } : e))} placeholder="Activity" style={[s.input, { flex: 1, fontSize: 12 }]} />
                   <TouchableOpacity onPress={() => setEntries(prev => prev.filter((_, idx) => idx !== i))}>
-                    <Ionicons name="trash-outline" size={16} color="#DC2626" />
+                    <Ionicons name="trash-outline" size={16} color={colors.danger} />
                   </TouchableOpacity>
                 </View>
               ))}
@@ -244,7 +243,7 @@ export default function LogsScreen() {
             {/* Show more toggle */}
             <TouchableOpacity onPress={() => setShowMore(!showMore)} style={s.showMoreBtn}>
               <Text style={s.showMoreText}>{showMore ? "Show less" : "Show more fields"}</Text>
-              <Ionicons name={showMore ? "chevron-up" : "chevron-down"} size={14} color="#F97316" />
+              <Ionicons name={showMore ? "chevron-up" : "chevron-down"} size={14} color={colors.tint} />
             </TouchableOpacity>
 
             {showMore && (
@@ -317,7 +316,7 @@ export default function LogsScreen() {
 
                 {/* Safety */}
                 <View style={s.field}>
-                  <Text style={[s.label, { color: "#DC2626" }]}>Safety incidents</Text>
+                  <Text style={[s.label, { color: colors.danger }]}>Safety incidents</Text>
                   <TextInput value={safetyIncidents} onChangeText={setSafetyIncidents} placeholder="Document any safety incidents..." multiline style={[s.input, { height: 60, textAlignVertical: "top", borderColor: safetyIncidents ? "#FECACA" : "#E8E6E1" }]} />
                 </View>
 
@@ -344,7 +343,7 @@ export default function LogsScreen() {
         {/* Log list */}
         {logs.length === 0 && !adding ? (
           <View style={s.emptyCard}>
-            <Ionicons name="document-text-outline" size={36} color="#D1D5DB" />
+            <Ionicons name="document-text-outline" size={36} color={colors.chevron} />
             <Text style={s.emptyTitle}>No daily logs yet</Text>
             <Text style={s.emptySub}>Tap the button below to file your first daily log</Text>
           </View>
@@ -363,21 +362,21 @@ export default function LogsScreen() {
                 </View>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                   {log.issues && <Ionicons name="warning-outline" size={14} color="#D97706" />}
-                  {log.signedBy && <Ionicons name="checkmark-circle" size={14} color="#16A34A" />}
+                  {log.signedBy && <Ionicons name="checkmark-circle" size={14} color={colors.success} />}
                   {log.photos?.length > 0 && (
                     <View style={s.photoBadge}>
-                      <Ionicons name="camera-outline" size={10} color="#6B7280" />
-                      <Text style={{ fontSize: 10, color: "#6B7280", fontWeight: "600" }}>{log.photos.length}</Text>
+                      <Ionicons name="camera-outline" size={10} color={colors.textSecondary} />
+                      <Text style={{ fontSize: 11, color: colors.textSecondary, fontWeight: "600" }}>{log.photos.length}</Text>
                     </View>
                   )}
-                  <Ionicons name="chevron-forward" size={14} color="#D1D5DB" />
+                  <Ionicons name="chevron-forward" size={14} color={colors.chevron} />
                 </View>
               </View>
               <Text style={s.logSummary} numberOfLines={2}>{log.summary}</Text>
               {log.entries?.length > 0 && (
                 <View style={s.entryPreview}>
                   {log.entries.slice(0, 2).map((e: any) => (
-                    <Text key={e.id} style={s.entryText}><Text style={{ color: "#F97316", fontWeight: "600" }}>{e.time}</Text> — {e.description}</Text>
+                    <Text key={e.id} style={s.entryText}><Text style={{ color: colors.tint, fontWeight: "600" }}>{e.time}</Text> — {e.description}</Text>
                   ))}
                   {log.entries.length > 2 && <Text style={s.entryMore}>+{log.entries.length - 2} more</Text>}
                 </View>
@@ -406,20 +405,20 @@ export default function LogsScreen() {
                   <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                     <View>
                       <Text style={s.modalTitle}>Daily report</Text>
-                      <Text style={{ fontSize: 12, color: "#9CA3AF" }}>
+                      <Text style={{ fontSize: 12, color: colors.textSecondary }}>
                         {new Date(viewingLog.date.split("T")[0] + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
                       </Text>
                     </View>
                     <TouchableOpacity onPress={() => setViewingLog(null)}>
-                      <Ionicons name="close" size={22} color="#9CA3AF" />
+                      <Ionicons name="close" size={22} color={colors.textSecondary} />
                     </TouchableOpacity>
                   </View>
 
                   {/* Signature status */}
                   {viewingLog.signedBy ? (
                     <View style={s.signedBanner}>
-                      <Ionicons name="checkmark-circle" size={14} color="#16A34A" />
-                      <Text style={{ fontSize: 12, color: "#16A34A", fontWeight: "600" }}>Signed by {viewingLog.signedBy}</Text>
+                      <Ionicons name="checkmark-circle" size={14} color={colors.success} />
+                      <Text style={{ fontSize: 12, color: colors.success, fontWeight: "600" }}>Signed by {viewingLog.signedBy}</Text>
                     </View>
                   ) : (
                     <View style={s.unsignedBanner}>
@@ -480,7 +479,7 @@ export default function LogsScreen() {
                   )}
 
                   {viewingLog.delayHours > 0 && (
-                    <Text style={[s.detailText, { color: "#DC2626", fontWeight: "600" }]}>Delay: {viewingLog.delayHours}h — {viewingLog.delayReason || "Not specified"}</Text>
+                    <Text style={[s.detailText, { color: colors.danger, fontWeight: "600" }]}>Delay: {viewingLog.delayHours}h — {viewingLog.delayReason || "Not specified"}</Text>
                   )}
 
                   {viewingLog.safetyIncidents && (
@@ -493,11 +492,11 @@ export default function LogsScreen() {
                   {/* Actions */}
                   <View style={s.modalActions}>
                     <TouchableOpacity onPress={() => startEdit(viewingLog)} style={s.modalEditBtn}>
-                      <Ionicons name="pencil-outline" size={16} color="#374151" />
+                      <Ionicons name="pencil-outline" size={16} color={colors.text} />
                       <Text style={s.modalEditText}>Edit</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => deleteLog(viewingLog.id)} style={s.modalDeleteBtn}>
-                      <Ionicons name="trash-outline" size={16} color="#DC2626" />
+                      <Ionicons name="trash-outline" size={16} color={colors.danger} />
                       <Text style={s.modalDeleteText}>Delete</Text>
                     </TouchableOpacity>
                   </View>
@@ -512,74 +511,74 @@ export default function LogsScreen() {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
+  container: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 100 },
-  center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#F5F4F0" },
-  header: { backgroundColor: "#1C1F26", paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20, position: "relative", overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: "rgba(249,115,22,0.08)" },
-  headerTitle: { fontSize: 22, fontWeight: "700", color: "white", letterSpacing: -0.5 },
-  headerSub: { fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 2 },
-  formCard: { backgroundColor: "white", margin: 16, borderRadius: 16, padding: 20, borderWidth: 1, borderColor: "#E8E6E1" },
+  center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background },
+  header: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 8 },
+  headerCircle: { display: "none" },
+  headerTitle: { fontSize: 34, lineHeight: 41, fontWeight: "700", color: colors.text, letterSpacing: -0.6 },
+  headerSub: { fontSize: 15, color: colors.textSecondary, marginTop: 2 },
+  formCard: { backgroundColor: "white", margin: 16, borderRadius: 16, padding: 20 },
   formHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
-  formTitle: { fontSize: 17, fontWeight: "700", color: "#1A1A1A" },
+  formTitle: { fontSize: 17, fontWeight: "700", color: colors.text },
   field: { marginBottom: 12 },
-  label: { fontSize: 13, fontWeight: "600", color: "#374151", marginBottom: 4 },
-  input: { backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, fontSize: 14, color: "#1A1A1A", borderWidth: 1, borderColor: "#E8E6E1" },
+  label: { fontSize: 13, fontWeight: "600", color: colors.text, marginBottom: 4 },
+  input: { backgroundColor: colors.fillSubtle, borderRadius: 10, padding: 12, fontSize: 14, color: colors.text },
   row: { flexDirection: "row", gap: 10 },
   weatherRow: { flexDirection: "row", gap: 6 },
-  weatherBtn: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 99, backgroundColor: "#F3F4F6", borderWidth: 1, borderColor: "#E8E6E1" },
-  weatherBtnActive: { backgroundColor: "#F97316", borderColor: "#F97316" },
-  weatherText: { fontSize: 12, color: "#6B7280", fontWeight: "600" },
+  weatherBtn: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 99, backgroundColor: colors.fillSubtle },
+  weatherBtnActive: { backgroundColor: colors.charcoal, borderColor: "#F97316" },
+  weatherText: { fontSize: 12, color: colors.textSecondary, fontWeight: "600" },
   weatherTextActive: { color: "white" },
   showMoreBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4, padding: 10, marginBottom: 12 },
-  showMoreText: { fontSize: 13, color: "#F97316", fontWeight: "600" },
+  showMoreText: { fontSize: 13, color: colors.tint, fontWeight: "600" },
   formBtns: { flexDirection: "row", gap: 10, marginTop: 8 },
-  cancelBtn: { flex: 1, backgroundColor: "#F3F4F6", borderRadius: 10, padding: 14, alignItems: "center" },
-  cancelText: { fontSize: 15, fontWeight: "600", color: "#6B7280" },
-  saveBtn: { flex: 1, backgroundColor: "#F97316", borderRadius: 10, padding: 14, alignItems: "center" },
+  cancelBtn: { flex: 1, backgroundColor: colors.fillSubtle, borderRadius: 10, padding: 14, alignItems: "center" },
+  cancelText: { fontSize: 15, fontWeight: "600", color: colors.textSecondary },
+  saveBtn: { flex: 1, backgroundColor: colors.charcoal, borderRadius: 10, padding: 14, alignItems: "center" },
   saveBtnText: { color: "white", fontSize: 15, fontWeight: "700" },
-  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", marginHorizontal: 16, borderWidth: 1, borderColor: "#E8E6E1" },
-  emptyTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginTop: 10, marginBottom: 4 },
-  emptySub: { fontSize: 13, color: "#9CA3AF", textAlign: "center" },
-  logCard: { backgroundColor: "white", borderRadius: 14, padding: 16, marginHorizontal: 16, marginBottom: 10, borderWidth: 1, borderColor: "#E8E6E1" },
+  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", marginHorizontal: 16 },
+  emptyTitle: { fontSize: 16, fontWeight: "700", color: colors.text, marginTop: 10, marginBottom: 4 },
+  emptySub: { fontSize: 13, color: colors.textSecondary, textAlign: "center" },
+  logCard: { backgroundColor: "white", borderRadius: 14, padding: 16, marginHorizontal: 16, marginBottom: 10 },
   logTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 },
-  logDate: { fontSize: 14, fontWeight: "700", color: "#1A1A1A" },
-  logMeta: { fontSize: 11, color: "#9CA3AF", marginTop: 2 },
-  logCreator: { fontSize: 10, color: "#D1D5DB", marginTop: 1 },
-  logSummary: { fontSize: 13, color: "#374151", lineHeight: 20 },
-  photoBadge: { flexDirection: "row", alignItems: "center", gap: 3, backgroundColor: "#F3F4F6", borderRadius: 99, paddingHorizontal: 6, paddingVertical: 2 },
-  entryPreview: { marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: "#F3F4F6" },
-  entryText: { fontSize: 11, color: "#6B7280", marginBottom: 2 },
-  entryMore: { fontSize: 10, color: "#F97316", fontWeight: "600", marginTop: 2 },
+  logDate: { fontSize: 14, fontWeight: "700", color: colors.text },
+  logMeta: { fontSize: 11, color: colors.textSecondary, marginTop: 2 },
+  logCreator: { fontSize: 11, color: colors.chevron, marginTop: 1 },
+  logSummary: { fontSize: 13, color: colors.text, lineHeight: 20 },
+  photoBadge: { flexDirection: "row", alignItems: "center", gap: 3, backgroundColor: colors.fillSubtle, borderRadius: 99, paddingHorizontal: 6, paddingVertical: 2 },
+  entryPreview: { marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.separator },
+  entryText: { fontSize: 11, color: colors.textSecondary, marginBottom: 2 },
+  entryMore: { fontSize: 11, color: colors.tint, fontWeight: "600", marginTop: 2 },
   fab: { position: "absolute", bottom: 30, left: 16, right: 16 },
-  fabBtn: { backgroundColor: "#F97316", borderRadius: 14, padding: 16, alignItems: "center" },
+  fabBtn: { backgroundColor: colors.charcoal, borderRadius: 14, padding: 16, alignItems: "center" },
   fabText: { color: "white", fontSize: 15, fontWeight: "700" },
   modalOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" },
   modalCard: { backgroundColor: "white", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, paddingBottom: 40, maxHeight: "85%" },
-  modalTitle: { fontSize: 18, fontWeight: "700", color: "#1A1A1A" },
+  modalTitle: { fontSize: 18, fontWeight: "700", color: colors.text },
   signedBanner: { flexDirection: "row", alignItems: "center", gap: 6, padding: 10, borderRadius: 8, backgroundColor: "#DCFCE7", marginBottom: 12 },
   unsignedBanner: { flexDirection: "row", alignItems: "center", gap: 6, padding: 10, borderRadius: 8, backgroundColor: "#FEF3C7", marginBottom: 12 },
   kpiRow: { flexDirection: "row", gap: 8, marginBottom: 14 },
-  kpi: { flex: 1, padding: 10, borderRadius: 8, backgroundColor: "#F9FAFB", alignItems: "center" },
-  kpiLabel: { fontSize: 9, color: "#9CA3AF", textTransform: "uppercase", marginBottom: 2 },
-  kpiValue: { fontSize: 15, fontWeight: "700", color: "#1A1A1A" },
+  kpi: { flex: 1, padding: 10, borderRadius: 8, backgroundColor: colors.fillSubtle, alignItems: "center" },
+  kpiLabel: { fontSize: 11, color: colors.textSecondary, marginBottom: 2 },
+  kpiValue: { fontSize: 15, fontWeight: "700", color: colors.text },
   section: { marginBottom: 12 },
-  sectionLabel: { fontSize: 10, fontWeight: "600", color: "#9CA3AF", textTransform: "uppercase", marginBottom: 4 },
-  sectionBox: { padding: 12, borderRadius: 8, backgroundColor: "#F9FAFB", borderWidth: 1, borderColor: "#E8E6E1" },
-  sectionText: { fontSize: 13, color: "#374151", lineHeight: 20 },
-  detailText: { fontSize: 12, color: "#6B7280", marginBottom: 8 },
+  sectionLabel: { fontSize: 11, fontWeight: "600", color: colors.textSecondary, marginBottom: 4 },
+  sectionBox: { padding: 12, borderRadius: 8, backgroundColor: colors.fillSubtle },
+  sectionText: { fontSize: 13, color: colors.text, lineHeight: 20 },
+  detailText: { fontSize: 12, color: colors.textSecondary, marginBottom: 8 },
   timelineEntry: { flexDirection: "row", gap: 8, marginBottom: 4, alignItems: "flex-start" },
-  timelineTime: { fontSize: 12, fontWeight: "600", color: "#F97316", minWidth: 65 },
-  timelineDesc: { fontSize: 12, color: "#374151", flex: 1 },
+  timelineTime: { fontSize: 12, fontWeight: "600", color: colors.tint, minWidth: 65 },
+  timelineDesc: { fontSize: 12, color: colors.text, flex: 1 },
   issueBox: { padding: 12, borderRadius: 8, backgroundColor: "#FEF3C7", borderWidth: 1, borderColor: "#FDE68A", marginBottom: 12 },
-  issueLabel: { fontSize: 10, fontWeight: "600", color: "#D97706", textTransform: "uppercase", marginBottom: 4 },
+  issueLabel: { fontSize: 11, fontWeight: "600", color: "#D97706", marginBottom: 4 },
   issueText: { fontSize: 13, color: "#92400E", lineHeight: 20 },
   safetyBox: { padding: 12, borderRadius: 8, backgroundColor: "#FEE2E2", borderWidth: 1, borderColor: "#FECACA", marginBottom: 12 },
-  safetyLabel: { fontSize: 10, fontWeight: "600", color: "#DC2626", textTransform: "uppercase", marginBottom: 4 },
+  safetyLabel: { fontSize: 11, fontWeight: "600", color: colors.danger, marginBottom: 4 },
   safetyText: { fontSize: 13, color: "#7F1D1D", lineHeight: 20 },
-  modalActions: { flexDirection: "row", gap: 10, marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: "#F3F4F6" },
-  modalEditBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, padding: 12, borderRadius: 10, backgroundColor: "#F3F4F6" },
-  modalEditText: { fontSize: 14, fontWeight: "600", color: "#374151" },
+  modalActions: { flexDirection: "row", gap: 10, marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.separator },
+  modalEditBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, padding: 12, borderRadius: 10, backgroundColor: colors.fillSubtle },
+  modalEditText: { fontSize: 14, fontWeight: "600", color: colors.text },
   modalDeleteBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, padding: 12, borderRadius: 10, backgroundColor: "#FEE2E2" },
-  modalDeleteText: { fontSize: 14, fontWeight: "600", color: "#DC2626" },
+  modalDeleteText: { fontSize: 14, fontWeight: "600", color: colors.danger },
 })

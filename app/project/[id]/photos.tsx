@@ -7,6 +7,8 @@ import { cloudinaryThumb } from "@/lib/images"
 import * as ImagePicker from "expo-image-picker"
 import { Ionicons } from "@expo/vector-icons"
 import { loadCached } from "@/lib/cache"
+import { colors } from "@/lib/theme"
+import { CircleButton } from "@/components/ui"
 
 const SCREEN_WIDTH = Dimensions.get("window").width
 const PHOTO_SIZE = (SCREEN_WIDTH - 48) / 3
@@ -167,10 +169,15 @@ export default function PhotosScreen() {
     ])
   }
 
-  if (loading) return <View style={styles.center}><ActivityIndicator color="#F97316" /></View>
+  if (loading) return <View style={styles.center}><ActivityIndicator color={colors.tint} /></View>
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <CircleButton icon="chevron-back" label="Back" onPress={() => router.back()} />
+        <Text style={styles.headerTitle} accessibilityRole="header">Photos</Text>
+        <Text style={styles.headerSub}>{photos.length} photo{photos.length === 1 ? "" : "s"}</Text>
+      </View>
       {uploadQueue.length > 0 && (
         <View style={styles.progressBar}>
           <Text style={styles.progressText}>
@@ -226,17 +233,20 @@ export default function PhotosScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
-  center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#F5F4F0" },
+  container: { flex: 1, backgroundColor: colors.background },
+  header: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 8, gap: 8 },
+  headerTitle: { fontSize: 34, lineHeight: 41, fontWeight: "700", letterSpacing: -0.6, color: colors.text, marginTop: 4 },
+  headerSub: { fontSize: 15, color: colors.textSecondary, marginTop: -6 },
+  center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background },
   content: { padding: 16, paddingBottom: 80 },
   gridRow: { gap: 8, marginBottom: 8 },
   photo: { width: PHOTO_SIZE, height: PHOTO_SIZE, borderRadius: 8, backgroundColor: "#E2E8F0" },
-  fab: { position: "absolute", bottom: 24, right: 24, width: 56, height: 56, borderRadius: 28, backgroundColor: "#F97316", justifyContent: "center", alignItems: "center", shadowColor: "#000", shadowOpacity: 0.2, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 6 },
+  fab: { position: "absolute", bottom: 24, right: 24, width: 56, height: 56, borderRadius: 28, backgroundColor: colors.charcoal, justifyContent: "center", alignItems: "center", shadowColor: "#000", shadowOpacity: 0.2, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 6 },
   fabDisabled: { opacity: 0.5 },
   emptyState: { alignItems: "center", paddingTop: 80, gap: 8 },
-  emptyText: { fontSize: 18, fontWeight: "600", color: "#1C1F26" },
+  emptyText: { fontSize: 18, fontWeight: "600", color: colors.text },
   emptySubText: { fontSize: 14, color: "#64748B" },
-  progressBar: { backgroundColor: "#1C1F26", padding: 12, paddingTop: 8 },
+  progressBar: { backgroundColor: colors.charcoal, padding: 12, paddingTop: 8 },
   progressText: { color: "#fff", fontSize: 13, fontWeight: "600", marginBottom: 6 },
   progressTrack: { height: 4, backgroundColor: "rgba(255,255,255,0.2)", borderRadius: 2, overflow: "hidden" },
   progressFill: { height: 4, borderRadius: 2 },

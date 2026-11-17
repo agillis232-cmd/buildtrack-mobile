@@ -4,6 +4,8 @@ import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
 import { parseDateOnly } from "@/lib/dates"
+import { colors } from "@/lib/theme"
+import { CircleButton } from "@/components/ui"
 
 export default function ProjectFinancialsScreen() {
   const { id } = useLocalSearchParams()
@@ -65,7 +67,7 @@ export default function ProjectFinancialsScreen() {
     )
   }
 
-  if (loading) return <View style={styles.center}><ActivityIndicator color="#F97316" /></View>
+  if (loading) return <View style={styles.center}><ActivityIndicator color={colors.tint} /></View>
   if (!financials) return <View style={styles.center}><Text style={styles.errorText}>Could not load financials</Text></View>
 
   const profitColor = financials.projectedProfit >= 0 ? "#16A34A" : "#DC2626"
@@ -74,13 +76,10 @@ export default function ProjectFinancialsScreen() {
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.content}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadFinancials() }} tintColor="#F97316" />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadFinancials() }} tintColor={colors.tint} />}
     >
       <View style={styles.headerBanner}>
-        <View style={styles.headerCircle} />
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={styles.backText}>← Back</Text>
-        </TouchableOpacity>
+        <CircleButton icon="chevron-back" label="Back" onPress={() => router.back()} />
         <Text style={styles.title}>Job Financials</Text>
         <View style={styles.profitRow}>
           <View style={styles.profitCard}>
@@ -217,45 +216,45 @@ function FinancialRow({ label, value, bold, positive, negative, warning }: {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
+  container: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 60 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  errorText: { fontSize: 16, color: "#6B7280" },
-  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 24, marginBottom: 20, position: "relative", overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: "rgba(249,115,22,0.08)" },
+  errorText: { fontSize: 16, color: colors.textSecondary },
+  headerBanner: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 8 },
+  headerCircle: { display: "none" },
   backBtn: { marginBottom: 12 },
-  backText: { color: "rgba(255,255,255,0.6)", fontSize: 15, fontWeight: "600" },
-  title: { fontSize: 26, fontWeight: "700", color: "white", letterSpacing: -0.5, marginBottom: 16 },
+  backText: { color: colors.textSecondary, fontSize: 15, fontWeight: "600" },
+  title: { fontSize: 34, lineHeight: 41, fontWeight: "700", color: colors.text, letterSpacing: -0.6, marginBottom: 16 },
   profitRow: { flexDirection: "row", gap: 10 },
-  profitCard: { flex: 1, backgroundColor: "rgba(255,255,255,0.08)", borderRadius: 12, padding: 14 },
-  profitLabel: { fontSize: 11, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 },
-  profitValue: { fontSize: 20, fontWeight: "700", color: "white", marginBottom: 2 },
+  profitCard: { flex: 1, backgroundColor: colors.card, borderRadius: 12, padding: 14 },
+  profitLabel: { fontSize: 15, color: colors.textSecondary, marginBottom: 6 },
+  profitValue: { fontSize: 20, fontWeight: "700", color: colors.text, marginBottom: 2 },
   profitMargin: { fontSize: 12, fontWeight: "600" },
-  profitSub: { fontSize: 11, color: "rgba(255,255,255,0.4)" },
+  profitSub: { fontSize: 15, color: colors.textSecondary },
   section: { paddingHorizontal: 16, marginBottom: 20 },
-  sectionTitle: { fontSize: 11, fontWeight: "700", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 },
-  card: { backgroundColor: "white", borderRadius: 14, borderWidth: 1, borderColor: "#E8E6E1", overflow: "hidden" },
-  row: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "#F3F4F6" },
-  rowBold: { backgroundColor: "#F9FAFB", borderBottomWidth: 0 },
-  rowLabel: { fontSize: 14, color: "#6B7280" },
-  rowLabelBold: { fontWeight: "700", color: "#1A1A1A" },
+  sectionTitle: { fontSize: 11, fontWeight: "700", color: colors.textSecondary, marginBottom: 8 },
+  card: { backgroundColor: "white", borderRadius: 14, overflow: "hidden" },
+  row: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.separator },
+  rowBold: { backgroundColor: colors.fillSubtle, borderBottomWidth: 0 },
+  rowLabel: { fontSize: 14, color: colors.textSecondary },
+  rowLabelBold: { fontWeight: "700", color: colors.text },
   rowValue: { fontSize: 14, fontWeight: "600" },
   rowValueBold: { fontSize: 16, fontWeight: "700" },
   lienWarning: { backgroundColor: "#FEF3C7", borderRadius: 14, padding: 16, marginHorizontal: 16, marginBottom: 20, borderWidth: 1, borderColor: "#FDE68A" },
   lienWarningTitle: { fontSize: 14, fontWeight: "700", color: "#D97706", marginBottom: 4 },
   lienWarningText: { fontSize: 13, color: "#D97706", lineHeight: 20, marginBottom: 8 },
   lienWarningLink: { fontSize: 13, fontWeight: "700", color: "#D97706" },
-  paymentRow: { backgroundColor: "white", borderRadius: 12, padding: 14, marginBottom: 8, flexDirection: "row", justifyContent: "space-between", alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1" },
+  paymentRow: { backgroundColor: "white", borderRadius: 12, padding: 14, marginBottom: 8, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   paymentRowPaid: { opacity: 0.7 },
   paymentLeft: { flex: 1 },
-  paymentNumber: { fontSize: 11, fontWeight: "700", color: "#9CA3AF", marginBottom: 2 },
-  paymentDesc: { fontSize: 14, fontWeight: "600", color: "#1A1A1A", marginBottom: 2 },
-  paymentDate: { fontSize: 11, color: "#9CA3AF" },
+  paymentNumber: { fontSize: 11, fontWeight: "700", color: colors.textSecondary, marginBottom: 2 },
+  paymentDesc: { fontSize: 14, fontWeight: "600", color: colors.text, marginBottom: 2 },
+  paymentDate: { fontSize: 11, color: colors.textSecondary },
   paymentRight: { alignItems: "flex-end", gap: 4 },
-  paymentAmount: { fontSize: 16, fontWeight: "700", color: "#1A1A1A" },
+  paymentAmount: { fontSize: 16, fontWeight: "700", color: colors.text },
   paymentStatus: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 },
   paymentStatusText: { fontSize: 11, fontWeight: "700" },
-  linkCard: { backgroundColor: "white", borderRadius: 12, padding: 14, marginBottom: 8, flexDirection: "row", justifyContent: "space-between", alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1" },
-  linkCardText: { fontSize: 14, fontWeight: "600", color: "#1A1A1A" },
-  linkCardArrow: { fontSize: 20, color: "#D1D5DB" },
+  linkCard: { backgroundColor: "white", borderRadius: 12, padding: 14, marginBottom: 8, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  linkCardText: { fontSize: 14, fontWeight: "600", color: colors.text },
+  linkCardArrow: { fontSize: 20, color: colors.chevron },
 })

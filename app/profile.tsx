@@ -5,6 +5,8 @@ import { useState } from "react"
 import * as ImagePicker from "expo-image-picker"
 import { API_URL } from "@/lib/api"
 import Constants from "expo-constants"
+import { colors } from "@/lib/theme"
+import { CircleButton } from "@/components/ui"
 
 export default function ProfileScreen() {
   const { user, signOut, token } = useAuth()
@@ -57,10 +59,7 @@ export default function ProfileScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.headerBanner}>
-        <View style={styles.headerCircle} />
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={styles.backText}>← Back</Text>
-        </TouchableOpacity>
+        <CircleButton icon="chevron-back" label="Back" onPress={() => router.back()} />
         <Text style={styles.pageTitle}>Profile</Text>
 
         <View style={styles.avatarSection}>
@@ -74,7 +73,7 @@ export default function ProfileScreen() {
             )}
             <View style={styles.avatarEditBadge}>
               {uploadingAvatar
-                ? <ActivityIndicator color="white" size="small" />
+                ? <ActivityIndicator color={colors.text} size="small" />
                 : <Text style={styles.avatarEditText}>Edit</Text>
               }
             </View>
@@ -142,19 +141,19 @@ export default function ProfileScreen() {
           }}
         ])
       }} style={{ marginHorizontal: 16, marginTop: 12, padding: 14, borderRadius: 12, borderWidth: 1, borderColor: "#FEE2E2", alignItems: "center" }}>
-        <Text style={{ color: "#DC2626", fontSize: 14, fontWeight: "600" }}>Delete Account</Text>
+        <Text style={{ color: colors.danger, fontSize: 14, fontWeight: "600" }}>Delete Account</Text>
       </TouchableOpacity>
 
       {/* Legal */}
       <View style={{ flexDirection: "row", justifyContent: "center", gap: 16, marginTop: 16, marginBottom: 32 }}>
         <TouchableOpacity onPress={() => Linking.openURL("https://buildtrackpro.app/legal/privacy")}>
-          <Text style={{ color: "#9CA3AF", fontSize: 12 }}>Privacy</Text>
+          <Text style={{ color: colors.textSecondary, fontSize: 12 }}>Privacy</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => Linking.openURL("https://buildtrackpro.app/legal/terms")}>
-          <Text style={{ color: "#9CA3AF", fontSize: 12 }}>Terms</Text>
+          <Text style={{ color: colors.textSecondary, fontSize: 12 }}>Terms</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => Linking.openURL("https://buildtrackpro.app/legal/eula")}>
-          <Text style={{ color: "#9CA3AF", fontSize: 12 }}>EULA</Text>
+          <Text style={{ color: colors.textSecondary, fontSize: 12 }}>EULA</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -171,33 +170,33 @@ function Row({ label, value, last }: { label: string, value: string, last?: bool
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
+  container: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 60 },
-  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 30, marginBottom: 24, position: "relative", overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -60, right: -60, width: 220, height: 220, borderRadius: 110, backgroundColor: "rgba(249,115,22,0.08)" },
+  headerBanner: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 8 },
+  headerCircle: { display: "none" },
   backBtn: { marginBottom: 16 },
-  backText: { color: "rgba(255,255,255,0.6)", fontSize: 15, fontWeight: "600" },
-  pageTitle: { fontSize: 28, fontWeight: "700", color: "white", marginBottom: 20, letterSpacing: -0.5 },
+  backText: { color: colors.textSecondary, fontSize: 15, fontWeight: "600" },
+  pageTitle: { fontSize: 34, lineHeight: 41, fontWeight: "700", color: colors.text, marginBottom: 20, letterSpacing: -0.6 },
   avatarSection: { alignItems: "center" },
   avatarWrapper: { position: "relative", marginBottom: 12 },
-  avatarImage: { width: 84, height: 84, borderRadius: 42, borderWidth: 3, borderColor: "rgba(255,255,255,0.2)" },
-  avatar: { width: 84, height: 84, borderRadius: 42, backgroundColor: "#F97316", justifyContent: "center", alignItems: "center", borderWidth: 3, borderColor: "rgba(255,255,255,0.2)" },
-  avatarText: { fontSize: 30, fontWeight: "700", color: "white" },
-  avatarEditBadge: { position: "absolute", bottom: 0, right: -4, backgroundColor: "#1C1F26", borderRadius: 99, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 2, borderColor: "#F5F4F0" },
-  avatarEditText: { fontSize: 10, color: "#F97316", fontWeight: "700" },
-  name: { fontSize: 20, fontWeight: "700", color: "white", marginBottom: 4 },
-  email: { fontSize: 13, color: "rgba(255,255,255,0.5)", marginBottom: 10 },
-  roleBadge: { backgroundColor: "rgba(249,115,22,0.2)", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 99, borderWidth: 1, borderColor: "rgba(249,115,22,0.3)" },
-  roleText: { fontSize: 11, fontWeight: "700", color: "#F97316" },
+  avatarImage: { width: 84, height: 84, borderRadius: 42, borderWidth: 3, borderColor: colors.separator },
+  avatar: { width: 84, height: 84, borderRadius: 42, backgroundColor: colors.charcoal, justifyContent: "center", alignItems: "center", borderWidth: 3, borderColor: colors.separator },
+  avatarText: { fontSize: 28, fontWeight: "700", color: "white" },
+  avatarEditBadge: { position: "absolute", bottom: 0, right: -4, backgroundColor: colors.charcoal, borderRadius: 99, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 2, borderColor: colors.background },
+  avatarEditText: { fontSize: 11, color: colors.accent, fontWeight: "700" },
+  name: { fontSize: 20, fontWeight: "700", color: colors.text, marginBottom: 4 },
+  email: { fontSize: 15, color: colors.textSecondary, marginBottom: 10 },
+  roleBadge: { backgroundColor: colors.tintSoft, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 99 },
+  roleText: { fontSize: 13, fontWeight: "600", color: colors.tint },
   section: { paddingHorizontal: 16, marginBottom: 20 },
-  sectionTitle: { fontSize: 11, fontWeight: "700", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 },
-  card: { backgroundColor: "white", borderRadius: 14, borderWidth: 1, borderColor: "#E8E6E1", overflow: "hidden" },
-  row: { flexDirection: "row", justifyContent: "space-between", padding: 14, borderBottomWidth: 1, borderBottomColor: "#F3F4F6" },
-  rowLabel: { fontSize: 14, color: "#6B7280" },
-  rowValue: { fontSize: 14, fontWeight: "600", color: "#1A1A1A", maxWidth: "60%", textAlign: "right" },
+  sectionTitle: { fontSize: 11, fontWeight: "700", color: colors.textSecondary, marginBottom: 8 },
+  card: { backgroundColor: "white", borderRadius: 14, overflow: "hidden" },
+  row: { flexDirection: "row", justifyContent: "space-between", padding: 14, borderBottomWidth: 1, borderBottomColor: colors.separator },
+  rowLabel: { fontSize: 14, color: colors.textSecondary },
+  rowValue: { fontSize: 14, fontWeight: "600", color: colors.text, maxWidth: "60%", textAlign: "right" },
  signOutBtn: { backgroundColor: "#DC2626", borderRadius: 14, padding: 16, alignItems: "center", marginHorizontal: 16 },
  signOutText: { color: "white", fontSize: 16, fontWeight: "700" },
   adminRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 14 },
-  adminRowLabel: { fontSize: 14, fontWeight: "600", color: "#1A1A1A" },
-  adminRowArrow: { fontSize: 20, color: "#D1D5DB" },
+  adminRowLabel: { fontSize: 14, fontWeight: "600", color: colors.text },
+  adminRowArrow: { fontSize: 20, color: colors.chevron },
 })

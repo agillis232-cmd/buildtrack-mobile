@@ -7,6 +7,8 @@ import { router } from "expo-router"
 import * as SecureStore from "expo-secure-store"
 import { API_URL } from "@/lib/api"
 import { Ionicons } from "@expo/vector-icons"
+import { colors } from "@/lib/theme"
+import { CircleButton } from "@/components/ui"
 
 const CATEGORY_ICONS: Record<string, string> = {
   general: "document-text-outline",
@@ -55,22 +57,20 @@ export default function NotesScreen() {
   const categories = ["general", "meeting", "decision", "reminder", "idea"]
 
   if (loading) return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#F5F4F0", justifyContent: "center", alignItems: "center" }}>
-      <ActivityIndicator color="#F97316" />
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background, justifyContent: "center", alignItems: "center" }}>
+      <ActivityIndicator color={colors.tint} />
     </SafeAreaView>
   )
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#F5F4F0" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
-      <View style={{ backgroundColor: "#1C1F26", paddingTop: 10, paddingBottom: 16, paddingHorizontal: 20 }}>
+      <View style={{ paddingTop: 4, paddingBottom: 8, paddingHorizontal: 16 }}>
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 16 }}>← Back</Text>
-          </TouchableOpacity>
+          <CircleButton icon="chevron-back" label="Back" onPress={() => router.back()} />
         </View>
-        <Text style={{ color: "white", fontSize: 22, fontWeight: "700", marginTop: 12 }}>Notes</Text>
-        <Text style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, marginTop: 4 }}>{notes.length} notes</Text>
+        <Text style={{ color: colors.text, fontSize: 34, lineHeight: 41, fontWeight: "700", letterSpacing: -0.6, marginTop: 12 }}>Notes</Text>
+        <Text style={{ color: colors.textSecondary, fontSize: 15, marginTop: 4 }}>{notes.length} notes</Text>
       </View>
 
       {/* Category filter */}
@@ -84,7 +84,7 @@ export default function NotesScreen() {
               borderWidth: 1, borderColor: filterCategory === "all" ? "#1C1F26" : "#E8E6E1",
             }}
           >
-            <Text style={{ fontSize: 11, fontWeight: "600", color: filterCategory === "all" ? "white" : "#6B7280" }}>All</Text>
+            <Text style={{ fontSize: 11, fontWeight: "600", color: filterCategory === "all" ? "white" : colors.textSecondary }}>All</Text>
           </TouchableOpacity>
           {categories.map(c => (
             <TouchableOpacity
@@ -96,7 +96,7 @@ export default function NotesScreen() {
                 borderWidth: 1, borderColor: filterCategory === c ? "#1C1F26" : "#E8E6E1",
               }}
             >
-              <Text style={{ fontSize: 11, fontWeight: "600", color: filterCategory === c ? "white" : "#6B7280" }}>
+              <Text style={{ fontSize: 11, fontWeight: "600", color: filterCategory === c ? "white" : colors.textSecondary }}>
                 {CATEGORY_ICONS[c]} {c.charAt(0).toUpperCase() + c.slice(1)}
               </Text>
             </TouchableOpacity>
@@ -107,13 +107,13 @@ export default function NotesScreen() {
       <ScrollView
         style={{ flex: 1, padding: 16 }}
         contentContainerStyle={{ paddingBottom: 30 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadNotes() }} tintColor="#F97316" />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadNotes() }} tintColor={colors.tint} />}
       >
         {filtered.length === 0 ? (
           <View style={{ alignItems: "center", paddingTop: 60 }}>
-            <Ionicons name="document-text-outline" size={40} color="#F97316" style={{ marginBottom: 12 }} />
-            <Text style={{ fontSize: 16, fontWeight: "700", color: "#1C1F26" }}>No notes yet</Text>
-            <Text style={{ fontSize: 13, color: "#999", marginTop: 4 }}>Use the assistant to capture notes</Text>
+            <Ionicons name="document-text-outline" size={40} color={colors.tint} style={{ marginBottom: 12 }} />
+            <Text style={{ fontSize: 16, fontWeight: "700", color: colors.text }}>No notes yet</Text>
+            <Text style={{ fontSize: 13, color: colors.textSecondary, marginTop: 4 }}>Use the assistant to capture notes</Text>
           </View>
         ) : (
           filtered.map(note => (
@@ -122,14 +122,13 @@ export default function NotesScreen() {
               onPress={() => setExpandedNote(expandedNote === note.id ? null : note.id)}
               style={{
                 backgroundColor: "white", borderRadius: 12, padding: 14, marginBottom: 10,
-                borderWidth: 1, borderColor: "#E8E6E1",
                 borderLeftWidth: 3, borderLeftColor: note.pinned ? "#F97316" : "#E8E6E1",
               }}
             >
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 8, flex: 1 }}>
                   <Text style={{ fontSize: 16 }}>{CATEGORY_ICONS[note.category] || "📝"}</Text>
-                  <Text style={{ fontSize: 14, fontWeight: "700", color: "#1C1F26", flex: 1 }}>{note.title || "Untitled"}</Text>
+                  <Text style={{ fontSize: 14, fontWeight: "700", color: colors.text, flex: 1 }}>{note.title || "Untitled"}</Text>
                 </View>
                 <TouchableOpacity onPress={() => togglePin(note.id, note.pinned)}>
                   <Text style={{ fontSize: 16, opacity: note.pinned ? 1 : 0.3 }}>📌</Text>
@@ -146,13 +145,13 @@ export default function NotesScreen() {
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 10, paddingTop: 8, borderTopWidth: 1, borderTopColor: "#F0EDE8" }}>
                 <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
                   {note.project && (
-                    <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: 99, backgroundColor: "#FFF7ED" }}>
-                      <Text style={{ fontSize: 10, color: "#F97316", fontWeight: "600" }}>{note.project.name}</Text>
+                    <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: 99, backgroundColor: colors.tintSoft }}>
+                      <Text style={{ fontSize: 11, color: colors.tint, fontWeight: "600" }}>{note.project.name}</Text>
                     </View>
                   )}
-                  <Text style={{ fontSize: 10, color: "#999" }}>{note.createdBy?.name}</Text>
+                  <Text style={{ fontSize: 11, color: colors.textSecondary }}>{note.createdBy?.name}</Text>
                 </View>
-                <Text style={{ fontSize: 10, color: "#999" }}>
+                <Text style={{ fontSize: 11, color: colors.textSecondary }}>
                   {new Date(note.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                 </Text>
               </View>
@@ -163,17 +162,19 @@ export default function NotesScreen() {
 
       {/* FAB to assistant */}
       <TouchableOpacity
+        accessibilityRole="button"
+        accessibilityLabel="Ask the assistant"
         onPress={() => router.push("/assistant")}
         style={{
           position: "absolute", bottom: 24, right: 24,
-          width: 56, height: 56, borderRadius: 16,
-          backgroundColor: "#F97316",
+          width: 56, height: 56, borderRadius: 28,
+          backgroundColor: colors.charcoal,
           alignItems: "center", justifyContent: "center",
-          shadowColor: "#F97316", shadowOffset: { width: 0, height: 4 },
+          shadowColor: "#1C1F26", shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.4, shadowRadius: 8, elevation: 8,
         }}
       >
-        <Ionicons name="hardware-chip-outline" size={26} color="white" />
+        <Ionicons name="sparkles-outline" size={24} color={colors.accent} />
       </TouchableOpacity>
     </SafeAreaView>
   )

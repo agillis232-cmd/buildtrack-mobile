@@ -3,6 +3,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs"
 import { Ionicons } from "@expo/vector-icons"
 import { colors, TAB_BAR_HEIGHT, tabBarBottom } from "@/lib/theme"
+import { useKeyboardVisible } from "@/lib/useKeyboardVisible"
 
 // The tab bar: a floating white capsule with the main tabs, and Quick Add as its
 // own round "+" button beside it. Content scrolls underneath (screens add their own
@@ -11,11 +12,14 @@ export default function FloatingTabBar({
   state, descriptors, navigation, quickAddRoute,
 }: BottomTabBarProps & { /** Route name shown as the separate "+" button instead of a tab. */ quickAddRoute?: string }) {
   const insets = useSafeAreaInsets()
+  const keyboardVisible = useKeyboardVisible()
 
   function go(routeKey: string, routeName: string, focused: boolean) {
     const event = navigation.emit({ type: "tabPress", target: routeKey, canPreventDefault: true })
     if (!focused && !event.defaultPrevented) navigation.navigate(routeName)
   }
+
+  if (keyboardVisible) return null
 
   const quickAdd = state.routes.find(r => r.name === quickAddRoute)
   const quickAddFocused = !!quickAdd && state.routes[state.index].key === quickAdd.key

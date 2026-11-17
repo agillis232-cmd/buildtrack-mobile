@@ -4,6 +4,8 @@ import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
 import { Ionicons } from "@expo/vector-icons"
+import { colors } from "@/lib/theme"
+import { CircleButton } from "@/components/ui"
 
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   "Selected": { bg: "#DBEAFE", text: "#2563EB" },
@@ -46,11 +48,11 @@ export default function SpecBookScreen() {
     return `${roomCode}-${catKey}-${String(idx + 1).padStart(2, "0")}`
   }
 
-  if (loading) return <View style={styles.center}><ActivityIndicator color="#F97316" /></View>
+  if (loading) return <View style={styles.center}><ActivityIndicator color={colors.tint} /></View>
 
   if (!specBook) return (
     <View style={styles.center}>
-      <Ionicons name="book-outline" size={48} color="#9CA3AF" />
+      <Ionicons name="book-outline" size={48} color={colors.textSecondary} />
       <Text style={styles.emptyText}>No spec book for this project</Text>
       <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
         <Text style={styles.backBtnText}>Go back</Text>
@@ -81,9 +83,7 @@ export default function SpecBookScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.headerBack}>
-          <Ionicons name="arrow-back" size={20} color="white" />
-        </TouchableOpacity>
+        <CircleButton icon="chevron-back" label="Back" onPress={() => router.back()} />
         <View style={{ flex: 1 }}>
           <Text style={styles.headerTitle}>Spec Book</Text>
           <Text style={styles.headerSub}>{meta.projectName} · {filledItems}/{totalItems} specified</Text>
@@ -99,11 +99,11 @@ export default function SpecBookScreen() {
 
       {/* Search */}
       <View style={styles.searchWrap}>
-        <Ionicons name="search" size={16} color="#9CA3AF" style={{ marginRight: 8 }} />
-        <TextInput value={search} onChangeText={setSearch} placeholder="Search specs..." placeholderTextColor="#9CA3AF" style={styles.searchInput} />
+        <Ionicons name="search" size={16} color={colors.textSecondary} style={{ marginRight: 8 }} />
+        <TextInput value={search} onChangeText={setSearch} placeholder="Search specs..." placeholderTextColor={colors.chevron} style={styles.searchInput} />
         {search ? (
           <TouchableOpacity onPress={() => setSearch("")}>
-            <Ionicons name="close-circle" size={18} color="#9CA3AF" />
+            <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
           </TouchableOpacity>
         ) : null}
       </View>
@@ -112,7 +112,7 @@ export default function SpecBookScreen() {
         {filteredRooms.map((room: any) => (
           <View key={room.id} style={styles.roomCard}>
             <TouchableOpacity onPress={() => setExpandedRoom(expandedRoom === room.id ? null : room.id)} style={styles.roomHeader}>
-              <Ionicons name={expandedRoom === room.id ? "chevron-down" : "chevron-forward"} size={16} color="#6B7280" />
+              <Ionicons name={expandedRoom === room.id ? "chevron-down" : "chevron-forward"} size={16} color={colors.textSecondary} />
               <Text style={styles.roomCode}>{room.code}</Text>
               <Text style={styles.roomName}>{room.name}</Text>
               <View style={styles.badge}>
@@ -194,43 +194,43 @@ export default function SpecBookScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
-  center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#F5F4F0", gap: 12 },
-  emptyText: { fontSize: 16, fontWeight: "600", color: "#6B7280" },
+  container: { flex: 1, backgroundColor: colors.background },
+  center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background, gap: 12 },
+  emptyText: { fontSize: 16, fontWeight: "600", color: colors.textSecondary },
   backBtn: { marginTop: 8, padding: 10 },
-  backBtnText: { fontSize: 14, color: "#F97316", fontWeight: "600" },
-  header: { backgroundColor: "#1C1F26", padding: 16, paddingTop: 56, flexDirection: "row", alignItems: "center", gap: 12 },
+  backBtnText: { fontSize: 14, color: colors.tint, fontWeight: "600" },
+  header: { flexDirection: "row", alignItems: "center", gap: 12 , paddingHorizontal: 16, paddingTop: 60, paddingBottom: 8 },
   headerBack: { padding: 4 },
-  headerTitle: { fontSize: 18, fontWeight: "700", color: "white" },
-  headerSub: { fontSize: 12, color: "rgba(255,255,255,0.5)", marginTop: 2 },
-  progressWrap: { backgroundColor: "#1C1F26", paddingHorizontal: 16, paddingBottom: 12 },
-  progressTrack: { height: 3, backgroundColor: "rgba(255,255,255,0.15)", borderRadius: 2 },
-  progressFill: { height: 3, backgroundColor: "#F97316", borderRadius: 2 },
-  searchWrap: { flexDirection: "row", alignItems: "center", margin: 16, marginBottom: 8, backgroundColor: "white", borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, borderWidth: 1, borderColor: "#E8E6E1" },
-  searchInput: { flex: 1, fontSize: 14, color: "#1C1F26", padding: 0 },
+  headerTitle: { fontSize: 18, fontWeight: "700", color: colors.text },
+  headerSub: { fontSize: 15, color: colors.textSecondary, marginTop: 2 },
+  progressWrap: { backgroundColor: colors.charcoal, paddingHorizontal: 16, paddingBottom: 12 },
+  progressTrack: { height: 4, backgroundColor: colors.track, borderRadius: 2, overflow: "hidden" },
+  progressFill: { height: 4, backgroundColor: colors.accent, borderRadius: 2 },
+  searchWrap: { flexDirection: "row", alignItems: "center", margin: 16, marginBottom: 8, backgroundColor: "white", borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10 },
+  searchInput: { flex: 1, fontSize: 14, color: colors.text, padding: 0 },
   scroll: { flex: 1 },
   scrollContent: { padding: 16, paddingTop: 8, paddingBottom: 40 },
-  roomCard: { marginBottom: 12, backgroundColor: "white", borderRadius: 12, borderWidth: 1, borderColor: "#E8E6E1", overflow: "hidden" },
+  roomCard: { marginBottom: 12, backgroundColor: "white", borderRadius: 12, overflow: "hidden" },
   roomHeader: { flexDirection: "row", alignItems: "center", padding: 14, gap: 8 },
-  roomCode: { fontSize: 13, fontWeight: "800", color: "#F97316", width: 36 },
-  roomName: { fontSize: 15, fontWeight: "700", color: "#1C1F26", flex: 1 },
-  badge: { backgroundColor: "#F3F4F6", borderRadius: 99, paddingHorizontal: 8, paddingVertical: 2 },
-  badgeText: { fontSize: 11, color: "#6B7280", fontWeight: "600" },
-  catHeader: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 8, backgroundColor: "rgba(28,31,38,0.03)", borderBottomWidth: 1, borderBottomColor: "#E8E6E1" },
-  catName: { fontSize: 10, fontWeight: "700", color: "#6B7280", textTransform: "uppercase", letterSpacing: 0.5 },
-  catCount: { fontSize: 10, color: "#9CA3AF" },
-  itemRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 14, paddingVertical: 10, gap: 8, borderBottomWidth: 1, borderBottomColor: "#F3F4F6" },
-  itemCode: { fontSize: 10, fontWeight: "700", color: "#F97316", fontFamily: "monospace", width: 60 },
-  itemName: { fontSize: 13, fontWeight: "600", color: "#1C1F26" },
-  itemPreview: { fontSize: 11, color: "#6B7280", marginTop: 2 },
+  roomCode: { fontSize: 13, fontWeight: "800", color: colors.tint, width: 36 },
+  roomName: { fontSize: 15, fontWeight: "700", color: colors.text, flex: 1 },
+  badge: { backgroundColor: colors.fillSubtle, borderRadius: 99, paddingHorizontal: 8, paddingVertical: 2 },
+  badgeText: { fontSize: 11, color: colors.textSecondary, fontWeight: "600" },
+  catHeader: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 8, backgroundColor: "rgba(28,31,38,0.03)", borderBottomWidth: 1, borderBottomColor: colors.separator },
+  catName: { fontSize: 11, fontWeight: "700", color: colors.textSecondary },
+  catCount: { fontSize: 11, color: colors.textSecondary },
+  itemRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 14, paddingVertical: 10, gap: 8, borderBottomWidth: 1, borderBottomColor: colors.separator },
+  itemCode: { fontSize: 11, fontWeight: "700", color: colors.tint, fontFamily: "monospace", width: 60 },
+  itemName: { fontSize: 13, fontWeight: "600", color: colors.text },
+  itemPreview: { fontSize: 11, color: colors.textSecondary, marginTop: 2 },
   swatch: { width: 14, height: 14, borderRadius: 3, borderWidth: 1, borderColor: "rgba(0,0,0,0.1)" },
   statusBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 99 },
-  statusText: { fontSize: 9, fontWeight: "700" },
+  statusText: { fontSize: 11, fontWeight: "700" },
   itemDetails: { paddingHorizontal: 14, paddingBottom: 12, paddingLeft: 74, flexDirection: "row", flexWrap: "wrap", gap: 12 },
   detailField: { width: "45%" },
-  detailLabel: { fontSize: 9, fontWeight: "700", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5 },
-  detailValue: { fontSize: 13, color: "#1C1F26", marginTop: 1 },
+  detailLabel: { fontSize: 11, fontWeight: "700", color: colors.textSecondary },
+  detailValue: { fontSize: 13, color: colors.text, marginTop: 1 },
   notesBox: { width: "100%", backgroundColor: "#FAFAF9", borderRadius: 6, padding: 8, marginTop: 4 },
-  notesText: { fontSize: 12, color: "#374151", lineHeight: 18, marginTop: 2 },
+  notesText: { fontSize: 12, color: colors.text, lineHeight: 18, marginTop: 2 },
 })
 

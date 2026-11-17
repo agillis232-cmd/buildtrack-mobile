@@ -2,6 +2,7 @@ import { useState } from "react"
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, ActivityIndicator, Image } from "react-native"
 import { useRouter } from "expo-router"
 import { API_URL } from "@/lib/api"
+import { StatusBar } from "expo-status-bar"
 
 const ROLES = [
   { key: "FIELD_WORKER", label: "Field Worker", sub: "Add logs, photos and expenses" },
@@ -58,6 +59,7 @@ export default function SignupScreen() {
 
   return (
     <View style={styles.container}>
+      <StatusBar style="light" />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.decorCircle} />
         <View style={styles.decorCircle2} />

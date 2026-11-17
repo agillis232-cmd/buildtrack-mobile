@@ -5,6 +5,8 @@ import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
 import { Ionicons } from "@expo/vector-icons"
 import { toDateKey } from "@/lib/dates"
+import { colors } from "@/lib/theme"
+import { CircleButton } from "@/components/ui"
 
 export default function AddExpenseScreen() {
   const { id, prefill } = useLocalSearchParams()
@@ -73,10 +75,7 @@ export default function AddExpenseScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         {/* Header */}
         <View style={styles.headerBanner}>
-          <View style={styles.headerCircle} />
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={20} color="white" />
-          </TouchableOpacity>
+          <CircleButton icon="chevron-back" label="Back" onPress={() => router.back()} />
           <Text style={styles.headerTitle}>Add expense</Text>
         </View>
 
@@ -155,10 +154,10 @@ export default function AddExpenseScreen() {
                     style={[styles.categoryItem, categoryId === cat.id && styles.categoryItemSelected]}
                   >
                     <View style={{ width: 14, height: 14, borderRadius: 7, backgroundColor: cat.color || "#6B7280" }} />
-                    <Text style={[styles.categoryItemText, categoryId === cat.id && { color: "#F97316", fontWeight: "700" }]}>
+                    <Text style={[styles.categoryItemText, categoryId === cat.id && { color: colors.tint, fontWeight: "700" }]}>
                       {cat.name}
                     </Text>
-                    {categoryId === cat.id && <Ionicons name="checkmark" size={16} color="#F97316" />}
+                    {categoryId === cat.id && <Ionicons name="checkmark" size={16} color={colors.tint} />}
                   </TouchableOpacity>
                 ))}
               </View>
@@ -180,42 +179,34 @@ export default function AddExpenseScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
+  container: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 40 },
-  headerBanner: {
-    backgroundColor: "#1C1F26", paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20,
-    position: "relative", overflow: "hidden",
-  },
-  headerCircle: {
-    position: "absolute", top: -60, right: -60, width: 200, height: 200,
-    borderRadius: 100, backgroundColor: "rgba(249,115,22,0.08)",
-  },
+  headerBanner: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 8 },
+  headerCircle: { display: "none" },
   backBtn: { marginBottom: 12 },
-  headerTitle: { fontSize: 22, fontWeight: "700", color: "white", letterSpacing: -0.5 },
+  headerTitle: { fontSize: 34, lineHeight: 41, fontWeight: "700", color: colors.text, letterSpacing: -0.6 },
   card: {
     backgroundColor: "white", margin: 16, borderRadius: 14, padding: 20,
-    borderWidth: 1, borderColor: "#E8E6E1",
   },
   field: { marginBottom: 16 },
-  label: { fontSize: 13, fontWeight: "600", color: "#374151", marginBottom: 6 },
+  label: { fontSize: 13, fontWeight: "600", color: colors.text, marginBottom: 6 },
   input: {
-    backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, fontSize: 14,
-    borderWidth: 1, borderColor: "#E8E6E1", color: "#1C1F26",
+    backgroundColor: colors.fillSubtle, borderRadius: 10, padding: 12, fontSize: 14, color: colors.text,
   },
   row: { flexDirection: "row", gap: 12 },
   categoryList: {
-    marginTop: 8, borderRadius: 10, borderWidth: 1, borderColor: "#E8E6E1",
+    marginTop: 8, borderRadius: 10,
     backgroundColor: "white", overflow: "hidden", zIndex: 10, position: "relative",
     marginBottom: 60,
   },
   categoryItem: {
     flexDirection: "row", alignItems: "center", gap: 10, padding: 12,
-    borderBottomWidth: 1, borderBottomColor: "#F3F4F6",
+    borderBottomWidth: 1, borderBottomColor: colors.separator,
   },
-  categoryItemSelected: { backgroundColor: "#FFF7ED" },
-  categoryItemText: { flex: 1, fontSize: 14, color: "#374151" },
+  categoryItemSelected: { backgroundColor: colors.tintSoft },
+  categoryItemText: { flex: 1, fontSize: 14, color: colors.text },
   saveBtn: {
-    backgroundColor: "#F97316", marginHorizontal: 16, padding: 16,
+    backgroundColor: colors.charcoal, marginHorizontal: 16, padding: 16,
     borderRadius: 12, alignItems: "center",
   },
   saveBtnText: { color: "white", fontSize: 16, fontWeight: "700" },

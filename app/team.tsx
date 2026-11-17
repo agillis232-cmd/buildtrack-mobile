@@ -3,6 +3,8 @@ import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { useRouter } from "expo-router"
 import { API_URL } from "@/lib/api"
+import { colors } from "@/lib/theme"
+import { CircleButton } from "@/components/ui"
 
 const ROLES = ["ADMIN", "PROJECT_MANAGER", "FIELD_WORKER"]
 
@@ -182,16 +184,13 @@ export default function AdminUsersScreen() {
 
   const pendingCount = users.filter(u => u.status === "PENDING").length
 
-  if (loading) return <View style={styles.center}><ActivityIndicator color="#F97316" /></View>
+  if (loading) return <View style={styles.center}><ActivityIndicator color={colors.tint} /></View>
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.headerBanner}>
-          <View style={styles.headerCircle} />
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backText}>← Back</Text>
-          </TouchableOpacity>
+          <CircleButton icon="chevron-back" label="Back" onPress={() => router.back()} />
           <Text style={styles.title}>Team Management</Text>
           <Text style={styles.subtitle}>{users.length} team members</Text>
           {pendingCount > 0 && (
@@ -367,71 +366,71 @@ export default function AdminUsersScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
+  container: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 40 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 24, marginBottom: 20, position: "relative", overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -60, right: -60, width: 220, height: 220, borderRadius: 110, backgroundColor: "rgba(249,115,22,0.08)" },
+  headerBanner: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 8 },
+  headerCircle: { display: "none" },
   backBtn: { marginBottom: 12 },
-  backText: { color: "rgba(255,255,255,0.6)", fontSize: 15, fontWeight: "600" },
-  title: { fontSize: 26, fontWeight: "700", color: "white", letterSpacing: -0.5, marginBottom: 4 },
-  subtitle: { fontSize: 13, color: "rgba(255,255,255,0.4)", marginBottom: 10 },
+  backText: { color: colors.textSecondary, fontSize: 15, fontWeight: "600" },
+  title: { fontSize: 34, lineHeight: 41, fontWeight: "700", color: colors.text, letterSpacing: -0.6, marginBottom: 4 },
+  subtitle: { fontSize: 15, color: colors.textSecondary, marginBottom: 10 },
   pendingBanner: { backgroundColor: "rgba(217,119,6,0.2)", borderRadius: 99, paddingHorizontal: 12, paddingVertical: 5, alignSelf: "flex-start", borderWidth: 1, borderColor: "rgba(217,119,6,0.3)" },
   pendingBannerText: { fontSize: 12, color: "#D97706", fontWeight: "700" },
   filterRow: { flexDirection: "row", gap: 8, paddingHorizontal: 16, marginBottom: 16 },
-  filterBtn: { flex: 1, paddingVertical: 8, borderRadius: 99, backgroundColor: "white", borderWidth: 1, borderColor: "#E8E6E1", alignItems: "center" },
-  filterBtnActive: { backgroundColor: "#1C1F26", borderColor: "#1C1F26" },
-  filterText: { fontSize: 12, fontWeight: "600", color: "#6B7280" },
+  filterBtn: { flex: 1, paddingVertical: 8, borderRadius: 99, backgroundColor: "white", alignItems: "center" },
+  filterBtnActive: { backgroundColor: colors.charcoal, borderColor: "#1C1F26" },
+  filterText: { fontSize: 12, fontWeight: "600", color: colors.textSecondary },
   filterTextActive: { color: "white" },
-  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1", marginHorizontal: 16 },
-  emptyTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 6 },
-  emptySub: { fontSize: 13, color: "#9CA3AF" },
-  userCard: { backgroundColor: "white", borderRadius: 14, padding: 14, marginHorizontal: 16, marginBottom: 10, borderWidth: 1, borderColor: "#E8E6E1" },
+  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", marginHorizontal: 16 },
+  emptyTitle: { fontSize: 16, fontWeight: "700", color: colors.text, marginBottom: 6 },
+  emptySub: { fontSize: 13, color: colors.textSecondary },
+  userCard: { backgroundColor: "white", borderRadius: 14, padding: 14, marginHorizontal: 16, marginBottom: 10 },
   userLeft: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 8 },
   avatar: { width: 44, height: 44, borderRadius: 22 },
   avatarFallback: { width: 44, height: 44, borderRadius: 22, justifyContent: "center", alignItems: "center" },
   avatarText: { fontSize: 18, fontWeight: "700", color: "white" },
-  userName: { fontSize: 15, fontWeight: "700", color: "#1A1A1A", marginBottom: 2 },
-  userEmail: { fontSize: 12, color: "#9CA3AF", marginBottom: 6 },
+  userName: { fontSize: 15, fontWeight: "700", color: colors.text, marginBottom: 2 },
+  userEmail: { fontSize: 12, color: colors.textSecondary, marginBottom: 6 },
   badgeRow: { flexDirection: "row", gap: 6 },
   roleBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 },
-  roleBadgeText: { fontSize: 10, fontWeight: "700" },
+  roleBadgeText: { fontSize: 11, fontWeight: "700" },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 },
-  statusBadgeText: { fontSize: 10, fontWeight: "700" },
+  statusBadgeText: { fontSize: 11, fontWeight: "700" },
   quickActions: { flexDirection: "row", gap: 8 },
   approveBtn: { flex: 1, backgroundColor: "#DCFCE7", borderRadius: 8, padding: 8, alignItems: "center" },
-  approveBtnText: { fontSize: 12, fontWeight: "700", color: "#16A34A" },
+  approveBtnText: { fontSize: 12, fontWeight: "700", color: colors.success },
   rejectBtn: { flex: 1, backgroundColor: "#FEE2E2", borderRadius: 8, padding: 8, alignItems: "center" },
-  rejectBtnText: { fontSize: 12, fontWeight: "700", color: "#DC2626" },
+  rejectBtnText: { fontSize: 12, fontWeight: "700", color: colors.danger },
   modalOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" },
   modalCard: { backgroundColor: "white", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, paddingBottom: 40, maxHeight: "90%" },
   modalUserHeader: { alignItems: "center", marginBottom: 20 },
   modalAvatar: { width: 72, height: 72, borderRadius: 36, marginBottom: 12 },
   modalAvatarFallback: { width: 72, height: 72, borderRadius: 36, justifyContent: "center", alignItems: "center", marginBottom: 12 },
   modalAvatarText: { fontSize: 28, fontWeight: "700", color: "white" },
-  modalName: { fontSize: 20, fontWeight: "700", color: "#1A1A1A", marginBottom: 4 },
-  modalEmail: { fontSize: 14, color: "#9CA3AF", marginBottom: 8 },
+  modalName: { fontSize: 20, fontWeight: "700", color: colors.text, marginBottom: 4 },
+  modalEmail: { fontSize: 14, color: colors.textSecondary, marginBottom: 8 },
   approvalSection: { marginBottom: 20 },
-  sectionTitle: { fontSize: 11, fontWeight: "700", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 },
+  sectionTitle: { fontSize: 11, fontWeight: "700", color: colors.textSecondary, marginBottom: 10 },
   approvalBtns: { flexDirection: "row", gap: 10 },
   approveFullBtn: { flex: 2, backgroundColor: "#16A34A", borderRadius: 12, padding: 14, alignItems: "center" },
   approveFullBtnText: { color: "white", fontWeight: "700", fontSize: 15 },
   rejectFullBtn: { flex: 1, backgroundColor: "#FEE2E2", borderRadius: 12, padding: 14, alignItems: "center" },
-  rejectFullBtnText: { color: "#DC2626", fontWeight: "700", fontSize: 15 },
+  rejectFullBtnText: { color: colors.danger, fontWeight: "700", fontSize: 15 },
   section: { marginBottom: 20 },
   roleRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  roleBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99, backgroundColor: "#F3F4F6", borderWidth: 1, borderColor: "#E8E6E1" },
-  roleBtnText: { fontSize: 12, color: "#6B7280", fontWeight: "600" },
-  projectRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 12, borderRadius: 10, backgroundColor: "#F9FAFB", borderWidth: 1, borderColor: "#E8E6E1", marginBottom: 6 },
-  projectRowAssigned: { backgroundColor: "#FFF7ED", borderColor: "#F97316" },
-  projectRowText: { fontSize: 14, color: "#6B7280", fontWeight: "500" },
-  projectRowTextAssigned: { color: "#1A1A1A", fontWeight: "700" },
-  assignToggle: { backgroundColor: "#F3F4F6", borderRadius: 99, paddingHorizontal: 10, paddingVertical: 4 },
-  assignToggleActive: { backgroundColor: "#F97316" },
-  assignToggleText: { fontSize: 11, color: "#6B7280", fontWeight: "600" },
+  roleBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99, backgroundColor: colors.fillSubtle },
+  roleBtnText: { fontSize: 12, color: colors.textSecondary, fontWeight: "600" },
+  projectRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 12, borderRadius: 10, backgroundColor: colors.fillSubtle, marginBottom: 6 },
+  projectRowAssigned: { backgroundColor: colors.tintSoft, borderColor: "#F97316" },
+  projectRowText: { fontSize: 14, color: colors.textSecondary, fontWeight: "500" },
+  projectRowTextAssigned: { color: colors.text, fontWeight: "700" },
+  assignToggle: { backgroundColor: colors.fillSubtle, borderRadius: 99, paddingHorizontal: 10, paddingVertical: 4 },
+  assignToggleActive: { backgroundColor: colors.charcoal },
+  assignToggleText: { fontSize: 11, color: colors.textSecondary, fontWeight: "600" },
   assignToggleTextActive: { color: "white" },
   deleteUserBtn: { backgroundColor: "#FEE2E2", borderRadius: 12, padding: 14, alignItems: "center", borderWidth: 1, borderColor: "#FECACA" },
-  deleteUserBtnText: { color: "#DC2626", fontWeight: "700", fontSize: 15 },
-  closeBtn: { backgroundColor: "#F3F4F6", borderRadius: 12, padding: 14, alignItems: "center", marginTop: 8 },
-  closeBtnText: { color: "#6B7280", fontWeight: "600", fontSize: 15 },
+  deleteUserBtnText: { color: colors.danger, fontWeight: "700", fontSize: 15 },
+  closeBtn: { backgroundColor: colors.fillSubtle, borderRadius: 12, padding: 14, alignItems: "center", marginTop: 8 },
+  closeBtnText: { color: colors.textSecondary, fontWeight: "600", fontSize: 15 },
 })

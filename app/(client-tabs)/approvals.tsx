@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity
 import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
+import { colors } from "@/lib/theme"
 
 export default function ClientApprovalsScreen() {
   const { token } = useAuth()
@@ -67,16 +68,15 @@ export default function ClientApprovalsScreen() {
     }
   }
 
-  if (loading) return <View style={styles.center}><ActivityIndicator color="#F97316" /></View>
+  if (loading) return <View style={styles.center}><ActivityIndicator color={colors.tint} /></View>
 
   return (
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.content}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadData() }} tintColor="#F97316" />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadData() }} tintColor={colors.tint} />}
     >
       <View style={styles.headerBanner}>
-        <View style={styles.headerCircle} />
         <Text style={styles.title}>Change Orders</Text>
         {pending.length > 0 && (
           <View style={styles.pendingBadge}>
@@ -113,7 +113,7 @@ export default function ClientApprovalsScreen() {
                   value={sigName}
                   onChangeText={setSigName}
                   placeholder="Your full name"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor={colors.chevron}
                 />
               </View>
 
@@ -123,7 +123,7 @@ export default function ClientApprovalsScreen() {
                   onPress={() => handleAction(co.id, "reject")}
                   disabled={!!processing}
                 >
-                  {processing === co.id ? <ActivityIndicator color="#DC2626" size="small" /> : <Text style={styles.rejectBtnText}>Reject</Text>}
+                  {processing === co.id ? <ActivityIndicator color={colors.danger} size="small" /> : <Text style={styles.rejectBtnText}>Reject</Text>}
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.approveBtn}
@@ -167,38 +167,38 @@ export default function ClientApprovalsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
-  content: { paddingBottom: 60 },
+  container: { flex: 1, backgroundColor: colors.background },
+  content: { paddingBottom: 130 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 24, marginBottom: 20, position: "relative", overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: "rgba(249,115,22,0.08)" },
-  title: { fontSize: 26, fontWeight: "700", color: "white", letterSpacing: -0.5, marginBottom: 8 },
+  headerBanner: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 8 },
+  headerCircle: { display: "none" },
+  title: { fontSize: 34, lineHeight: 41, fontWeight: "700", color: colors.text, letterSpacing: -0.6, marginBottom: 8 },
   pendingBadge: { backgroundColor: "rgba(217,119,6,0.2)", borderRadius: 99, paddingHorizontal: 12, paddingVertical: 5, alignSelf: "flex-start", borderWidth: 1, borderColor: "rgba(217,119,6,0.3)" },
   pendingBadgeText: { fontSize: 12, color: "#D97706", fontWeight: "700" },
   section: { paddingHorizontal: 16, marginBottom: 20 },
-  sectionTitle: { fontSize: 13, fontWeight: "700", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 },
+  sectionTitle: { fontSize: 13, fontWeight: "700", color: colors.textSecondary, marginBottom: 10 },
   pendingCard: { backgroundColor: "white", borderRadius: 16, padding: 16, borderWidth: 1, borderColor: "#FDE68A", marginBottom: 12 },
-  historyCard: { backgroundColor: "white", borderRadius: 14, padding: 14, borderWidth: 1, borderColor: "#E8E6E1", marginBottom: 8 },
+  historyCard: { backgroundColor: "white", borderRadius: 14, padding: 14, marginBottom: 8 },
   coHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 6 },
-  coNumber: { fontSize: 12, fontWeight: "700", color: "#9CA3AF" },
-  coCost: { fontSize: 20, fontWeight: "700", color: "#F97316" },
-  coCostSmall: { fontSize: 14, fontWeight: "700", color: "#F97316", marginTop: 2 },
-  coTitle: { fontSize: 15, fontWeight: "700", color: "#1A1A1A", marginBottom: 6 },
-  coDesc: { fontSize: 13, color: "#6B7280", lineHeight: 20, marginBottom: 12 },
+  coNumber: { fontSize: 12, fontWeight: "700", color: colors.textSecondary },
+  coCost: { fontSize: 20, fontWeight: "700", color: colors.tint },
+  coCostSmall: { fontSize: 14, fontWeight: "700", color: colors.tint, marginTop: 2 },
+  coTitle: { fontSize: 15, fontWeight: "700", color: colors.text, marginBottom: 6 },
+  coDesc: { fontSize: 13, color: colors.textSecondary, lineHeight: 20, marginBottom: 12 },
   impactBox: { backgroundColor: "#EFF6FF", borderRadius: 10, padding: 12, marginBottom: 12 },
   impactText: { fontSize: 13, color: "#1D4ED8", lineHeight: 20 },
   impactValue: { fontWeight: "700" },
   sigSection: { marginBottom: 12 },
-  sigLabel: { fontSize: 12, fontWeight: "600", color: "#374151", marginBottom: 6 },
-  sigInput: { backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, fontSize: 15, color: "#1A1A1A", borderWidth: 1, borderColor: "#E8E6E1" },
+  sigLabel: { fontSize: 12, fontWeight: "600", color: colors.text, marginBottom: 6 },
+  sigInput: { backgroundColor: colors.fillSubtle, borderRadius: 10, padding: 12, fontSize: 15, color: colors.text },
   actionBtns: { flexDirection: "row", gap: 10 },
   rejectBtn: { flex: 1, backgroundColor: "#FEE2E2", borderRadius: 10, padding: 13, alignItems: "center" },
-  rejectBtnText: { color: "#DC2626", fontWeight: "700", fontSize: 14 },
+  rejectBtnText: { color: colors.danger, fontWeight: "700", fontSize: 14 },
   approveBtn: { flex: 2, backgroundColor: "#16A34A", borderRadius: 10, padding: 13, alignItems: "center" },
   approveBtnText: { color: "white", fontWeight: "700", fontSize: 14 },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 },
   statusText: { fontSize: 11, fontWeight: "700" },
-  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1", marginHorizontal: 16 },
-  emptyTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 6 },
-  emptySub: { fontSize: 13, color: "#9CA3AF", textAlign: "center" },
+  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", marginHorizontal: 16 },
+  emptyTitle: { fontSize: 16, fontWeight: "700", color: colors.text, marginBottom: 6 },
+  emptySub: { fontSize: 13, color: colors.textSecondary, textAlign: "center" },
 })

@@ -5,6 +5,7 @@ import { useRouter } from "expo-router"
 import { API_URL } from "@/lib/api"
 import * as ImagePicker from "expo-image-picker"
 import { cloudinaryThumb } from "@/lib/images"
+import { colors } from "@/lib/theme"
 
 export default function ClientPhotosScreen() {
   const { token } = useAuth()
@@ -77,16 +78,15 @@ export default function ClientPhotosScreen() {
     ])
   }
 
-  if (loading) return <View style={styles.center}><ActivityIndicator color="#F97316" /></View>
+  if (loading) return <View style={styles.center}><ActivityIndicator color={colors.tint} /></View>
 
   return (
     <View style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadPhotos() }} tintColor="#F97316" />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadPhotos() }} tintColor={colors.tint} />}
       >
         <View style={styles.headerBanner}>
-          <View style={styles.headerCircle} />
           <Text style={styles.title}>Site Photos</Text>
           <Text style={styles.subtitle}>{photos.length} photo{photos.length !== 1 ? "s" : ""}</Text>
         </View>
@@ -127,22 +127,23 @@ export default function ClientPhotosScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
-  content: { paddingBottom: 120 },
+  container: { flex: 1, backgroundColor: colors.background },
+  content: { paddingBottom: 190 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 24, marginBottom: 20, position: "relative", overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: "rgba(249,115,22,0.08)" },
-  title: { fontSize: 26, fontWeight: "700", color: "white", letterSpacing: -0.5, marginBottom: 4 },
-  subtitle: { fontSize: 13, color: "rgba(255,255,255,0.4)" },
-  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1", marginHorizontal: 16 },
-  emptyTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 6 },
-  emptySub: { fontSize: 13, color: "#9CA3AF", textAlign: "center" },
+  headerBanner: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 8 },
+  headerCircle: { display: "none" },
+  title: { fontSize: 34, lineHeight: 41, fontWeight: "700", color: colors.text, letterSpacing: -0.6, marginBottom: 4 },
+  subtitle: { fontSize: 15, color: colors.textSecondary },
+  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", marginHorizontal: 16 },
+  emptyTitle: { fontSize: 16, fontWeight: "700", color: colors.text, marginBottom: 6 },
+  emptySub: { fontSize: 13, color: colors.textSecondary, textAlign: "center" },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 3, paddingHorizontal: 16 },
   photoWrapper: { width: "48%", borderRadius: 12, overflow: "hidden", position: "relative" },
   photo: { width: "100%", height: 160, backgroundColor: "#E8E6E1" },
   captionOverlay: { position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: "rgba(0,0,0,0.55)", padding: 8 },
   captionText: { fontSize: 11, color: "white", fontWeight: "500" },
-  fab: { position: "absolute", bottom: 30, left: 16, right: 16 },
-  fabBtn: { backgroundColor: "#F97316", borderRadius: 14, padding: 16, alignItems: "center" },
+  // sits above the floating tab bar
+  fab: { position: "absolute", bottom: 104, left: 16, right: 16 },
+  fabBtn: { backgroundColor: colors.charcoal, borderRadius: 14, padding: 16, alignItems: "center" },
   fabText: { color: "white", fontSize: 15, fontWeight: "700" },
 })

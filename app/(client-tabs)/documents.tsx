@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
 import * as DocumentPicker from "expo-document-picker"
+import { colors } from "@/lib/theme"
 
 export default function ClientDocumentsScreen() {
   const { token } = useAuth()
@@ -90,16 +91,15 @@ export default function ClientDocumentsScreen() {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
   }
 
-  if (loading) return <View style={styles.center}><ActivityIndicator color="#F97316" /></View>
+  if (loading) return <View style={styles.center}><ActivityIndicator color={colors.tint} /></View>
 
   return (
     <View style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadDocuments() }} tintColor="#F97316" />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadDocuments() }} tintColor={colors.tint} />}
       >
         <View style={styles.headerBanner}>
-          <View style={styles.headerCircle} />
           <Text style={styles.title}>Documents</Text>
           <Text style={styles.subtitle}>{documents.length} file{documents.length !== 1 ? "s" : ""}</Text>
         </View>
@@ -141,25 +141,26 @@ export default function ClientDocumentsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
-  content: { paddingBottom: 120 },
+  container: { flex: 1, backgroundColor: colors.background },
+  content: { paddingBottom: 190 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 24, marginBottom: 20, position: "relative", overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: "rgba(249,115,22,0.08)" },
-  title: { fontSize: 26, fontWeight: "700", color: "white", letterSpacing: -0.5, marginBottom: 4 },
-  subtitle: { fontSize: 13, color: "rgba(255,255,255,0.4)" },
-  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1", marginHorizontal: 16 },
-  emptyTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 6 },
-  emptySub: { fontSize: 13, color: "#9CA3AF", textAlign: "center" },
-  docCard: { backgroundColor: "white", borderRadius: 14, padding: 14, marginHorizontal: 16, marginBottom: 10, flexDirection: "row", alignItems: "center", gap: 12, borderWidth: 1, borderColor: "#E8E6E1" },
+  headerBanner: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 8 },
+  headerCircle: { display: "none" },
+  title: { fontSize: 34, lineHeight: 41, fontWeight: "700", color: colors.text, letterSpacing: -0.6, marginBottom: 4 },
+  subtitle: { fontSize: 15, color: colors.textSecondary },
+  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", marginHorizontal: 16 },
+  emptyTitle: { fontSize: 16, fontWeight: "700", color: colors.text, marginBottom: 6 },
+  emptySub: { fontSize: 13, color: colors.textSecondary, textAlign: "center" },
+  docCard: { backgroundColor: "white", borderRadius: 14, padding: 14, marginHorizontal: 16, marginBottom: 10, flexDirection: "row", alignItems: "center", gap: 12 },
   fileIconBox: { width: 48, height: 48, borderRadius: 12, justifyContent: "center", alignItems: "center" },
-  fileIconText: { fontSize: 11, fontWeight: "800", letterSpacing: 0.5 },
+  fileIconText: { fontSize: 11, fontWeight: "800" },
   docInfo: { flex: 1 },
-  docName: { fontSize: 14, fontWeight: "700", color: "#1A1A1A", marginBottom: 2 },
-  docDesc: { fontSize: 12, color: "#6B7280", marginBottom: 2 },
-  docMeta: { fontSize: 11, color: "#9CA3AF" },
-  openText: { fontSize: 13, fontWeight: "700", color: "#F97316" },
-  fab: { position: "absolute", bottom: 30, left: 16, right: 16 },
-  fabBtn: { backgroundColor: "#F97316", borderRadius: 14, padding: 16, alignItems: "center" },
+  docName: { fontSize: 14, fontWeight: "700", color: colors.text, marginBottom: 2 },
+  docDesc: { fontSize: 12, color: colors.textSecondary, marginBottom: 2 },
+  docMeta: { fontSize: 11, color: colors.textSecondary },
+  openText: { fontSize: 13, fontWeight: "700", color: colors.tint },
+  // sits above the floating tab bar
+  fab: { position: "absolute", bottom: 104, left: 16, right: 16 },
+  fabBtn: { backgroundColor: colors.charcoal, borderRadius: 14, padding: 16, alignItems: "center" },
   fabText: { color: "white", fontSize: 15, fontWeight: "700" },
 })

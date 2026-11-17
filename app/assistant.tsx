@@ -6,6 +6,8 @@ import {
 import { useLocalSearchParams, router } from "expo-router"
 import * as SecureStore from "expo-secure-store"
 import { Ionicons } from "@expo/vector-icons"
+import { colors } from "@/lib/theme"
+import { CircleButton } from "@/components/ui"
 
 const API = "https://buildtrackpro.app"
 
@@ -115,46 +117,44 @@ export default function AssistantScreen() {
     : ["Brain dump", "Create a task", "Add a reminder", "Add a note"]
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#F5F4F0" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
-      <View style={{ backgroundColor: "#1C1F26", paddingTop: 10, paddingBottom: 16, paddingHorizontal: 20 }}>
+      <View style={{ paddingTop: 4, paddingBottom: 8, paddingHorizontal: 16 }}>
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={20} color="rgba(255,255,255,0.6)" />
-          </TouchableOpacity>
+          <CircleButton icon="chevron-back" label="Back" onPress={() => router.back()} />
           <View style={{ flex: 1, alignItems: "center" }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-              <Ionicons name="sparkles-outline" size={18} color="#F97316" />
-              <Text style={{ fontSize: 16, fontWeight: "700", color: "white" }}>
+              <Ionicons name="sparkles-outline" size={18} color={colors.tint} />
+              <Text style={{ fontSize: 16, fontWeight: "700", color: colors.text }}>
                 {projectName ? `${projectName}` : "Assistant"}
               </Text>
             </View>
           </View>
           <View style={{ flexDirection: "row", gap: 8 }}>
             <TouchableOpacity onPress={() => { setShowHistory(!showHistory); if (!showHistory) loadThreads() }}>
-              <Ionicons name="time-outline" size={20} color={showHistory ? "#F97316" : "rgba(255,255,255,0.6)"} />
+              <Ionicons name="time-outline" size={20} color={showHistory ? colors.tint : colors.textSecondary} />
             </TouchableOpacity>
             <TouchableOpacity onPress={startNewChat}>
-              <Ionicons name="add-circle-outline" size={20} color="rgba(255,255,255,0.6)" />
+              <Ionicons name="add-circle-outline" size={20} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
         </View>
         {threadId && !showHistory && (
           <TouchableOpacity onPress={startNewChat} style={{ marginTop: 8, alignSelf: "center" }}>
-            <Text style={{ color: "rgba(255,255,255,0.4)", fontSize: 11 }}>Continuing conversation — tap + for new</Text>
+            <Text style={{ color: colors.textSecondary, fontSize: 15 }}>Continuing conversation — tap + for new</Text>
           </TouchableOpacity>
         )}
       </View>
 
       {showHistory ? (
         <ScrollView style={{ flex: 1, padding: 16 }}>
-          <Text style={{ fontSize: 16, fontWeight: "700", color: "#1C1F26", marginBottom: 12 }}>Past conversations</Text>
+          <Text style={{ fontSize: 16, fontWeight: "700", color: colors.text, marginBottom: 12 }}>Past conversations</Text>
           {loadingThreads ? (
-            <ActivityIndicator color="#F97316" style={{ marginTop: 40 }} />
+            <ActivityIndicator color={colors.tint} style={{ marginTop: 40 }} />
           ) : threads.length === 0 ? (
             <View style={{ alignItems: "center", padding: 40 }}>
-              <Ionicons name="chatbubbles-outline" size={32} color="#D1D5DB" />
-              <Text style={{ fontSize: 14, color: "#9CA3AF", marginTop: 8 }}>No past conversations</Text>
+              <Ionicons name="chatbubbles-outline" size={32} color={colors.chevron} />
+              <Text style={{ fontSize: 14, color: colors.textSecondary, marginTop: 8 }}>No past conversations</Text>
             </View>
           ) : (
             threads.map(thread => (
@@ -163,24 +163,23 @@ export default function AssistantScreen() {
                 onPress={() => loadThread(thread.id)}
                 style={{
                   backgroundColor: "white", borderRadius: 12, padding: 14, marginBottom: 8,
-                  borderWidth: 1, borderColor: "#E8E6E1",
                 }}
               >
                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                  <Text style={{ fontSize: 14, fontWeight: "600", color: "#1C1F26", flex: 1 }} numberOfLines={1}>
+                  <Text style={{ fontSize: 14, fontWeight: "600", color: colors.text, flex: 1 }} numberOfLines={1}>
                     {thread.title || "Untitled"}
                   </Text>
-                  <Text style={{ fontSize: 11, color: "#9CA3AF" }}>
+                  <Text style={{ fontSize: 11, color: colors.textSecondary }}>
                     {new Date(thread.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                   </Text>
                 </View>
                 <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 4 }}>
-                  <Text style={{ fontSize: 11, color: "#9CA3AF" }}>
+                  <Text style={{ fontSize: 11, color: colors.textSecondary }}>
                     {thread._count?.messages || 0} messages
                   </Text>
                 </View>
                 {thread.messages?.[0] && (
-                  <Text style={{ fontSize: 11, color: "#9CA3AF", marginTop: 4 }} numberOfLines={1}>
+                  <Text style={{ fontSize: 11, color: colors.textSecondary, marginTop: 4 }} numberOfLines={1}>
                     {thread.messages[0].content.substring(0, 80)}...
                   </Text>
                 )}
@@ -198,13 +197,13 @@ export default function AssistantScreen() {
           >
             {messages.length === 0 && (
               <View style={{ alignItems: "center", paddingTop: 40, paddingBottom: 20 }}>
-                <View style={{ width: 56, height: 56, borderRadius: 16, backgroundColor: "#FFF7ED", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
-                  <Ionicons name="sparkles" size={28} color="#F97316" />
+                <View style={{ width: 56, height: 56, borderRadius: 16, backgroundColor: colors.tintSoft, alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
+                  <Ionicons name="sparkles" size={28} color={colors.tint} />
                 </View>
-                <Text style={{ fontSize: 17, fontWeight: "700", color: "#1C1F26", marginBottom: 4 }}>
+                <Text style={{ fontSize: 17, fontWeight: "700", color: colors.text, marginBottom: 4 }}>
                   {projectName ? `${projectName} Assistant` : "BuildTrack Assistant"}
                 </Text>
-                <Text style={{ fontSize: 13, color: "#9CA3AF", textAlign: "center", lineHeight: 20, paddingHorizontal: 20 }}>
+                <Text style={{ fontSize: 13, color: colors.textSecondary, textAlign: "center", lineHeight: 20, paddingHorizontal: 20 }}>
                   I can create notes, tasks, calendar events, and daily logs. Try a brain dump — paste your thoughts and I'll organize them into action items.
                 </Text>
                 <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, justifyContent: "center", marginTop: 16 }}>
@@ -212,9 +211,9 @@ export default function AssistantScreen() {
                     <TouchableOpacity
                       key={i}
                       onPress={() => { setInput(s); }}
-                      style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99, backgroundColor: "white", borderWidth: 1, borderColor: "#E8E6E1" }}
+                      style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99, backgroundColor: "white" }}
                     >
-                      <Text style={{ fontSize: 13, color: "#374151", fontWeight: "500" }}>{s}</Text>
+                      <Text style={{ fontSize: 13, color: colors.text, fontWeight: "500" }}>{s}</Text>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -229,7 +228,7 @@ export default function AssistantScreen() {
                   borderRadius: 16,
                   backgroundColor: msg.role === "user" ? "#1C1F26" : "white",
                   borderWidth: msg.role === "user" ? 0 : 1,
-                  borderColor: "#E8E6E1",
+                  borderColor: colors.separator,
                   ...(msg.role === "user"
                     ? { borderBottomRightRadius: 4 }
                     : { borderBottomLeftRadius: 4 }),
@@ -254,9 +253,9 @@ export default function AssistantScreen() {
                         <Ionicons
                           name={(ACTION_ICON_MAP[action.type] || "pin-outline") as any}
                           size={16}
-                          color="#16A34A"
+                          color={colors.success}
                         />
-                        <Text style={{ flex: 1, fontSize: 13, fontWeight: "600", color: "#374151" }}>
+                        <Text style={{ flex: 1, fontSize: 13, fontWeight: "600", color: colors.text }}>
                           {action.title || action.summary || "Item created"}
                         </Text>
                         <Ionicons
@@ -273,8 +272,8 @@ export default function AssistantScreen() {
 
             {loading && (
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8, padding: 14 }}>
-                <ActivityIndicator size="small" color="#F97316" />
-                <Text style={{ fontSize: 13, color: "#9CA3AF" }}>Thinking...</Text>
+                <ActivityIndicator size="small" color={colors.tint} />
+                <Text style={{ fontSize: 13, color: colors.textSecondary }}>Thinking...</Text>
               </View>
             )}
           </ScrollView>
@@ -282,19 +281,18 @@ export default function AssistantScreen() {
           {/* Input */}
           <View style={{
             flexDirection: "row", gap: 8, padding: 12, paddingBottom: Platform.OS === "ios" ? 28 : 12,
-            backgroundColor: "white", borderTopWidth: 1, borderTopColor: "#E8E6E1",
+            backgroundColor: "white", borderTopWidth: 1, borderTopColor: colors.separator,
           }}>
             <TextInput
               value={input}
               onChangeText={setInput}
               onSubmitEditing={handleSend}
               placeholder={projectName ? `Ask about ${projectName}...` : "Ask me anything..."}
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.chevron}
               multiline
               style={{
-                flex: 1, backgroundColor: "#F9FAFB", borderRadius: 12, padding: 12,
-                fontSize: 14, color: "#1C1F26", maxHeight: 100,
-                borderWidth: 1, borderColor: "#E8E6E1",
+                flex: 1, backgroundColor: colors.fillSubtle, borderRadius: 12, padding: 12,
+                fontSize: 14, color: colors.text, maxHeight: 100,
               }}
             />
             <TouchableOpacity

@@ -5,6 +5,8 @@ import { useRouter } from "expo-router"
 import { API_URL } from "@/lib/api"
 import DatePicker from "@/components/DatePicker"
 import { parseDateOnly } from "@/lib/dates"
+import { colors } from "@/lib/theme"
+import { CircleButton } from "@/components/ui"
 
 const STATUS_COLORS: Record<string, string> = {
   UNPAID: "#DC2626",
@@ -169,19 +171,16 @@ export default function VendorInvoicesScreen() {
   const totalUnpaid = invoices.filter(i => i.status !== "PAID").reduce((sum, i) => sum + (i.amount - (i.paidAmount || 0)), 0)
   const totalPaid = invoices.filter(i => i.status === "PAID").reduce((sum, i) => sum + i.amount, 0)
 
-  if (loading) return <View style={styles.center}><ActivityIndicator color="#F97316" /></View>
+  if (loading) return <View style={styles.center}><ActivityIndicator color={colors.tint} /></View>
 
   return (
     <View style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadInvoices() }} tintColor="#F97316" />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadInvoices() }} tintColor={colors.tint} />}
       >
         <View style={styles.headerBanner}>
-          <View style={styles.headerCircle} />
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backText}>← Back</Text>
-          </TouchableOpacity>
+          <CircleButton icon="chevron-back" label="Back" onPress={() => router.back()} />
           <Text style={styles.title}>Vendor Invoices</Text>
           <View style={styles.headerStats}>
             <View style={styles.headerStat}>
@@ -275,21 +274,21 @@ export default function VendorInvoicesScreen() {
             <ScrollView>
               <View style={styles.field}>
                 <Text style={styles.label}>Vendor Name *</Text>
-                <TextInput style={styles.input} value={vendorName} onChangeText={setVendorName} placeholder="Acme Plumbing" placeholderTextColor="#9CA3AF" />
+                <TextInput style={styles.input} value={vendorName} onChangeText={setVendorName} placeholder="Acme Plumbing" placeholderTextColor={colors.chevron} />
               </View>
               <View style={styles.field}>
                 <Text style={styles.label}>Invoice Number</Text>
-                <TextInput style={styles.input} value={invoiceNumber} onChangeText={setInvoiceNumber} placeholder="INV-001" placeholderTextColor="#9CA3AF" />
+                <TextInput style={styles.input} value={invoiceNumber} onChangeText={setInvoiceNumber} placeholder="INV-001" placeholderTextColor={colors.chevron} />
               </View>
               <View style={styles.field}>
                 <Text style={styles.label}>Amount *</Text>
-                <TextInput style={styles.input} value={amount} onChangeText={setAmount} placeholder="0.00" keyboardType="decimal-pad" placeholderTextColor="#9CA3AF" />
+                <TextInput style={styles.input} value={amount} onChangeText={setAmount} placeholder="0.00" keyboardType="decimal-pad" placeholderTextColor={colors.chevron} />
               </View>
               <DatePicker label="Due Date" value={dueDate} onChange={setDueDate} placeholder="Select due date..." />
               <View style={styles.field}>
                 <Text style={styles.label}>Link to Project</Text>
                 <TouchableOpacity style={styles.selectBtn} onPress={() => setShowProjectPicker(true)}>
-                  <Text style={[styles.selectBtnText, !projectId && { color: "#9CA3AF" }]}>
+                  <Text style={[styles.selectBtnText, !projectId && { color: colors.textSecondary }]}>
                     {projectId ? projects.find(p => p.id === projectId)?.name || "Select..." : "Select project..."}
                   </Text>
                   <Text style={styles.arrow}>›</Text>
@@ -297,7 +296,7 @@ export default function VendorInvoicesScreen() {
               </View>
               <View style={styles.field}>
                 <Text style={styles.label}>Notes</Text>
-                <TextInput style={[styles.input, { height: 60, textAlignVertical: "top" }]} value={notes} onChangeText={setNotes} placeholder="Optional notes..." placeholderTextColor="#9CA3AF" multiline />
+                <TextInput style={[styles.input, { height: 60, textAlignVertical: "top" }]} value={notes} onChangeText={setNotes} placeholder="Optional notes..." placeholderTextColor={colors.chevron} multiline />
               </View>
               <TouchableOpacity
                 style={[styles.toggleRow, lienWaiverRequired && styles.toggleRowActive]}
@@ -328,7 +327,7 @@ export default function VendorInvoicesScreen() {
             <Text style={styles.modalSub}>{showPayModal?.vendorName} — ${showPayModal?.amount?.toLocaleString()}</Text>
             <View style={styles.field}>
               <Text style={styles.label}>Amount Paid</Text>
-              <TextInput style={styles.input} value={paidAmount} onChangeText={setPaidAmount} keyboardType="decimal-pad" placeholderTextColor="#9CA3AF" />
+              <TextInput style={styles.input} value={paidAmount} onChangeText={setPaidAmount} keyboardType="decimal-pad" placeholderTextColor={colors.chevron} />
             </View>
             <View style={styles.field}>
               <Text style={styles.label}>Payment Method</Text>
@@ -348,7 +347,7 @@ export default function VendorInvoicesScreen() {
             </View>
             <View style={styles.field}>
               <Text style={styles.label}>Notes</Text>
-              <TextInput style={styles.input} value={payNotes} onChangeText={setPayNotes} placeholder="Check #, reference..." placeholderTextColor="#9CA3AF" />
+              <TextInput style={styles.input} value={payNotes} onChangeText={setPayNotes} placeholder="Check #, reference..." placeholderTextColor={colors.chevron} />
             </View>
             {showPayModal?.lienWaiverRequired && (
               <TouchableOpacity
@@ -383,7 +382,7 @@ export default function VendorInvoicesScreen() {
               </TouchableOpacity>
               {projects.map(p => (
                 <TouchableOpacity key={p.id} style={[styles.projOption, projectId === p.id && styles.projOptionActive]} onPress={() => { setProjectId(p.id); setShowProjectPicker(false) }}>
-                  <Text style={[styles.projOptionText, projectId === p.id && { color: "#F97316", fontWeight: "700" }]}>{p.name}</Text>
+                  <Text style={[styles.projOptionText, projectId === p.id && { color: colors.tint, fontWeight: "700" }]}>{p.name}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -398,75 +397,75 @@ export default function VendorInvoicesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
+  container: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 120 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 24, marginBottom: 16, position: "relative", overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: "rgba(249,115,22,0.08)" },
+  headerBanner: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 8 },
+  headerCircle: { display: "none" },
   backBtn: { marginBottom: 12 },
-  backText: { color: "rgba(255,255,255,0.6)", fontSize: 15, fontWeight: "600" },
-  title: { fontSize: 26, fontWeight: "700", color: "white", letterSpacing: -0.5, marginBottom: 16 },
+  backText: { color: colors.textSecondary, fontSize: 15, fontWeight: "600" },
+  title: { fontSize: 34, lineHeight: 41, fontWeight: "700", color: colors.text, letterSpacing: -0.6, marginBottom: 16 },
   headerStats: { flexDirection: "row", gap: 20 },
   headerStat: { alignItems: "center" },
-  headerStatValue: { fontSize: 20, fontWeight: "700", color: "white", marginBottom: 2 },
-  headerStatLabel: { fontSize: 11, color: "rgba(255,255,255,0.4)", textTransform: "uppercase" },
-  headerStatDivider: { width: 1, backgroundColor: "rgba(255,255,255,0.1)" },
+  headerStatValue: { fontSize: 20, fontWeight: "700", color: colors.text, marginBottom: 2 },
+  headerStatLabel: { fontSize: 15, color: colors.textSecondary },
+  headerStatDivider: { width: 1, backgroundColor: colors.card },
   filterRow: { flexDirection: "row", gap: 8, paddingHorizontal: 16, marginBottom: 16 },
-  filterBtn: { flex: 1, paddingVertical: 8, borderRadius: 99, backgroundColor: "white", borderWidth: 1, borderColor: "#E8E6E1", alignItems: "center" },
-  filterBtnActive: { backgroundColor: "#1C1F26", borderColor: "#1C1F26" },
-  filterText: { fontSize: 11, fontWeight: "600", color: "#6B7280" },
+  filterBtn: { flex: 1, paddingVertical: 8, borderRadius: 99, backgroundColor: "white", alignItems: "center" },
+  filterBtnActive: { backgroundColor: colors.charcoal, borderColor: "#1C1F26" },
+  filterText: { fontSize: 11, fontWeight: "600", color: colors.textSecondary },
   filterTextActive: { color: "white" },
-  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1", marginHorizontal: 16 },
-  emptyTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 6 },
-  emptySub: { fontSize: 13, color: "#9CA3AF", textAlign: "center" },
-  invoiceCard: { backgroundColor: "white", borderRadius: 14, padding: 16, marginHorizontal: 16, marginBottom: 10, borderWidth: 1, borderColor: "#E8E6E1" },
+  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", marginHorizontal: 16 },
+  emptyTitle: { fontSize: 16, fontWeight: "700", color: colors.text, marginBottom: 6 },
+  emptySub: { fontSize: 13, color: colors.textSecondary, textAlign: "center" },
+  invoiceCard: { backgroundColor: "white", borderRadius: 14, padding: 16, marginHorizontal: 16, marginBottom: 10 },
   invoiceTop: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
   invoiceLeft: { flex: 1 },
-  vendorName: { fontSize: 15, fontWeight: "700", color: "#1A1A1A", marginBottom: 2 },
-  invoiceNumber: { fontSize: 12, color: "#9CA3AF", marginBottom: 2 },
-  projectName: { fontSize: 12, color: "#F97316", fontWeight: "600" },
+  vendorName: { fontSize: 15, fontWeight: "700", color: colors.text, marginBottom: 2 },
+  invoiceNumber: { fontSize: 12, color: colors.textSecondary, marginBottom: 2 },
+  projectName: { fontSize: 12, color: colors.tint, fontWeight: "600" },
   invoiceRight: { alignItems: "flex-end", gap: 4 },
-  invoiceAmount: { fontSize: 18, fontWeight: "700", color: "#1A1A1A" },
+  invoiceAmount: { fontSize: 18, fontWeight: "700", color: colors.text },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 },
   statusText: { fontSize: 11, fontWeight: "700" },
-  dueDate: { fontSize: 12, color: "#6B7280", marginBottom: 8 },
-  overdue: { color: "#DC2626", fontWeight: "700" },
+  dueDate: { fontSize: 12, color: colors.textSecondary, marginBottom: 8 },
+  overdue: { color: colors.danger, fontWeight: "700" },
   lienBadge: { backgroundColor: "#FEF3C7", borderRadius: 8, padding: 8, marginBottom: 8, borderWidth: 1, borderColor: "#FDE68A" },
   lienBadgeReceived: { backgroundColor: "#DCFCE7", borderColor: "#BBF7D0" },
   lienText: { fontSize: 12, color: "#D97706", fontWeight: "600" },
-  lienTextReceived: { color: "#16A34A" },
-  invoiceActions: { flexDirection: "row", gap: 8, paddingTop: 10, borderTopWidth: 1, borderTopColor: "#F3F4F6" },
+  lienTextReceived: { color: colors.success },
+  invoiceActions: { flexDirection: "row", gap: 8, paddingTop: 10, borderTopWidth: 1, borderTopColor: colors.separator },
   payBtn: { flex: 2, backgroundColor: "#DCFCE7", borderRadius: 8, padding: 8, alignItems: "center" },
-  payBtnText: { fontSize: 13, fontWeight: "700", color: "#16A34A" },
+  payBtnText: { fontSize: 13, fontWeight: "700", color: colors.success },
   deleteBtn: { flex: 1, backgroundColor: "#FEE2E2", borderRadius: 8, padding: 8, alignItems: "center" },
-  deleteBtnText: { fontSize: 13, fontWeight: "600", color: "#DC2626" },
+  deleteBtnText: { fontSize: 13, fontWeight: "600", color: colors.danger },
   fab: { position: "absolute", bottom: 30, left: 16, right: 16 },
-  fabBtn: { backgroundColor: "#F97316", borderRadius: 14, padding: 16, alignItems: "center" },
+  fabBtn: { backgroundColor: colors.charcoal, borderRadius: 14, padding: 16, alignItems: "center" },
   fabText: { color: "white", fontSize: 15, fontWeight: "700" },
   modalOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" },
   modalCard: { backgroundColor: "white", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, paddingBottom: 40, maxHeight: "85%" },
-  modalTitle: { fontSize: 18, fontWeight: "700", color: "#1A1A1A", marginBottom: 4 },
-  modalSub: { fontSize: 13, color: "#9CA3AF", marginBottom: 16 },
+  modalTitle: { fontSize: 18, fontWeight: "700", color: colors.text, marginBottom: 4 },
+  modalSub: { fontSize: 13, color: colors.textSecondary, marginBottom: 16 },
   field: { marginBottom: 14 },
-  label: { fontSize: 13, fontWeight: "600", color: "#374151", marginBottom: 6 },
-  input: { backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, fontSize: 15, color: "#1A1A1A", borderWidth: 1, borderColor: "#E8E6E1" },
-  selectBtn: { backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, borderWidth: 1, borderColor: "#E8E6E1", flexDirection: "row", justifyContent: "space-between" },
-  selectBtnText: { fontSize: 15, color: "#1A1A1A" },
-  arrow: { fontSize: 18, color: "#9CA3AF" },
-  toggleRow: { padding: 12, borderRadius: 10, backgroundColor: "#F9FAFB", borderWidth: 1, borderColor: "#E8E6E1", marginBottom: 14, alignItems: "center" },
+  label: { fontSize: 13, fontWeight: "600", color: colors.text, marginBottom: 6 },
+  input: { backgroundColor: colors.fillSubtle, borderRadius: 10, padding: 12, fontSize: 15, color: colors.text },
+  selectBtn: { backgroundColor: colors.fillSubtle, borderRadius: 10, padding: 12, flexDirection: "row", justifyContent: "space-between" },
+  selectBtnText: { fontSize: 15, color: colors.text },
+  arrow: { fontSize: 18, color: colors.textSecondary },
+  toggleRow: { padding: 12, borderRadius: 10, backgroundColor: colors.fillSubtle, marginBottom: 14, alignItems: "center" },
   toggleRowActive: { backgroundColor: "#DCFCE7", borderColor: "#16A34A" },
-  toggleText: { fontSize: 13, fontWeight: "600", color: "#6B7280" },
-  toggleTextActive: { color: "#16A34A" },
+  toggleText: { fontSize: 13, fontWeight: "600", color: colors.textSecondary },
+  toggleTextActive: { color: colors.success },
   modalBtns: { flexDirection: "row", gap: 10, marginTop: 8 },
-  cancelBtn: { flex: 1, backgroundColor: "#F3F4F6", borderRadius: 12, padding: 14, alignItems: "center" },
-  cancelBtnText: { fontSize: 15, fontWeight: "600", color: "#6B7280" },
-  saveBtn: { flex: 1, backgroundColor: "#F97316", borderRadius: 12, padding: 14, alignItems: "center" },
+  cancelBtn: { flex: 1, backgroundColor: colors.fillSubtle, borderRadius: 12, padding: 14, alignItems: "center" },
+  cancelBtnText: { fontSize: 15, fontWeight: "600", color: colors.textSecondary },
+  saveBtn: { flex: 1, backgroundColor: colors.charcoal, borderRadius: 12, padding: 14, alignItems: "center" },
   saveBtnText: { color: "white", fontSize: 15, fontWeight: "700" },
-  methodBtn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 99, backgroundColor: "#F3F4F6", borderWidth: 1, borderColor: "#E8E6E1" },
-  methodBtnActive: { backgroundColor: "#1C1F26", borderColor: "#1C1F26" },
-  methodBtnText: { fontSize: 12, color: "#6B7280", fontWeight: "600" },
+  methodBtn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 99, backgroundColor: colors.fillSubtle },
+  methodBtnActive: { backgroundColor: colors.charcoal, borderColor: "#1C1F26" },
+  methodBtnText: { fontSize: 12, color: colors.textSecondary, fontWeight: "600" },
   methodBtnTextActive: { color: "white" },
-  projOption: { padding: 14, borderRadius: 10, backgroundColor: "#F9FAFB", borderWidth: 1, borderColor: "#E8E6E1", marginBottom: 8 },
-  projOptionActive: { backgroundColor: "#FFF7ED", borderColor: "#F97316" },
-  projOptionText: { fontSize: 14, color: "#1A1A1A", fontWeight: "500" },
+  projOption: { padding: 14, borderRadius: 10, backgroundColor: colors.fillSubtle, marginBottom: 8 },
+  projOptionActive: { backgroundColor: colors.tintSoft, borderColor: "#F97316" },
+  projOptionText: { fontSize: 14, color: colors.text, fontWeight: "500" },
 })

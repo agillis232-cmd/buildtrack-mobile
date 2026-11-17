@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator
 import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
+import { colors } from "@/lib/theme"
+import { CircleButton } from "@/components/ui"
 
 export default function ChangeOrdersScreen() {
   const { id } = useLocalSearchParams()
@@ -131,16 +133,13 @@ export default function ChangeOrdersScreen() {
 
   const totalCost = changeOrders.reduce((sum, co) => sum + co.costImpact, 0)
 
-  if (loading) return <View style={styles.center}><ActivityIndicator color="#F97316" /></View>
+  if (loading) return <View style={styles.center}><ActivityIndicator color={colors.tint} /></View>
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.headerBanner}>
-          <View style={styles.headerCircle} />
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backText}>← Back</Text>
-          </TouchableOpacity>
+          <CircleButton icon="chevron-back" label="Back" onPress={() => router.back()} />
           <Text style={styles.title}>Change Orders</Text>
           {changeOrders.length > 0 && (
             <View style={styles.headerStats}>
@@ -159,22 +158,22 @@ export default function ChangeOrdersScreen() {
 
             <View style={styles.field}>
               <Text style={styles.label}>Title *</Text>
-              <TextInput style={styles.input} value={title} onChangeText={setTitle} placeholder="Additional electrical work" placeholderTextColor="#9CA3AF" />
+              <TextInput style={styles.input} value={title} onChangeText={setTitle} placeholder="Additional electrical work" placeholderTextColor={colors.chevron} />
             </View>
 
             <View style={styles.field}>
               <Text style={styles.label}>Description *</Text>
-              <TextInput style={[styles.input, styles.multiline]} value={description} onChangeText={setDescription} placeholder="Describe the scope of change..." placeholderTextColor="#9CA3AF" multiline numberOfLines={3} />
+              <TextInput style={[styles.input, styles.multiline]} value={description} onChangeText={setDescription} placeholder="Describe the scope of change..." placeholderTextColor={colors.chevron} multiline numberOfLines={3} />
             </View>
 
             <View style={styles.twoCol}>
               <View style={[styles.field, { flex: 1 }]}>
                 <Text style={styles.label}>Cost Impact ($) *</Text>
-                <TextInput style={styles.input} value={costImpact} onChangeText={setCostImpact} placeholder="2500.00" placeholderTextColor="#9CA3AF" keyboardType="decimal-pad" />
+                <TextInput style={styles.input} value={costImpact} onChangeText={setCostImpact} placeholder="2500.00" placeholderTextColor={colors.chevron} keyboardType="decimal-pad" />
               </View>
               <View style={[styles.field, { flex: 1 }]}>
                 <Text style={styles.label}>Schedule (days)</Text>
-                <TextInput style={styles.input} value={scheduleDays} onChangeText={setScheduleDays} placeholder="3" placeholderTextColor="#9CA3AF" keyboardType="number-pad" />
+                <TextInput style={styles.input} value={scheduleDays} onChangeText={setScheduleDays} placeholder="3" placeholderTextColor={colors.chevron} keyboardType="number-pad" />
               </View>
             </View>
 
@@ -255,20 +254,20 @@ export default function ChangeOrdersScreen() {
             <ScrollView>
               <View style={styles.field}>
                 <Text style={styles.label}>Title *</Text>
-                <TextInput style={styles.input} value={title} onChangeText={setTitle} placeholder="Title" placeholderTextColor="#9CA3AF" />
+                <TextInput style={styles.input} value={title} onChangeText={setTitle} placeholder="Title" placeholderTextColor={colors.chevron} />
               </View>
               <View style={styles.field}>
                 <Text style={styles.label}>Description *</Text>
-                <TextInput style={[styles.input, styles.multiline]} value={description} onChangeText={setDescription} placeholder="Description" placeholderTextColor="#9CA3AF" multiline numberOfLines={3} />
+                <TextInput style={[styles.input, styles.multiline]} value={description} onChangeText={setDescription} placeholder="Description" placeholderTextColor={colors.chevron} multiline numberOfLines={3} />
               </View>
               <View style={styles.twoCol}>
                 <View style={[styles.field, { flex: 1 }]}>
                   <Text style={styles.label}>Cost Impact ($) *</Text>
-                  <TextInput style={styles.input} value={costImpact} onChangeText={setCostImpact} keyboardType="decimal-pad" placeholder="0.00" placeholderTextColor="#9CA3AF" />
+                  <TextInput style={styles.input} value={costImpact} onChangeText={setCostImpact} keyboardType="decimal-pad" placeholder="0.00" placeholderTextColor={colors.chevron} />
                 </View>
                 <View style={[styles.field, { flex: 1 }]}>
                   <Text style={styles.label}>Schedule (days)</Text>
-                  <TextInput style={styles.input} value={scheduleDays} onChangeText={setScheduleDays} keyboardType="number-pad" placeholder="0" placeholderTextColor="#9CA3AF" />
+                  <TextInput style={styles.input} value={scheduleDays} onChangeText={setScheduleDays} keyboardType="number-pad" placeholder="0" placeholderTextColor={colors.chevron} />
                 </View>
               </View>
               <View style={styles.field}>
@@ -298,59 +297,59 @@ export default function ChangeOrdersScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
+  container: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 120 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 20, marginBottom: 20, position: "relative", overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: "rgba(249,115,22,0.08)" },
+  headerBanner: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 8 },
+  headerCircle: { display: "none" },
   backBtn: { marginBottom: 12 },
-  backText: { color: "rgba(255,255,255,0.6)", fontSize: 15, fontWeight: "600" },
-  title: { fontSize: 26, fontWeight: "700", color: "white", letterSpacing: -0.5, marginBottom: 6 },
+  backText: { color: colors.textSecondary, fontSize: 15, fontWeight: "600" },
+  title: { fontSize: 34, lineHeight: 41, fontWeight: "700", color: colors.text, letterSpacing: -0.6, marginBottom: 6 },
   headerStats: { flexDirection: "row", alignItems: "center", gap: 8 },
-  headerStatValue: { fontSize: 13, color: "rgba(255,255,255,0.5)", fontWeight: "600" },
-  headerStatDot: { fontSize: 13, color: "rgba(255,255,255,0.3)" },
-  addCard: { backgroundColor: "white", borderRadius: 16, padding: 20, marginHorizontal: 16, marginBottom: 20, borderWidth: 1, borderColor: "#E8E6E1", shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 3 },
+  headerStatValue: { fontSize: 15, color: colors.textSecondary, fontWeight: "600" },
+  headerStatDot: { fontSize: 15, color: colors.textSecondary },
+  addCard: { backgroundColor: "white", borderRadius: 16, padding: 20, marginHorizontal: 16, marginBottom: 20, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 3 },
   addCardHeader: { marginBottom: 20 },
-  addTitle: { fontSize: 17, fontWeight: "700", color: "#1A1A1A" },
+  addTitle: { fontSize: 17, fontWeight: "700", color: colors.text },
   field: { marginBottom: 14 },
-  label: { fontSize: 13, fontWeight: "600", color: "#374151", marginBottom: 6 },
-  input: { backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, fontSize: 15, color: "#1A1A1A", borderWidth: 1, borderColor: "#E8E6E1" },
+  label: { fontSize: 13, fontWeight: "600", color: colors.text, marginBottom: 6 },
+  input: { backgroundColor: colors.fillSubtle, borderRadius: 10, padding: 12, fontSize: 15, color: colors.text },
   multiline: { height: 80, textAlignVertical: "top" },
   twoCol: { flexDirection: "row", gap: 12 },
   reasonRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  reasonBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99, backgroundColor: "#F3F4F6", borderWidth: 1, borderColor: "#E8E6E1" },
-  reasonBtnActive: { backgroundColor: "#F97316", borderColor: "#F97316" },
-  reasonBtnText: { fontSize: 12, color: "#6B7280", fontWeight: "600" },
+  reasonBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99, backgroundColor: colors.fillSubtle },
+  reasonBtnActive: { backgroundColor: colors.charcoal, borderColor: "#F97316" },
+  reasonBtnText: { fontSize: 12, color: colors.textSecondary, fontWeight: "600" },
   reasonBtnTextActive: { color: "white" },
   formBtns: { flexDirection: "row", gap: 10, marginTop: 8 },
-  cancelBtn: { flex: 1, backgroundColor: "#F3F4F6", borderRadius: 10, padding: 13, alignItems: "center" },
-  cancelText: { fontSize: 15, fontWeight: "600", color: "#6B7280" },
-  saveBtn: { flex: 1, backgroundColor: "#F97316", borderRadius: 10, padding: 13, alignItems: "center" },
+  cancelBtn: { flex: 1, backgroundColor: colors.fillSubtle, borderRadius: 10, padding: 13, alignItems: "center" },
+  cancelText: { fontSize: 15, fontWeight: "600", color: colors.textSecondary },
+  saveBtn: { flex: 1, backgroundColor: colors.charcoal, borderRadius: 10, padding: 13, alignItems: "center" },
   saveBtnText: { color: "white", fontSize: 15, fontWeight: "700" },
-  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1", marginHorizontal: 16 },
-  emptyTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 6 },
-  emptySub: { fontSize: 13, color: "#9CA3AF", textAlign: "center" },
-  coCard: { backgroundColor: "white", borderRadius: 16, padding: 16, marginHorizontal: 16, marginBottom: 10, borderWidth: 1, borderColor: "#E8E6E1", shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 2 },
+  emptyCard: { backgroundColor: "white", borderRadius: 14, padding: 40, alignItems: "center", marginHorizontal: 16 },
+  emptyTitle: { fontSize: 16, fontWeight: "700", color: colors.text, marginBottom: 6 },
+  emptySub: { fontSize: 13, color: colors.textSecondary, textAlign: "center" },
+  coCard: { backgroundColor: "white", borderRadius: 16, padding: 16, marginHorizontal: 16, marginBottom: 10, shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 2 },
   coTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
   coNumberRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  coNumber: { fontSize: 12, fontWeight: "700", color: "#9CA3AF" },
+  coNumber: { fontSize: 12, fontWeight: "700", color: colors.textSecondary },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 },
   statusText: { fontSize: 11, fontWeight: "700" },
-  coCost: { fontSize: 18, fontWeight: "700", color: "#F97316" },
-  coTitle: { fontSize: 15, fontWeight: "700", color: "#1A1A1A", marginBottom: 6 },
-  coDesc: { fontSize: 13, color: "#6B7280", lineHeight: 20, marginBottom: 10 },
+  coCost: { fontSize: 18, fontWeight: "700", color: colors.tint },
+  coTitle: { fontSize: 15, fontWeight: "700", color: colors.text, marginBottom: 6 },
+  coDesc: { fontSize: 13, color: colors.textSecondary, lineHeight: 20, marginBottom: 10 },
   coMeta: { flexDirection: "row", gap: 8, marginBottom: 12, flexWrap: "wrap" },
-  coMetaPill: { backgroundColor: "#F3F4F6", borderRadius: 99, paddingHorizontal: 10, paddingVertical: 4 },
-  coMetaText: { fontSize: 11, color: "#6B7280", fontWeight: "600" },
-  coActions: { flexDirection: "row", gap: 8, paddingTop: 10, borderTopWidth: 1, borderTopColor: "#F3F4F6" },
-  editBtn: { flex: 1, backgroundColor: "#F3F4F6", borderRadius: 8, padding: 8, alignItems: "center" },
-  editBtnText: { fontSize: 13, fontWeight: "600", color: "#374151" },
+  coMetaPill: { backgroundColor: colors.fillSubtle, borderRadius: 99, paddingHorizontal: 10, paddingVertical: 4 },
+  coMetaText: { fontSize: 11, color: colors.textSecondary, fontWeight: "600" },
+  coActions: { flexDirection: "row", gap: 8, paddingTop: 10, borderTopWidth: 1, borderTopColor: colors.separator },
+  editBtn: { flex: 1, backgroundColor: colors.fillSubtle, borderRadius: 8, padding: 8, alignItems: "center" },
+  editBtnText: { fontSize: 13, fontWeight: "600", color: colors.text },
   deleteBtn: { flex: 1, backgroundColor: "#FEE2E2", borderRadius: 8, padding: 8, alignItems: "center" },
-  deleteBtnText: { fontSize: 13, fontWeight: "600", color: "#DC2626" },
+  deleteBtnText: { fontSize: 13, fontWeight: "600", color: colors.danger },
   fab: { position: "absolute", bottom: 30, left: 16, right: 16 },
-  fabBtn: { backgroundColor: "#F97316", borderRadius: 14, padding: 16, alignItems: "center" },
+  fabBtn: { backgroundColor: colors.charcoal, borderRadius: 14, padding: 16, alignItems: "center" },
   fabText: { color: "white", fontSize: 15, fontWeight: "700" },
   modalOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" },
   modalCard: { backgroundColor: "white", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, paddingBottom: 40, maxHeight: "85%" },
-  modalTitle: { fontSize: 18, fontWeight: "700", color: "#1A1A1A", marginBottom: 20 },
+  modalTitle: { fontSize: 18, fontWeight: "700", color: colors.text, marginBottom: 20 },
 })

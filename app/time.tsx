@@ -9,6 +9,8 @@ import { API_URL } from "@/lib/api"
 import { useAuth } from "@/lib/auth"
 import { Ionicons } from "@expo/vector-icons"
 import { parseDateOnly, toDateKey } from "@/lib/dates"
+import { colors } from "@/lib/theme"
+import { CircleButton } from "@/components/ui"
 
 const STATUS_COLORS: Record<string, string> = { PENDING: "#D97706", APPROVED: "#16A34A", REJECTED: "#DC2626" }
 
@@ -130,44 +132,42 @@ export default function TimeScreen() {
   const pendingCount = pendingEntries.length
 
   if (loading) return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#F5F4F0", justifyContent: "center", alignItems: "center" }}>
-      <ActivityIndicator color="#F97316" />
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background, justifyContent: "center", alignItems: "center" }}>
+      <ActivityIndicator color={colors.tint} />
     </SafeAreaView>
   )
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#F5F4F0" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
-      <View style={{ backgroundColor: "#1C1F26", paddingTop: 10, paddingBottom: 16, paddingHorizontal: 20 }}>
+      <View style={{ paddingTop: 4, paddingBottom: 8, paddingHorizontal: 16 }}>
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 16 }}>← Back</Text>
-          </TouchableOpacity>
+          <CircleButton icon="chevron-back" label="Back" onPress={() => router.back()} />
         </View>
-        <Text style={{ color: "white", fontSize: 22, fontWeight: "700", marginTop: 12 }}>Time tracking</Text>
+        <Text style={{ color: colors.text, fontSize: 34, lineHeight: 41, fontWeight: "700", letterSpacing: -0.6, marginTop: 12 }}>Time tracking</Text>
 
         {/* Stats */}
         <View style={{ flexDirection: "row", gap: 12, marginTop: 12 }}>
-          <View style={{ flex: 1, backgroundColor: "rgba(255,255,255,0.08)", borderRadius: 10, padding: 12 }}>
+          <View style={{ flex: 1, backgroundColor: colors.card, borderRadius: 10, padding: 12 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-              <Ionicons name="time-outline" size={14} color="#F97316" />
-              <Text style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", textTransform: "uppercase" }}>This week</Text>
+              <Ionicons name="time-outline" size={14} color={colors.tint} />
+              <Text style={{ fontSize: 11, color: colors.textSecondary }}>This week</Text>
             </View>
-            <Text style={{ fontSize: 20, fontWeight: "700", color: "white", marginTop: 4 }}>{totalHoursThisWeek.toFixed(1)}h</Text>
+            <Text style={{ fontSize: 20, fontWeight: "700", color: colors.text, marginTop: 4 }}>{totalHoursThisWeek.toFixed(1)}h</Text>
           </View>
-          <View style={{ flex: 1, backgroundColor: "rgba(255,255,255,0.08)", borderRadius: 10, padding: 12 }}>
+          <View style={{ flex: 1, backgroundColor: colors.card, borderRadius: 10, padding: 12 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
               <Ionicons name="document-text-outline" size={14} color="#D97706" />
-              <Text style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", textTransform: "uppercase" }}>Pending</Text>
+              <Text style={{ fontSize: 11, color: colors.textSecondary }}>Pending</Text>
             </View>
             <Text style={{ fontSize: 20, fontWeight: "700", color: pendingCount > 0 ? "#D97706" : "white", marginTop: 4 }}>{pendingCount}</Text>
           </View>
-          <View style={{ flex: 1, backgroundColor: "rgba(255,255,255,0.08)", borderRadius: 10, padding: 12 }}>
+          <View style={{ flex: 1, backgroundColor: colors.card, borderRadius: 10, padding: 12 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-              <Ionicons name="checkmark-circle-outline" size={14} color="#16A34A" />
-              <Text style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", textTransform: "uppercase" }}>Total entries</Text>
+              <Ionicons name="checkmark-circle-outline" size={14} color={colors.success} />
+              <Text style={{ fontSize: 11, color: colors.textSecondary }}>Total entries</Text>
             </View>
-            <Text style={{ fontSize: 20, fontWeight: "700", color: "white", marginTop: 4 }}>{myEntries.length}</Text>
+            <Text style={{ fontSize: 20, fontWeight: "700", color: colors.text, marginTop: 4 }}>{myEntries.length}</Text>
           </View>
         </View>
       </View>
@@ -178,14 +178,14 @@ export default function TimeScreen() {
           onPress={() => setTab("mine")}
           style={{ flex: 1, paddingVertical: 8, borderRadius: 8, alignItems: "center", backgroundColor: tab === "mine" ? "#1C1F26" : "white", borderWidth: 1, borderColor: tab === "mine" ? "#1C1F26" : "#E8E6E1" }}
         >
-          <Text style={{ fontSize: 12, fontWeight: "600", color: tab === "mine" ? "white" : "#6B7280" }}>My time</Text>
+          <Text style={{ fontSize: 12, fontWeight: "600", color: tab === "mine" ? "white" : colors.textSecondary }}>My time</Text>
         </TouchableOpacity>
         {isAdmin && (
           <TouchableOpacity
             onPress={() => setTab("pending")}
             style={{ flex: 1, paddingVertical: 8, borderRadius: 8, alignItems: "center", backgroundColor: tab === "pending" ? "#1C1F26" : "white", borderWidth: 1, borderColor: tab === "pending" ? "#1C1F26" : "#E8E6E1" }}
           >
-            <Text style={{ fontSize: 12, fontWeight: "600", color: tab === "pending" ? "white" : "#6B7280" }}>
+            <Text style={{ fontSize: 12, fontWeight: "600", color: tab === "pending" ? "white" : colors.textSecondary }}>
               Approve ({pendingCount})
             </Text>
           </TouchableOpacity>
@@ -195,15 +195,15 @@ export default function TimeScreen() {
       <ScrollView
         style={{ flex: 1, padding: 16 }}
         contentContainerStyle={{ paddingBottom: 100 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadEntries() }} tintColor="#F97316" />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadEntries() }} tintColor={colors.tint} />}
       >
         {displayEntries.length === 0 ? (
           <View style={{ alignItems: "center", paddingTop: 60 }}>
-            <Ionicons name="time-outline" size={40} color="#D1D5DB" />
-            <Text style={{ fontSize: 16, fontWeight: "700", color: "#9CA3AF", marginTop: 12 }}>
+            <Ionicons name="time-outline" size={40} color={colors.chevron} />
+            <Text style={{ fontSize: 16, fontWeight: "700", color: colors.textSecondary, marginTop: 12 }}>
               {tab === "pending" ? "No pending entries" : "No time logged yet"}
             </Text>
-            <Text style={{ fontSize: 13, color: "#D1D5DB", marginTop: 4 }}>
+            <Text style={{ fontSize: 13, color: colors.chevron, marginTop: 4 }}>
               {tab === "pending" ? "All timesheets are up to date" : "Tap + to log your hours"}
             </Text>
           </View>
@@ -213,43 +213,42 @@ export default function TimeScreen() {
             return (
               <View key={entry.id} style={{
                 backgroundColor: "white", borderRadius: 12, padding: 14, marginBottom: 10,
-                borderWidth: 1, borderColor: "#E8E6E1",
                 borderLeftWidth: 3, borderLeftColor: statusColor,
               }}>
                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 14, fontWeight: "600", color: "#1C1F26" }}>{entry.project?.name || "Unknown project"}</Text>
-                    {tab === "pending" && <Text style={{ fontSize: 11, color: "#9CA3AF", marginTop: 2 }}>{entry.user?.name}</Text>}
+                    <Text style={{ fontSize: 14, fontWeight: "600", color: colors.text }}>{entry.project?.name || "Unknown project"}</Text>
+                    {tab === "pending" && <Text style={{ fontSize: 11, color: colors.textSecondary, marginTop: 2 }}>{entry.user?.name}</Text>}
                   </View>
                   <View style={{ alignItems: "flex-end" }}>
-                    <Text style={{ fontSize: 18, fontWeight: "700", color: "#1C1F26" }}>{entry.hoursWorked}h</Text>
-                    {entry.laborCost > 0 && <Text style={{ fontSize: 11, color: "#16A34A" }}>${entry.laborCost.toFixed(0)}</Text>}
+                    <Text style={{ fontSize: 18, fontWeight: "700", color: colors.text }}>{entry.hoursWorked}h</Text>
+                    {entry.laborCost > 0 && <Text style={{ fontSize: 11, color: colors.success }}>${entry.laborCost.toFixed(0)}</Text>}
                   </View>
                 </View>
 
                 <View style={{ flexDirection: "row", gap: 8, alignItems: "center", marginBottom: 8 }}>
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                    <Ionicons name="calendar-outline" size={12} color="#9CA3AF" />
-                    <Text style={{ fontSize: 11, color: "#9CA3AF" }}>
+                    <Ionicons name="calendar-outline" size={12} color={colors.textSecondary} />
+                    <Text style={{ fontSize: 11, color: colors.textSecondary }}>
                       {parseDateOnly(entry.date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
                     </Text>
                   </View>
                   <View style={{ paddingHorizontal: 6, paddingVertical: 1, borderRadius: 99, backgroundColor: statusColor + "15" }}>
-                    <Text style={{ fontSize: 10, fontWeight: "600", color: statusColor }}>{entry.status}</Text>
+                    <Text style={{ fontSize: 11, fontWeight: "600", color: statusColor }}>{entry.status}</Text>
                   </View>
                 </View>
 
-                {entry.notes && <Text style={{ fontSize: 12, color: "#6B7280", marginBottom: 8 }}>{entry.notes}</Text>}
+                {entry.notes && <Text style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 8 }}>{entry.notes}</Text>}
 
                 {/* Actions */}
-                <View style={{ flexDirection: "row", gap: 8, borderTopWidth: 1, borderTopColor: "#F3F4F6", paddingTop: 10 }}>
+                <View style={{ flexDirection: "row", gap: 8, borderTopWidth: 1, borderTopColor: colors.separator, paddingTop: 10 }}>
                   {tab === "pending" && isAdmin && entry.status === "PENDING" && (
                     <TouchableOpacity
                       onPress={() => approveEntry(entry.id)}
                       style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4, backgroundColor: "#DCFCE7", borderRadius: 8, paddingVertical: 8 }}
                     >
-                      <Ionicons name="checkmark-circle-outline" size={14} color="#16A34A" />
-                      <Text style={{ fontSize: 12, fontWeight: "600", color: "#16A34A" }}>Approve</Text>
+                      <Ionicons name="checkmark-circle-outline" size={14} color={colors.success} />
+                      <Text style={{ fontSize: 12, fontWeight: "600", color: colors.success }}>Approve</Text>
                     </TouchableOpacity>
                   )}
                   {entry.status === "PENDING" && (
@@ -257,14 +256,14 @@ export default function TimeScreen() {
                       onPress={() => deleteEntry(entry.id)}
                       style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4, backgroundColor: "#FEE2E2", borderRadius: 8, paddingVertical: 8 }}
                     >
-                      <Ionicons name="trash-outline" size={14} color="#DC2626" />
-                      <Text style={{ fontSize: 12, fontWeight: "600", color: "#DC2626" }}>Delete</Text>
+                      <Ionicons name="trash-outline" size={14} color={colors.danger} />
+                      <Text style={{ fontSize: 12, fontWeight: "600", color: colors.danger }}>Delete</Text>
                     </TouchableOpacity>
                   )}
                   {entry.status === "APPROVED" && (
                     <View style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4, paddingVertical: 8 }}>
-                      <Ionicons name="checkmark-circle" size={14} color="#16A34A" />
-                      <Text style={{ fontSize: 12, fontWeight: "600", color: "#16A34A" }}>Approved</Text>
+                      <Ionicons name="checkmark-circle" size={14} color={colors.success} />
+                      <Text style={{ fontSize: 12, fontWeight: "600", color: colors.success }}>Approved</Text>
                     </View>
                   )}
                 </View>
@@ -279,14 +278,14 @@ export default function TimeScreen() {
         <View style={{ flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" }}>
           <View style={{ backgroundColor: "white", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, paddingBottom: 40 }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-              <Text style={{ fontSize: 18, fontWeight: "700", color: "#1C1F26" }}>Log time</Text>
+              <Text style={{ fontSize: 18, fontWeight: "700", color: colors.text }}>Log time</Text>
               <TouchableOpacity onPress={() => setAdding(false)}>
-                <Ionicons name="close" size={22} color="#6B7280" />
+                <Ionicons name="close" size={22} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
             {/* Project picker */}
-            <Text style={{ fontSize: 13, fontWeight: "600", color: "#374151", marginBottom: 8 }}>Project</Text>
+            <Text style={{ fontSize: 13, fontWeight: "600", color: colors.text, marginBottom: 8 }}>Project</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
               <View style={{ flexDirection: "row", gap: 8 }}>
                 {projects.map(p => (
@@ -299,24 +298,24 @@ export default function TimeScreen() {
                       borderWidth: 1, borderColor: projectId === p.id ? "#1C1F26" : "#E8E6E1",
                     }}
                   >
-                    <Text style={{ fontSize: 12, fontWeight: "600", color: projectId === p.id ? "white" : "#6B7280" }}>{p.name}</Text>
+                    <Text style={{ fontSize: 12, fontWeight: "600", color: projectId === p.id ? "white" : colors.textSecondary }}>{p.name}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
             </ScrollView>
 
             {/* Date */}
-            <Text style={{ fontSize: 13, fontWeight: "600", color: "#374151", marginBottom: 8 }}>Date</Text>
+            <Text style={{ fontSize: 13, fontWeight: "600", color: colors.text, marginBottom: 8 }}>Date</Text>
             <TextInput
               value={date}
               onChangeText={setDate}
               placeholder="YYYY-MM-DD"
-              placeholderTextColor="#9CA3AF"
-              style={{ backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, fontSize: 15, borderWidth: 1, borderColor: "#E8E6E1", marginBottom: 16, color: "#1C1F26" }}
+              placeholderTextColor={colors.chevron}
+              style={{ backgroundColor: colors.fillSubtle, borderRadius: 10, padding: 12, fontSize: 15, marginBottom: 16, color: colors.text }}
             />
 
             {/* Hours */}
-            <Text style={{ fontSize: 13, fontWeight: "600", color: "#374151", marginBottom: 8 }}>Hours worked</Text>
+            <Text style={{ fontSize: 13, fontWeight: "600", color: colors.text, marginBottom: 8 }}>Hours worked</Text>
             <View style={{ flexDirection: "row", gap: 8, marginBottom: 16 }}>
               {[4, 6, 8, 10].map(h => (
                 <TouchableOpacity
@@ -328,37 +327,37 @@ export default function TimeScreen() {
                     borderWidth: 1, borderColor: hours === h.toString() ? "#F97316" : "#E8E6E1",
                   }}
                 >
-                  <Text style={{ fontSize: 14, fontWeight: "700", color: hours === h.toString() ? "white" : "#6B7280" }}>{h}h</Text>
+                  <Text style={{ fontSize: 14, fontWeight: "700", color: hours === h.toString() ? "white" : colors.textSecondary }}>{h}h</Text>
                 </TouchableOpacity>
               ))}
               <TextInput
                 value={hours}
                 onChangeText={setHours}
                 placeholder="Other"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.chevron}
                 keyboardType="decimal-pad"
                 style={{
-                  flex: 1, backgroundColor: "#F9FAFB", borderRadius: 8, padding: 10,
-                  fontSize: 14, borderWidth: 1, borderColor: "#E8E6E1", textAlign: "center", color: "#1C1F26"
+                  flex: 1, backgroundColor: colors.fillSubtle, borderRadius: 8, padding: 10,
+                  fontSize: 14, textAlign: "center", color: colors.text
                 }}
               />
             </View>
 
             {/* Notes */}
-            <Text style={{ fontSize: 13, fontWeight: "600", color: "#374151", marginBottom: 8 }}>Notes (optional)</Text>
+            <Text style={{ fontSize: 13, fontWeight: "600", color: colors.text, marginBottom: 8 }}>Notes (optional)</Text>
             <TextInput
               value={notes}
               onChangeText={setNotes}
               placeholder="What did you work on?"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.chevron}
               multiline
-              style={{ backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, fontSize: 15, borderWidth: 1, borderColor: "#E8E6E1", marginBottom: 20, height: 70, textAlignVertical: "top", color: "#1C1F26" }}
+              style={{ backgroundColor: colors.fillSubtle, borderRadius: 10, padding: 12, fontSize: 15, marginBottom: 20, height: 70, textAlignVertical: "top", color: colors.text }}
             />
 
             <TouchableOpacity
               onPress={saveEntry}
               disabled={saving}
-              style={{ backgroundColor: "#F97316", borderRadius: 12, padding: 16, alignItems: "center" }}
+              style={{ backgroundColor: colors.charcoal, borderRadius: 12, height: 50, alignItems: "center", justifyContent: "center" }}
             >
               {saving ? <ActivityIndicator color="white" /> : (
                 <Text style={{ color: "white", fontSize: 16, fontWeight: "700" }}>Log time</Text>
@@ -374,10 +373,10 @@ export default function TimeScreen() {
           onPress={() => setAdding(true)}
           style={{
             position: "absolute", bottom: 24, right: 24,
-            width: 56, height: 56, borderRadius: 16,
-            backgroundColor: "#F97316",
+            width: 56, height: 56, borderRadius: 28,
+            backgroundColor: colors.charcoal,
             alignItems: "center", justifyContent: "center",
-            shadowColor: "#F97316", shadowOffset: { width: 0, height: 4 },
+            shadowColor: "#1C1F26", shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.4, shadowRadius: 8, elevation: 8,
           }}
         >

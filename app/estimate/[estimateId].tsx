@@ -4,6 +4,8 @@ import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
 import { parseDateOnly } from "@/lib/dates"
+import { colors } from "@/lib/theme"
+import { CircleButton } from "@/components/ui"
 
 const STATUS_COLORS: Record<string, string> = {
   DRAFT: "#6B7280",
@@ -149,7 +151,7 @@ export default function EstimateDetailScreen() {
     ])
   }
 
-  if (loading) return <View style={styles.center}><ActivityIndicator color="#F97316" /></View>
+  if (loading) return <View style={styles.center}><ActivityIndicator color={colors.tint} /></View>
   if (!estimate) return <View style={styles.center}><Text style={styles.errorText}>Estimate not found</Text></View>
 
   const statusColor = STATUS_COLORS[estimate.status] || "#6B7280"
@@ -158,10 +160,7 @@ export default function EstimateDetailScreen() {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.headerBanner}>
-          <View style={styles.headerCircle} />
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backText}>← Back</Text>
-          </TouchableOpacity>
+          <CircleButton icon="chevron-back" label="Back" onPress={() => router.back()} />
           <View style={styles.headerTop}>
             <Text style={styles.estimateNumber}>{estimate.estimateNumber}</Text>
             <TouchableOpacity
@@ -319,7 +318,7 @@ export default function EstimateDetailScreen() {
                 onChangeText={setProjectWeeks}
                 keyboardType="number-pad"
                 placeholder="12"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.chevron}
               />
             </View>
 
@@ -330,7 +329,7 @@ export default function EstimateDetailScreen() {
                 value={startDate}
                 onChangeText={setStartDate}
                 placeholder="YYYY-MM-DD"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.chevron}
               />
             </View>
 
@@ -364,7 +363,7 @@ export default function EstimateDetailScreen() {
                 value={sendTo}
                 onChangeText={setSendTo}
                 placeholder="client@email.com"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.chevron}
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
@@ -376,7 +375,7 @@ export default function EstimateDetailScreen() {
                 value={sendMessage}
                 onChangeText={setSendMessage}
                 placeholder="Please review the attached estimate..."
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.chevron}
                 multiline
               />
             </View>
@@ -407,80 +406,80 @@ function Row({ label, value, last }: { label: string, value: string, last?: bool
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
+  container: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 60 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  errorText: { fontSize: 16, color: "#6B7280" },
-  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 24, marginBottom: 16, position: "relative", overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: "rgba(249,115,22,0.08)" },
+  errorText: { fontSize: 16, color: colors.textSecondary },
+  headerBanner: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 8 },
+  headerCircle: { display: "none" },
   backBtn: { marginBottom: 12 },
-  backText: { color: "rgba(255,255,255,0.6)", fontSize: 15, fontWeight: "600" },
+  backText: { color: colors.textSecondary, fontSize: 15, fontWeight: "600" },
   headerTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
-  estimateNumber: { fontSize: 13, fontWeight: "700", color: "rgba(255,255,255,0.5)" },
+  estimateNumber: { fontSize: 15, fontWeight: "700", color: colors.textSecondary },
   statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99 },
   statusText: { fontSize: 12, fontWeight: "700" },
-  clientName: { fontSize: 22, fontWeight: "700", color: "white", marginBottom: 4 },
-  projectAddress: { fontSize: 13, color: "rgba(255,255,255,0.5)", marginBottom: 8 },
-  total: { fontSize: 28, fontWeight: "700", color: "#F97316" },
-  infoCard: { backgroundColor: "white", borderRadius: 14, marginHorizontal: 16, marginBottom: 12, borderWidth: 1, borderColor: "#E8E6E1", overflow: "hidden" },
-  cardTitle: { fontSize: 12, fontWeight: "700", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5, padding: 14, paddingBottom: 8 },
-  row: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 14, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: "#F3F4F6" },
-  rowLabel: { fontSize: 13, color: "#6B7280" },
-  rowValue: { fontSize: 13, fontWeight: "600", color: "#1A1A1A", maxWidth: "60%", textAlign: "right" },
-  categoryCard: { backgroundColor: "white", borderRadius: 14, marginHorizontal: 16, marginBottom: 10, borderWidth: 1, borderColor: "#E8E6E1", overflow: "hidden" },
-  categoryName: { fontSize: 13, fontWeight: "700", color: "#1A1A1A", padding: 14, paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: "#F3F4F6", textTransform: "uppercase", letterSpacing: 0.3 },
+  clientName: { fontSize: 34, lineHeight: 41, fontWeight: "700", color: colors.text, marginBottom: 4, letterSpacing: -0.6 },
+  projectAddress: { fontSize: 15, color: colors.textSecondary, marginBottom: 8 },
+  total: { fontSize: 28, fontWeight: "700", color: colors.tint },
+  infoCard: { backgroundColor: "white", borderRadius: 14, marginHorizontal: 16, marginBottom: 12, overflow: "hidden" },
+  cardTitle: { fontSize: 12, fontWeight: "700", color: colors.textSecondary, padding: 14, paddingBottom: 8 },
+  row: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 14, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.separator },
+  rowLabel: { fontSize: 13, color: colors.textSecondary },
+  rowValue: { fontSize: 13, fontWeight: "600", color: colors.text, maxWidth: "60%", textAlign: "right" },
+  categoryCard: { backgroundColor: "white", borderRadius: 14, marginHorizontal: 16, marginBottom: 10, overflow: "hidden" },
+  categoryName: { fontSize: 13, fontWeight: "700", color: colors.text, padding: 14, paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: colors.separator },
   lineItem: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", paddingHorizontal: 14, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: "#F9FAFB" },
   lineItemExcluded: { opacity: 0.5 },
   lineItemLeft: { flex: 1, marginRight: 8 },
-  lineItemDesc: { fontSize: 13, color: "#1A1A1A", marginBottom: 2 },
+  lineItemDesc: { fontSize: 13, color: colors.text, marginBottom: 2 },
   lineItemDescExcluded: { textDecorationLine: "line-through" },
-  lineItemDetail: { fontSize: 11, color: "#9CA3AF" },
-  lineItemTotal: { fontSize: 13, fontWeight: "700", color: "#1A1A1A" },
-  lineItemTotalExcluded: { color: "#9CA3AF", fontStyle: "italic" },
-  catTotal: { flexDirection: "row", justifyContent: "space-between", padding: 14, backgroundColor: "#F9FAFB" },
-  catTotalLabel: { fontSize: 12, fontWeight: "600", color: "#6B7280" },
-  catTotalValue: { fontSize: 14, fontWeight: "700", color: "#1A1A1A" },
-  excludedCard: { backgroundColor: "white", borderRadius: 14, marginHorizontal: 16, marginBottom: 10, borderWidth: 1, borderColor: "#E8E6E1", overflow: "hidden" },
-  excludedText: { fontSize: 13, color: "#6B7280", padding: 14, paddingTop: 0, lineHeight: 20 },
-  notesCard: { backgroundColor: "white", borderRadius: 14, marginHorizontal: 16, marginBottom: 10, borderWidth: 1, borderColor: "#E8E6E1", overflow: "hidden" },
-  notesText: { fontSize: 13, color: "#374151", padding: 14, paddingTop: 0, lineHeight: 20 },
-  totalCard: { backgroundColor: "#1C1F26", borderRadius: 14, marginHorizontal: 16, marginBottom: 16, padding: 20, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  lineItemDetail: { fontSize: 11, color: colors.textSecondary },
+  lineItemTotal: { fontSize: 13, fontWeight: "700", color: colors.text },
+  lineItemTotalExcluded: { color: colors.textSecondary, fontStyle: "italic" },
+  catTotal: { flexDirection: "row", justifyContent: "space-between", padding: 14, backgroundColor: colors.fillSubtle },
+  catTotalLabel: { fontSize: 12, fontWeight: "600", color: colors.textSecondary },
+  catTotalValue: { fontSize: 14, fontWeight: "700", color: colors.text },
+  excludedCard: { backgroundColor: "white", borderRadius: 14, marginHorizontal: 16, marginBottom: 10, overflow: "hidden" },
+  excludedText: { fontSize: 13, color: colors.textSecondary, padding: 14, paddingTop: 0, lineHeight: 20 },
+  notesCard: { backgroundColor: "white", borderRadius: 14, marginHorizontal: 16, marginBottom: 10, overflow: "hidden" },
+  notesText: { fontSize: 13, color: colors.text, padding: 14, paddingTop: 0, lineHeight: 20 },
+  totalCard: { backgroundColor: colors.charcoal, borderRadius: 14, marginHorizontal: 16, marginBottom: 16, padding: 20, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   totalLabel: { fontSize: 14, color: "rgba(255,255,255,0.6)", fontWeight: "600" },
   totalValue: { fontSize: 24, fontWeight: "700", color: "white" },
   scheduleSection: { marginHorizontal: 16, marginBottom: 16 },
   scheduleHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
-  scheduleTitle: { fontSize: 14, fontWeight: "700", color: "#1A1A1A" },
-  generateBtn: { backgroundColor: "#F97316", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
+  scheduleTitle: { fontSize: 14, fontWeight: "700", color: colors.text },
+  generateBtn: { backgroundColor: colors.charcoal, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
   generateBtnText: { color: "white", fontSize: 12, fontWeight: "700" },
-  paymentRow: { backgroundColor: "white", borderRadius: 12, padding: 14, marginBottom: 8, flexDirection: "row", justifyContent: "space-between", alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1" },
+  paymentRow: { backgroundColor: "white", borderRadius: 12, padding: 14, marginBottom: 8, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   paymentLeft: { flex: 1 },
-  paymentNumber: { fontSize: 12, fontWeight: "700", color: "#9CA3AF", marginBottom: 2 },
-  paymentDesc: { fontSize: 14, fontWeight: "600", color: "#1A1A1A", marginBottom: 2 },
-  paymentDate: { fontSize: 11, color: "#9CA3AF" },
-  paymentAmount: { fontSize: 16, fontWeight: "700", color: "#F97316" },
-  noSchedule: { backgroundColor: "white", borderRadius: 12, padding: 20, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1" },
-  noScheduleText: { fontSize: 13, color: "#9CA3AF", textAlign: "center", lineHeight: 20 },
+  paymentNumber: { fontSize: 12, fontWeight: "700", color: colors.textSecondary, marginBottom: 2 },
+  paymentDesc: { fontSize: 14, fontWeight: "600", color: colors.text, marginBottom: 2 },
+  paymentDate: { fontSize: 11, color: colors.textSecondary },
+  paymentAmount: { fontSize: 16, fontWeight: "700", color: colors.tint },
+  noSchedule: { backgroundColor: "white", borderRadius: 12, padding: 20, alignItems: "center" },
+  noScheduleText: { fontSize: 13, color: colors.textSecondary, textAlign: "center", lineHeight: 20 },
   actions: { paddingHorizontal: 16, marginBottom: 20 },
   deleteBtn: { backgroundColor: "#FEE2E2", borderRadius: 12, padding: 14, alignItems: "center", borderWidth: 1, borderColor: "#FECACA" },
-  deleteBtnText: { color: "#DC2626", fontWeight: "700", fontSize: 15 },
+  deleteBtnText: { color: colors.danger, fontWeight: "700", fontSize: 15 },
   modalOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" },
   modalCard: { backgroundColor: "white", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, paddingBottom: 40, maxHeight: "80%" },
-  modalTitle: { fontSize: 18, fontWeight: "700", color: "#1A1A1A", marginBottom: 8 },
-  modalSub: { fontSize: 13, color: "#9CA3AF", marginBottom: 20, lineHeight: 20 },
+  modalTitle: { fontSize: 18, fontWeight: "700", color: colors.text, marginBottom: 8 },
+  modalSub: { fontSize: 13, color: colors.textSecondary, marginBottom: 20, lineHeight: 20 },
   field: { marginBottom: 14 },
-  fieldLabel: { fontSize: 13, fontWeight: "600", color: "#374151", marginBottom: 6 },
-  input: { backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, fontSize: 15, color: "#1A1A1A", borderWidth: 1, borderColor: "#E8E6E1" },
-  previewBox: { backgroundColor: "#F9FAFB", borderRadius: 10, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: "#E8E6E1" },
-  previewTitle: { fontSize: 12, fontWeight: "700", color: "#6B7280", marginBottom: 8 },
-  previewText: { fontSize: 13, color: "#374151", marginBottom: 4 },
-  statusOption: { padding: 14, borderRadius: 10, backgroundColor: "#F9FAFB", borderWidth: 1, borderColor: "#E8E6E1", marginBottom: 8 },
-  statusOptionText: { fontSize: 14, fontWeight: "600", color: "#374151" },
+  fieldLabel: { fontSize: 13, fontWeight: "600", color: colors.text, marginBottom: 6 },
+  input: { backgroundColor: colors.fillSubtle, borderRadius: 10, padding: 12, fontSize: 15, color: colors.text },
+  previewBox: { backgroundColor: colors.fillSubtle, borderRadius: 10, padding: 14, marginBottom: 16 },
+  previewTitle: { fontSize: 12, fontWeight: "700", color: colors.textSecondary, marginBottom: 8 },
+  previewText: { fontSize: 13, color: colors.text, marginBottom: 4 },
+  statusOption: { padding: 14, borderRadius: 10, backgroundColor: colors.fillSubtle, marginBottom: 8 },
+  statusOptionText: { fontSize: 14, fontWeight: "600", color: colors.text },
   modalBtns: { flexDirection: "row", gap: 10, marginTop: 8 },
-  cancelBtn: { flex: 1, backgroundColor: "#F3F4F6", borderRadius: 12, padding: 14, alignItems: "center" },
-  cancelBtnText: { fontSize: 15, fontWeight: "600", color: "#6B7280" },
-  saveBtn: { flex: 1, backgroundColor: "#F97316", borderRadius: 12, padding: 14, alignItems: "center" },
+  cancelBtn: { flex: 1, backgroundColor: colors.fillSubtle, borderRadius: 12, padding: 14, alignItems: "center" },
+  cancelBtnText: { fontSize: 15, fontWeight: "600", color: colors.textSecondary },
+  saveBtn: { flex: 1, backgroundColor: colors.charcoal, borderRadius: 12, padding: 14, alignItems: "center" },
   saveBtnText: { color: "white", fontSize: 15, fontWeight: "700" },
-  pdfBtn: { backgroundColor: "#1C1F26", borderRadius: 12, padding: 14, alignItems: "center", marginBottom: 10 },
+  pdfBtn: { backgroundColor: colors.charcoal, borderRadius: 12, padding: 14, alignItems: "center", marginBottom: 10 },
   pdfBtnText: { color: "white", fontWeight: "700", fontSize: 15 },
   sendBtn: { backgroundColor: "#3B82F6", borderRadius: 12, padding: 14, alignItems: "center", marginBottom: 10 },
   sendBtnText: { color: "white", fontWeight: "700", fontSize: 15 },

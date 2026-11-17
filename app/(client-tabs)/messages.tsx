@@ -2,6 +2,9 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator
 import { useEffect, useState, useRef } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
+import { colors, TAB_BAR_HEIGHT, tabBarBottom } from "@/lib/theme"
+import { useKeyboardVisible } from "@/lib/useKeyboardVisible"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 export default function ClientMessagesScreen() {
   const { token, user } = useAuth()
@@ -9,6 +12,8 @@ export default function ClientMessagesScreen() {
   const [projectId, setProjectId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [body, setBody] = useState("")
+  const insets = useSafeAreaInsets()
+  const keyboardVisible = useKeyboardVisible()
   const [sending, setSending] = useState(false)
   const scrollRef = useRef<ScrollView>(null)
 
@@ -51,12 +56,11 @@ export default function ClientMessagesScreen() {
     setSending(false)
   }
 
-  if (loading) return <View style={styles.center}><ActivityIndicator color="#F97316" /></View>
+  if (loading) return <View style={styles.center}><ActivityIndicator color={colors.tint} /></View>
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : "height"}>
       <View style={styles.header}>
-        <View style={styles.headerCircle} />
         <Text style={styles.title}>Messages</Text>
         <Text style={styles.subtitle}>Communicate with your project team</Text>
       </View>
@@ -95,13 +99,13 @@ export default function ClientMessagesScreen() {
         )}
       </ScrollView>
 
-      <View style={styles.inputBar}>
+      <View style={[styles.inputBar, !keyboardVisible && { marginBottom: tabBarBottom(insets.bottom) + TAB_BAR_HEIGHT + 8 }]}>
         <TextInput
           style={styles.input}
           value={body}
           onChangeText={setBody}
           placeholder="Type a message..."
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.chevron}
           multiline
           maxLength={1000}
         />
@@ -118,33 +122,33 @@ export default function ClientMessagesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
+  container: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  header: { backgroundColor: "#1C1F26", paddingTop: 60, paddingHorizontal: 20, paddingBottom: 16, position: "relative", overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: "rgba(249,115,22,0.08)" },
-  title: { fontSize: 22, fontWeight: "700", color: "white", letterSpacing: -0.5, marginBottom: 2 },
-  subtitle: { fontSize: 13, color: "rgba(255,255,255,0.4)" },
+  header: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 8 },
+  headerCircle: { display: "none" },
+  title: { fontSize: 34, lineHeight: 41, fontWeight: "700", color: colors.text, letterSpacing: -0.6, marginBottom: 2 },
+  subtitle: { fontSize: 15, color: colors.textSecondary },
   messagesList: { flex: 1 },
   messagesContent: { padding: 16, paddingBottom: 8, flexGrow: 1 },
   emptyState: { flex: 1, justifyContent: "center", alignItems: "center", paddingVertical: 60 },
-  emptyTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A1A", marginBottom: 6 },
-  emptySub: { fontSize: 13, color: "#9CA3AF", textAlign: "center" },
+  emptyTitle: { fontSize: 16, fontWeight: "700", color: colors.text, marginBottom: 6 },
+  emptySub: { fontSize: 13, color: colors.textSecondary, textAlign: "center" },
   bubbleWrapper: { flexDirection: "row", marginBottom: 12, alignItems: "flex-end", gap: 8 },
   bubbleWrapperMe: { justifyContent: "flex-end" },
   bubbleWrapperThem: { justifyContent: "flex-start" },
-  senderAvatar: { width: 30, height: 30, borderRadius: 15, backgroundColor: "#1C1F26", justifyContent: "center", alignItems: "center", flexShrink: 0 },
+  senderAvatar: { width: 30, height: 30, borderRadius: 15, backgroundColor: colors.charcoal, justifyContent: "center", alignItems: "center", flexShrink: 0 },
   senderAvatarText: { fontSize: 12, fontWeight: "700", color: "white" },
   bubble: { maxWidth: "72%", borderRadius: 18, padding: 12 },
-  bubbleMe: { backgroundColor: "#F97316", borderBottomRightRadius: 4 },
-  bubbleThem: { backgroundColor: "white", borderBottomLeftRadius: 4, borderWidth: 1, borderColor: "#E8E6E1" },
-  senderName: { fontSize: 11, fontWeight: "700", color: "#9CA3AF", marginBottom: 4 },
-  bubbleText: { fontSize: 15, color: "#1A1A1A", lineHeight: 21 },
+  bubbleMe: { backgroundColor: colors.charcoal, borderBottomRightRadius: 4 },
+  bubbleThem: { backgroundColor: "white", borderBottomLeftRadius: 4 },
+  senderName: { fontSize: 11, fontWeight: "700", color: colors.textSecondary, marginBottom: 4 },
+  bubbleText: { fontSize: 15, color: colors.text, lineHeight: 21 },
   bubbleTextMe: { color: "white" },
-  bubbleTime: { fontSize: 10, color: "#9CA3AF", marginTop: 4, textAlign: "right" },
+  bubbleTime: { fontSize: 11, color: colors.textSecondary, marginTop: 4, textAlign: "right" },
   bubbleTimeMe: { color: "rgba(255,255,255,0.7)" },
-  inputBar: { flexDirection: "row", padding: 12, backgroundColor: "white", borderTopWidth: 1, borderTopColor: "#E8E6E1", gap: 10, alignItems: "flex-end" },
-  input: { flex: 1, backgroundColor: "#F9FAFB", borderRadius: 20, paddingHorizontal: 16, paddingVertical: 10, fontSize: 15, color: "#1A1A1A", borderWidth: 1, borderColor: "#E8E6E1", maxHeight: 100 },
-  sendBtn: { backgroundColor: "#F97316", borderRadius: 20, paddingHorizontal: 18, paddingVertical: 10, justifyContent: "center", alignItems: "center" },
+  inputBar: { flexDirection: "row", padding: 12, backgroundColor: "white", borderTopWidth: 1, borderTopColor: colors.separator, gap: 10, alignItems: "flex-end" },
+  input: { flex: 1, backgroundColor: colors.fillSubtle, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 10, fontSize: 15, color: colors.text, maxHeight: 100 },
+  sendBtn: { backgroundColor: colors.charcoal, borderRadius: 20, paddingHorizontal: 18, paddingVertical: 10, justifyContent: "center", alignItems: "center" },
   sendBtnDisabled: { backgroundColor: "#E8E6E1" },
   sendBtnText: { color: "white", fontWeight: "700", fontSize: 14 },
 })

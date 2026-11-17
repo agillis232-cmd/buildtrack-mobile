@@ -5,6 +5,8 @@ import { useRouter } from "expo-router"
 import { API_URL } from "@/lib/api"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import DatePicker from "@/components/DatePicker"
+import { colors } from "@/lib/theme"
+import { CircleButton } from "@/components/ui"
 
 const DEFAULT_CATEGORIES = [
   "Demolition & Site Preparation",
@@ -185,10 +187,7 @@ export default function NewEstimateScreen() {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.headerBanner}>
-          <View style={styles.headerCircle} />
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backText}>← Back</Text>
-          </TouchableOpacity>
+          <CircleButton icon="chevron-back" label="Back" onPress={() => router.back()} />
           <Text style={styles.title}>New Estimate</Text>
           {total > 0 && (
             <Text style={styles.totalPreview}>Total: ${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
@@ -236,7 +235,7 @@ export default function NewEstimateScreen() {
                       value={item.description}
                       onChangeText={v => updateLineItem(catIndex, itemIndex, "description", v)}
                       placeholder="Description of work..."
-                      placeholderTextColor="#9CA3AF"
+                      placeholderTextColor={colors.chevron}
                       multiline
                     />
                     <TouchableOpacity onPress={() => removeLineItem(catIndex, itemIndex)} style={styles.removeItem}>
@@ -313,7 +312,7 @@ export default function NewEstimateScreen() {
                 value={notes}
                 onChangeText={setNotes}
                 placeholder="Timeline, special conditions..."
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.chevron}
                 multiline
                 numberOfLines={3}
               />
@@ -325,7 +324,7 @@ export default function NewEstimateScreen() {
                 value={excludedItems}
                 onChangeText={setExcludedItems}
                 placeholder="Pendant lights, granite slabs..."
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.chevron}
                 multiline
                 numberOfLines={3}
               />
@@ -376,7 +375,7 @@ export default function NewEstimateScreen() {
               value={newCategoryName}
               onChangeText={setNewCategoryName}
               placeholder="Custom category name..."
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.chevron}
             />
             <View style={styles.modalBtns}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowCategoryPicker(false)}>
@@ -419,14 +418,14 @@ export default function NewEstimateScreen() {
 
 function Field({ label, value, onChange, placeholder, keyboardType, last }: any) {
   return (
-    <View style={[styles.fieldInner, !last && { borderBottomWidth: 1, borderBottomColor: "#F3F4F6" }]}>
+    <View style={[styles.fieldInner, !last && { borderBottomWidth: 1, borderBottomColor: colors.separator }]}>
       <Text style={styles.fieldLabel}>{label}</Text>
       <TextInput
         style={styles.fieldInput}
         value={value}
         onChangeText={onChange}
         placeholder={placeholder}
-        placeholderTextColor="#9CA3AF"
+        placeholderTextColor={colors.chevron}
         keyboardType={keyboardType || "default"}
         autoCapitalize="none"
       />
@@ -435,68 +434,68 @@ function Field({ label, value, onChange, placeholder, keyboardType, last }: any)
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F4F0" },
+  container: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 120 },
-  headerBanner: { backgroundColor: "#1C1F26", padding: 20, paddingTop: 60, paddingBottom: 24, marginBottom: 20, position: "relative", overflow: "hidden" },
-  headerCircle: { position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: "rgba(249,115,22,0.08)" },
+  headerBanner: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 8 },
+  headerCircle: { display: "none" },
   backBtn: { marginBottom: 12 },
-  backText: { color: "rgba(255,255,255,0.6)", fontSize: 15, fontWeight: "600" },
-  title: { fontSize: 26, fontWeight: "700", color: "white", letterSpacing: -0.5, marginBottom: 4 },
-  totalPreview: { fontSize: 18, fontWeight: "700", color: "#F97316", marginTop: 8 },
+  backText: { color: colors.textSecondary, fontSize: 15, fontWeight: "600" },
+  title: { fontSize: 34, lineHeight: 41, fontWeight: "700", color: colors.text, letterSpacing: -0.6, marginBottom: 4 },
+  totalPreview: { fontSize: 18, fontWeight: "700", color: colors.tint, marginTop: 8 },
   section: { paddingHorizontal: 16, marginBottom: 20 },
-  sectionLabel: { fontSize: 11, fontWeight: "700", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 },
-  card: { backgroundColor: "white", borderRadius: 14, borderWidth: 1, borderColor: "#E8E6E1", overflow: "hidden" },
+  sectionLabel: { fontSize: 11, fontWeight: "700", color: colors.textSecondary, marginBottom: 8 },
+  card: { backgroundColor: "white", borderRadius: 14, overflow: "hidden" },
   fieldInner: { padding: 14 },
-  fieldLabel: { fontSize: 12, fontWeight: "600", color: "#6B7280", marginBottom: 4 },
-  fieldInput: { fontSize: 15, color: "#1A1A1A" },
-  input: { backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, fontSize: 15, color: "#1A1A1A", borderWidth: 1, borderColor: "#E8E6E1" },
+  fieldLabel: { fontSize: 12, fontWeight: "600", color: colors.textSecondary, marginBottom: 4 },
+  fieldInput: { fontSize: 15, color: colors.text },
+  input: { backgroundColor: colors.fillSubtle, borderRadius: 10, padding: 12, fontSize: 15, color: colors.text },
   multiline: { height: 80, textAlignVertical: "top" },
-  selectBtn: { backgroundColor: "white", borderRadius: 12, padding: 14, borderWidth: 1, borderColor: "#E8E6E1", flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  selectBtnText: { fontSize: 15, color: "#1A1A1A", fontWeight: "500" },
-  placeholder: { color: "#9CA3AF" },
-  arrow: { fontSize: 18, color: "#9CA3AF" },
-  categoryCard: { backgroundColor: "white", borderRadius: 14, padding: 16, borderWidth: 1, borderColor: "#E8E6E1", marginBottom: 12 },
-  categoryHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 14, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: "#F3F4F6" },
-  categoryName: { fontSize: 14, fontWeight: "700", color: "#1A1A1A", flex: 1 },
-  removeCat: { fontSize: 16, color: "#DC2626", fontWeight: "700", paddingLeft: 10 },
-  lineItemRow: { backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, marginBottom: 8, borderWidth: 1, borderColor: "#E8E6E1" },
+  selectBtn: { backgroundColor: "white", borderRadius: 12, padding: 14, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  selectBtnText: { fontSize: 15, color: colors.text, fontWeight: "500" },
+  placeholder: { color: colors.textSecondary },
+  arrow: { fontSize: 18, color: colors.textSecondary },
+  categoryCard: { backgroundColor: "white", borderRadius: 14, padding: 16, marginBottom: 12 },
+  categoryHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 14, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: colors.separator },
+  categoryName: { fontSize: 14, fontWeight: "700", color: colors.text, flex: 1 },
+  removeCat: { fontSize: 16, color: colors.danger, fontWeight: "700", paddingLeft: 10 },
+  lineItemRow: { backgroundColor: colors.fillSubtle, borderRadius: 10, padding: 12, marginBottom: 8 },
   lineItemTop: { flexDirection: "row", alignItems: "flex-start", gap: 8, marginBottom: 8 },
   descInput: { flex: 1, backgroundColor: "transparent", borderWidth: 0, padding: 0, fontSize: 14, minHeight: 40 },
   removeItem: { padding: 4 },
-  removeItemText: { fontSize: 14, color: "#DC2626", fontWeight: "700" },
+  removeItemText: { fontSize: 14, color: colors.danger, fontWeight: "700" },
   lineItemNumbers: { flexDirection: "row", gap: 8 },
   numField: { flex: 1, alignItems: "center" },
-  numLabel: { fontSize: 10, color: "#9CA3AF", fontWeight: "600", marginBottom: 4 },
-  numInput: { backgroundColor: "white", borderRadius: 6, padding: 6, fontSize: 13, color: "#1A1A1A", borderWidth: 1, borderColor: "#E8E6E1", width: "100%", textAlign: "center" },
-  numTotal: { fontSize: 13, fontWeight: "700", color: "#F97316", marginTop: 6 },
-  unitBtn: { backgroundColor: "white", borderRadius: 6, padding: 6, borderWidth: 1, borderColor: "#E8E6E1", width: "100%", alignItems: "center" },
-  unitBtnText: { fontSize: 13, color: "#374151", fontWeight: "600" },
-  excludedBtn: { marginTop: 8, paddingVertical: 6, alignItems: "center", borderRadius: 6, backgroundColor: "#F3F4F6" },
+  numLabel: { fontSize: 11, color: colors.textSecondary, fontWeight: "600", marginBottom: 4 },
+  numInput: { backgroundColor: "white", borderRadius: 6, padding: 6, fontSize: 13, color: colors.text, width: "100%", textAlign: "center" },
+  numTotal: { fontSize: 13, fontWeight: "700", color: colors.tint, marginTop: 6 },
+  unitBtn: { backgroundColor: "white", borderRadius: 6, padding: 6, width: "100%", alignItems: "center" },
+  unitBtnText: { fontSize: 13, color: colors.text, fontWeight: "600" },
+  excludedBtn: { marginTop: 8, paddingVertical: 6, alignItems: "center", borderRadius: 6, backgroundColor: colors.fillSubtle },
   excludedBtnActive: { backgroundColor: "#FEF3C7" },
-  excludedBtnText: { fontSize: 11, color: "#9CA3AF", fontWeight: "600" },
+  excludedBtnText: { fontSize: 11, color: colors.textSecondary, fontWeight: "600" },
   excludedBtnTextActive: { color: "#D97706" },
-  addItemBtn: { marginTop: 8, paddingVertical: 10, alignItems: "center", borderRadius: 8, borderWidth: 1, borderColor: "#E8E6E1", borderStyle: "dashed" },
-  addItemBtnText: { fontSize: 13, color: "#F97316", fontWeight: "600" },
-  addCategoryBtn: { backgroundColor: "white", borderRadius: 14, padding: 16, alignItems: "center", borderWidth: 1, borderColor: "#E8E6E1", borderStyle: "dashed" },
-  addCategoryBtnText: { fontSize: 14, color: "#F97316", fontWeight: "600" },
-  totalCard: { backgroundColor: "#1C1F26", borderRadius: 14, padding: 20, marginHorizontal: 16, marginBottom: 20, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  addItemBtn: { marginTop: 8, paddingVertical: 10, alignItems: "center", borderRadius: 8, borderStyle: "dashed" },
+  addItemBtnText: { fontSize: 13, color: colors.tint, fontWeight: "600" },
+  addCategoryBtn: { backgroundColor: "white", borderRadius: 14, padding: 16, alignItems: "center", borderStyle: "dashed" },
+  addCategoryBtnText: { fontSize: 14, color: colors.tint, fontWeight: "600" },
+  totalCard: { backgroundColor: colors.charcoal, borderRadius: 14, padding: 20, marginHorizontal: 16, marginBottom: 20, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   totalLabel: { fontSize: 14, color: "rgba(255,255,255,0.6)", fontWeight: "600" },
   totalValue: { fontSize: 24, fontWeight: "700", color: "white" },
-  footer: { position: "absolute", bottom: 0, left: 0, right: 0, padding: 16, backgroundColor: "white", borderTopWidth: 1, borderTopColor: "#E8E6E1", flexDirection: "row", gap: 12 },
-  cancelBtn: { flex: 1, backgroundColor: "#F3F4F6", borderRadius: 12, padding: 14, alignItems: "center" },
-  cancelText: { fontSize: 15, fontWeight: "600", color: "#6B7280" },
-  saveBtn: { flex: 2, backgroundColor: "#F97316", borderRadius: 12, padding: 14, alignItems: "center" },
+  footer: { position: "absolute", bottom: 0, left: 0, right: 0, padding: 16, backgroundColor: "white", borderTopWidth: 1, borderTopColor: colors.separator, flexDirection: "row", gap: 12 },
+  cancelBtn: { flex: 1, backgroundColor: colors.fillSubtle, borderRadius: 12, padding: 14, alignItems: "center" },
+  cancelText: { fontSize: 15, fontWeight: "600", color: colors.textSecondary },
+  saveBtn: { flex: 2, backgroundColor: colors.charcoal, borderRadius: 12, padding: 14, alignItems: "center" },
   saveBtnText: { color: "white", fontSize: 15, fontWeight: "700" },
   modalOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" },
   modalCard: { backgroundColor: "white", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, paddingBottom: 40, maxHeight: "75%" },
-  modalTitle: { fontSize: 18, fontWeight: "700", color: "#1A1A1A", marginBottom: 16 },
-  catOption: { padding: 14, borderRadius: 10, backgroundColor: "#F9FAFB", borderWidth: 1, borderColor: "#E8E6E1", marginBottom: 8 },
-  catOptionActive: { backgroundColor: "#FFF7ED", borderColor: "#F97316" },
-  catOptionSaved: { borderColor: "#F97316", backgroundColor: "#FFF7ED" },
-  catOptionText: { fontSize: 14, color: "#1A1A1A", fontWeight: "500" },
-  catOptionTextActive: { color: "#F97316", fontWeight: "700" },
-  catOptionTextSaved: { color: "#F97316", fontWeight: "600" },
-  savedLabel: { fontSize: 11, fontWeight: "700", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5, marginVertical: 10 },
-  orLabel: { fontSize: 12, color: "#9CA3AF", marginVertical: 12, textAlign: "center" },
+  modalTitle: { fontSize: 18, fontWeight: "700", color: colors.text, marginBottom: 16 },
+  catOption: { padding: 14, borderRadius: 10, backgroundColor: colors.fillSubtle, marginBottom: 8 },
+  catOptionActive: { backgroundColor: colors.tintSoft, borderColor: "#F97316" },
+  catOptionSaved: { borderColor: "#F97316", backgroundColor: colors.tintSoft },
+  catOptionText: { fontSize: 14, color: colors.text, fontWeight: "500" },
+  catOptionTextActive: { color: colors.tint, fontWeight: "700" },
+  catOptionTextSaved: { color: colors.tint, fontWeight: "600" },
+  savedLabel: { fontSize: 11, fontWeight: "700", color: colors.textSecondary, marginVertical: 10 },
+  orLabel: { fontSize: 12, color: colors.textSecondary, marginVertical: 12, textAlign: "center" },
   modalBtns: { flexDirection: "row", gap: 10, marginTop: 12 },
 })
