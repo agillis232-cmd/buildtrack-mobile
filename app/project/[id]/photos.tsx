@@ -4,6 +4,8 @@ import { useEffect, useState, useCallback } from "react"
 import { useAuth } from "@/lib/auth"
 import { API_URL } from "@/lib/api"
 import { cloudinaryThumb } from "@/lib/images"
+import { Image as CachedImage } from "expo-image"
+import { openPhotoViewer } from "@/lib/photoGallery"
 import * as ImagePicker from "expo-image-picker"
 import { Ionicons } from "@expo/vector-icons"
 import { loadCached } from "@/lib/cache"
@@ -213,8 +215,18 @@ export default function PhotosScreen() {
         columnWrapperStyle={styles.gridRow}
         initialNumToRender={18}
         windowSize={7}
-        renderItem={({ item }: { item: any }) => (
-          <Image source={{ uri: cloudinaryThumb(item.url) }} style={styles.photo} />
+        renderItem={({ item, index }: { item: any; index: number }) => (
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => openPhotoViewer(router, String(id), photos, index, {
+              onDeleted: photoId => setPhotos(list => list.filter(p => p.id !== photoId)),
+              onCaptionChanged: (photoId, caption) => setPhotos(list => list.map(p => (p.id === photoId ? { ...p, caption } : p))),
+            })}
+            accessibilityRole="imagebutton"
+            accessibilityLabel={`Photo ${index + 1} of ${photos.length}${item.caption ? `: ${item.caption}` : ""}`}
+          >
+            <CachedImage source={{ uri: cloudinaryThumb(item.url) }} style={styles.photo} transition={120} recyclingKey={item.id} cachePolicy="memory-disk" />
+          </TouchableOpacity>
         )}
         ListEmptyComponent={
           <View style={styles.emptyState}>

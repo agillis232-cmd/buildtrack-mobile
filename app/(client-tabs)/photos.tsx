@@ -1,10 +1,12 @@
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Image, RefreshControl, Alert } from "react-native"
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, RefreshControl, Alert } from "react-native"
 import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { useRouter } from "expo-router"
 import { API_URL } from "@/lib/api"
 import * as ImagePicker from "expo-image-picker"
 import { cloudinaryThumb } from "@/lib/images"
+import { Image as CachedImage } from "expo-image"
+import { openPhotoViewer } from "@/lib/photoGallery"
 import { colors } from "@/lib/theme"
 
 export default function ClientPhotosScreen() {
@@ -98,14 +100,16 @@ export default function ClientPhotosScreen() {
           </View>
         ) : (
           <View style={styles.grid}>
-            {photos.map(photo => (
+            {photos.map((photo, index) => (
               <TouchableOpacity
                 key={photo.id}
                 style={styles.photoWrapper}
-                onPress={() => router.push(`/project/${projectId}/photo-viewer?photoId=${photo.id}&url=${encodeURIComponent(photo.url)}&caption=${encodeURIComponent(photo.caption || "")}` as any)}
-                activeOpacity={0.9}
+                onPress={() => projectId && openPhotoViewer(router, projectId, photos, index)}
+                activeOpacity={0.85}
+                accessibilityRole="imagebutton"
+                accessibilityLabel={`Photo ${index + 1} of ${photos.length}${photo.caption ? `: ${photo.caption}` : ""}`}
               >
-                <Image source={{ uri: cloudinaryThumb(photo.url) }} style={styles.photo} />
+                <CachedImage source={{ uri: cloudinaryThumb(photo.url) }} style={styles.photo} transition={120} recyclingKey={photo.id} cachePolicy="memory-disk" />
                 {photo.caption ? (
                   <View style={styles.captionOverlay}>
                     <Text style={styles.captionText} numberOfLines={1}>{photo.caption}</Text>

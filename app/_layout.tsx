@@ -73,7 +73,13 @@ export default function RootLayout() {
     <AuthProvider>
       <StatusBar style="dark" />
       <SessionGate />
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack screenOptions={{ headerShown: false }}>
+        {/* The photo viewer fades in over the grid, which shows through as you pull a photo down to close it. */}
+        <Stack.Screen
+          name="project/[id]/photo-viewer"
+          options={{ presentation: "transparentModal", animation: "fade", contentStyle: { backgroundColor: "transparent" } }}
+        />
+      </Stack>
     </AuthProvider>
   )
 }
