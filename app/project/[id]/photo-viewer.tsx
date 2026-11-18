@@ -29,7 +29,8 @@ export default function PhotoViewerScreen() {
   const { token, user } = useAuth()
   const insets = useSafeAreaInsets()
   const { width, height } = useWindowDimensions()
-  const canEdit = !!user && user.role !== "CLIENT"
+  // Same rule as the server: clients and subcontractors can view and share, not edit or delete.
+  const canEdit = !!user && user.role !== "CLIENT" && user.role !== "SUBCONTRACTOR"
 
   const gallery = useMemo(() => currentGallery(projectId), [projectId])
   const [photos, setPhotos] = useState<GalleryPhoto[]>(() => {
